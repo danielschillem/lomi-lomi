@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: lomilomi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lomilomi
+      POSTGRES_PASSWORD: lomilomi
+      POSTGRES_DB: lomilomi
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: lomilomi-api
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      PORT: "8888"
+      DB_DRIVER: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: lomilomi
+      DB_PASSWORD: lomilomi
+      DB_NAME: lomilomi
+      JWT_SECRET: change-me-in-production
+      CORS_ORIGIN: "http://localhost:3000"
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    container_name: lomilomi-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: "http://localhost:8888/api/v1"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
