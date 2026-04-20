@@ -25,6 +25,9 @@ type Config struct {
 	SMTPPass         string
 	SMTPFrom         string
 	BaseURL          string
+	TwilioSID        string
+	TwilioToken      string
+	TwilioPhone      string
 }
 
 func Load() *Config {
@@ -48,6 +51,9 @@ func Load() *Config {
 		SMTPPass:         getEnv("SMTP_PASS", ""),
 		SMTPFrom:         getEnv("SMTP_FROM", "noreply@lomilomi.app"),
 		BaseURL:          getEnv("BASE_URL", "http://localhost:8888"),
+		TwilioSID:        getEnv("TWILIO_ACCOUNT_SID", ""),
+		TwilioToken:      getEnv("TWILIO_AUTH_TOKEN", ""),
+		TwilioPhone:      getEnv("TWILIO_PHONE_NUMBER", ""),
 	}
 
 	if cfg.JWTSecret == "change-me-in-production" {

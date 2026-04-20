@@ -67,6 +67,9 @@ func main() {
 	authRateLimit := middleware.RateLimitAuth()
 	api.Post("/auth/register", authRateLimit, authHandler.Register)
 	api.Post("/auth/login", authRateLimit, authHandler.Login)
+	api.Post("/auth/send-otp", authRateLimit, authHandler.SendOTP)
+	api.Post("/auth/verify-otp", authRateLimit, authHandler.VerifyOTP)
+	api.Post("/auth/register-phone", authRateLimit, authHandler.RegisterPhone)
 
 	// Public shop & places
 	api.Get("/shop/products", shopHandler.GetProducts)
@@ -80,68 +83,68 @@ func main() {
 	api.Get("/wellness/services/:id", wellnessHandler.GetService)
 
 	// Protected routes
-	protected := api.Group("", middleware.JWTAuth(cfg))
-	protected.Get("/auth/me", authHandler.Me)
-	protected.Put("/auth/password", authHandler.ChangePassword)
-	protected.Delete("/auth/account", authHandler.DeleteAccount)
+	jwt := middleware.JWTAuth(cfg)
+	api.Get("/auth/me", jwt, authHandler.Me)
+	api.Put("/auth/password", jwt, authHandler.ChangePassword)
+	api.Delete("/auth/account", jwt, authHandler.DeleteAccount)
 
-	protected.Get("/profiles/:id", profileHandler.GetProfile)
-	protected.Put("/profiles/me", profileHandler.UpdateProfile)
-	protected.Get("/preferences", profileHandler.GetPreferences)
-	protected.Put("/preferences", profileHandler.UpdatePreferences)
-	protected.Get("/discover", profileHandler.Discover)
-	protected.Get("/search", profileHandler.SearchProfiles)
+	api.Get("/profiles/:id", jwt, profileHandler.GetProfile)
+	api.Put("/profiles/me", jwt, profileHandler.UpdateProfile)
+	api.Get("/preferences", jwt, profileHandler.GetPreferences)
+	api.Put("/preferences", jwt, profileHandler.UpdatePreferences)
+	api.Get("/discover", jwt, profileHandler.Discover)
+	api.Get("/search", jwt, profileHandler.SearchProfiles)
 
 	// Like / Match
-	protected.Post("/likes", matchHandler.LikeUser)
-	protected.Post("/pass", matchHandler.PassUser)
-	protected.Get("/matches", matchHandler.GetMatches)
-	protected.Delete("/matches/:id", matchHandler.Unmatch)
+	api.Post("/likes", jwt, matchHandler.LikeUser)
+	api.Post("/pass", jwt, matchHandler.PassUser)
+	api.Get("/matches", jwt, matchHandler.GetMatches)
+	api.Delete("/matches/:id", jwt, matchHandler.Unmatch)
 
 	// Notifications
-	protected.Get("/notifications", matchHandler.GetNotifications)
-	protected.Get("/notifications/unread", matchHandler.UnreadCount)
-	protected.Put("/notifications/read", matchHandler.MarkNotificationsRead)
-	protected.Delete("/notifications/:id", matchHandler.DeleteNotification)
+	api.Get("/notifications", jwt, matchHandler.GetNotifications)
+	api.Get("/notifications/unread", jwt, matchHandler.UnreadCount)
+	api.Put("/notifications/read", jwt, matchHandler.MarkNotificationsRead)
+	api.Delete("/notifications/:id", jwt, matchHandler.DeleteNotification)
 
 	// Messaging
-	protected.Get("/conversations", messageHandler.GetConversations)
-	protected.Get("/conversations/:id/messages", messageHandler.GetMessages)
-	protected.Post("/messages", messageHandler.SendMessage)
-	protected.Put("/conversations/:id/read", messageHandler.MarkRead)
-	protected.Get("/conversations/with/:userId", messageHandler.GetOrCreateConversation)
+	api.Get("/conversations", jwt, messageHandler.GetConversations)
+	api.Get("/conversations/:id/messages", jwt, messageHandler.GetMessages)
+	api.Post("/messages", jwt, messageHandler.SendMessage)
+	api.Put("/conversations/:id/read", jwt, messageHandler.MarkRead)
+	api.Get("/conversations/with/:userId", jwt, messageHandler.GetOrCreateConversation)
 
 	// Shop
-	protected.Post("/shop/orders", shopHandler.CreateOrder)
-	protected.Get("/shop/orders", shopHandler.GetOrders)
+	api.Post("/shop/orders", jwt, shopHandler.CreateOrder)
+	api.Get("/shop/orders", jwt, shopHandler.GetOrders)
 
 	// Stripe Checkout
-	protected.Post("/checkout", paymentHandler.CreateCheckout)
+	api.Post("/checkout", jwt, paymentHandler.CreateCheckout)
 	api.Post("/stripe/webhook", paymentHandler.HandleWebhook)
 
 	// Upload avatar
-	protected.Post("/upload/avatar", uploadHandler.UploadAvatar)
+	api.Post("/upload/avatar", jwt, uploadHandler.UploadAvatar)
 
 	// Photo gallery
-	protected.Post("/photos", uploadHandler.UploadPhoto)
-	protected.Delete("/photos/:id", uploadHandler.DeletePhoto)
+	api.Post("/photos", jwt, uploadHandler.UploadPhoto)
+	api.Delete("/photos/:id", jwt, uploadHandler.DeletePhoto)
 	api.Get("/users/:id/photos", uploadHandler.GetPhotos)
 
 	// Email verification
-	protected.Post("/auth/send-verification", uploadHandler.SendVerification)
+	api.Post("/auth/send-verification", jwt, uploadHandler.SendVerification)
 	api.Get("/auth/verify-email", uploadHandler.VerifyEmail)
 
 	// Wellness bookings & reviews
-	protected.Post("/wellness/bookings", wellnessHandler.CreateBooking)
-	protected.Get("/wellness/bookings", wellnessHandler.GetMyBookings)
-	protected.Put("/wellness/bookings/:id/cancel", wellnessHandler.CancelBooking)
-	protected.Post("/wellness/reviews", wellnessHandler.CreateReview)
+	api.Post("/wellness/bookings", jwt, wellnessHandler.CreateBooking)
+	api.Get("/wellness/bookings", jwt, wellnessHandler.GetMyBookings)
+	api.Put("/wellness/bookings/:id/cancel", jwt, wellnessHandler.CancelBooking)
+	api.Post("/wellness/reviews", jwt, wellnessHandler.CreateReview)
 
 	// Safety: report & block
-	protected.Post("/reports", safetyHandler.CreateReport)
-	protected.Post("/blocks", safetyHandler.BlockUser)
-	protected.Delete("/blocks/:id", safetyHandler.UnblockUser)
-	protected.Get("/blocks", safetyHandler.GetBlockedUsers)
+	api.Post("/reports", jwt, safetyHandler.CreateReport)
+	api.Post("/blocks", jwt, safetyHandler.BlockUser)
+	api.Delete("/blocks/:id", jwt, safetyHandler.UnblockUser)
+	api.Get("/blocks", jwt, safetyHandler.GetBlockedUsers)
 
 	// Static uploads directory
 	app.Static("/uploads", cfg.UploadDir)

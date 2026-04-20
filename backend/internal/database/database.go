@@ -48,6 +48,7 @@ func Migrate() {
 		&models.EmailVerification{},
 		&models.Report{},
 		&models.Block{},
+		&models.OTP{},
 		&models.Conversation{},
 		&models.Message{},
 		&models.Product{},

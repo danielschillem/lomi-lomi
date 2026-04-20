@@ -13,8 +13,9 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
 	Username   string     `gorm:"uniqueIndex;size:50;not null" json:"username"`
-	Email      string     `gorm:"uniqueIndex;size:255;not null" json:"-"`
-	Password   string     `gorm:"size:255;not null" json:"-"`
+	Email      string     `gorm:"uniqueIndex;size:255" json:"-"`
+	Phone      string     `gorm:"uniqueIndex;size:20" json:"-"`
+	Password   string     `gorm:"size:255" json:"-"`
 	Bio        string     `gorm:"size:500" json:"bio"`
 	AvatarURL  string     `gorm:"size:500" json:"avatar_url"`
 	Gender     string     `gorm:"size:20" json:"gender"`
@@ -111,4 +112,13 @@ type Block struct {
 	BlockedID uint      `gorm:"not null;index:idx_blocker_blocked" json:"blocked_id"`
 	Blocker   User      `gorm:"foreignKey:BlockerID" json:"blocker,omitempty"`
 	Blocked   User      `gorm:"foreignKey:BlockedID" json:"blocked,omitempty"`
+}
+
+type OTP struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Phone     string    `gorm:"size:20;not null;index" json:"-"`
+	Code      string    `gorm:"size:6;not null" json:"-"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Used      bool      `gorm:"default:false" json:"used"`
 }

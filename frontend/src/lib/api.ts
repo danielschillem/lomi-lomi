@@ -51,6 +51,51 @@ export function login(data: { email: string; password: string }) {
   }>("/auth/login", { method: "POST", body: JSON.stringify(data) });
 }
 
+/* ---- OTP Auth ---- */
+export function sendOTP(phone: string) {
+  return request<{ message: string; phone: string; dev_code?: string }>(
+    "/auth/send-otp",
+    {
+      method: "POST",
+      body: JSON.stringify({ phone }),
+    },
+  );
+}
+
+export function verifyOTP(phone: string, code: string) {
+  return request<{
+    action: "login" | "register";
+    token?: string;
+    user?: {
+      id: number;
+      username: string;
+      avatar_url: string;
+      is_verified: boolean;
+      role: string;
+    };
+    phone_verified?: string;
+  }>("/auth/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ phone, code }),
+  });
+}
+
+export function registerPhone(data: { username: string; phone: string }) {
+  return request<{
+    token: string;
+    user: {
+      id: number;
+      username: string;
+      avatar_url: string;
+      is_verified: boolean;
+      role: string;
+    };
+  }>("/auth/register-phone", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 /* ---- Profile ---- */
 export function getProfile() {
   return request<Record<string, unknown>>("/auth/me");
