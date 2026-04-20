@@ -181,6 +181,98 @@ export function markConversationRead(conversationId: number) {
   );
 }
 
+/* ---- Location Sharing ---- */
+export function startLocationShare(data: {
+  receiver_id: number;
+  latitude: number;
+  longitude: number;
+  duration?: number;
+}) {
+  return request<{
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+    latitude: number;
+    longitude: number;
+    is_active: boolean;
+    expires_at: string;
+  }>("/location/share", { method: "POST", body: JSON.stringify(data) });
+}
+
+export function updateLocationShare(
+  shareId: number,
+  data: { latitude: number; longitude: number },
+) {
+  return request<{ updated: boolean }>(`/location/share/${shareId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function stopLocationShare(shareId: number) {
+  return request<{ message: string }>(`/location/share/${shareId}`, {
+    method: "DELETE",
+  });
+}
+
+export function getActiveLocationShares() {
+  return request<
+    {
+      id: number;
+      sender_id: number;
+      receiver_id: number;
+      latitude: number;
+      longitude: number;
+      is_active: boolean;
+      expires_at: string;
+      sender?: { id: number; username: string; avatar_url?: string };
+      receiver?: { id: number; username: string; avatar_url?: string };
+    }[]
+  >("/location/shares");
+}
+
+/* ---- VTC Rides ---- */
+export function requestVTCRide(data: {
+  passenger_id: number;
+  pickup_lat: number;
+  pickup_lng: number;
+  pickup_address: string;
+  dropoff_lat: number;
+  dropoff_lng: number;
+  dropoff_address: string;
+  note?: string;
+}) {
+  return request<Record<string, unknown>>("/vtc/rides", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getMyVTCRides() {
+  return request<Record<string, unknown>[]>("/vtc/rides");
+}
+
+export function getVTCRide(id: number) {
+  return request<Record<string, unknown>>(`/vtc/rides/${id}`);
+}
+
+export function updateVTCRideStatus(id: number, status: string) {
+  return request<{ message: string; status: string }>(
+    `/vtc/rides/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}
+
+export function updateVTCDriverLocation(
+  rideId: number,
+  data: { latitude: number; longitude: number },
+) {
+  return request<{ updated: boolean }>(
+    `/vtc/rides/${rideId}/driver-location`,
+    { method: "PUT", body: JSON.stringify(data) },
+  );
+}
+
 /* ---- Shop ---- */
 export function getProducts() {
   return request<Record<string, unknown>[]>("/shop/products");
@@ -599,4 +691,180 @@ export function adminUpdateWellnessBookingStatus(id: number, status: string) {
     `/admin/wellness/bookings/${id}/status`,
     { method: "PUT", body: JSON.stringify({ status }) },
   );
+}
+
+/* ---- Owner Dashboard ---- */
+export function ownerGetStats() {
+  return request<{
+    places: number;
+    products: number;
+    wellness: number;
+    orders: number;
+    revenue: number;
+    bookings: number;
+    reservations: number;
+  }>("/owner/stats");
+}
+
+export function ownerGetPlaces() {
+  return request<{ places: Record<string, unknown>[] }>("/owner/places");
+}
+
+export function ownerUpdatePlace(id: number, data: Record<string, unknown>) {
+  return request<Record<string, unknown>>(`/owner/places/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function ownerGetProducts() {
+  return request<{ products: Record<string, unknown>[] }>("/owner/products");
+}
+
+export function ownerCreateProduct(data: Record<string, unknown>) {
+  return request<Record<string, unknown>>("/owner/products", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function ownerUpdateProduct(id: number, data: Record<string, unknown>) {
+  return request<Record<string, unknown>>(`/owner/products/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function ownerDeleteProduct(id: number) {
+  return request<Record<string, unknown>>(`/owner/products/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function ownerGetOrders(page = 1) {
+  return request<{
+    orders: Record<string, unknown>[];
+    total: number;
+    page: number;
+  }>(`/owner/orders?page=${page}`);
+}
+
+export function ownerUpdateOrderStatus(id: number, status: string) {
+  return request<Record<string, unknown>>(`/owner/orders/${id}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function ownerGetWellnessBookings(page = 1) {
+  return request<{
+    bookings: Record<string, unknown>[];
+    total: number;
+    page: number;
+  }>(`/owner/wellness/bookings?page=${page}`);
+}
+
+export function ownerUpdateBookingStatus(id: number, status: string) {
+  return request<Record<string, unknown>>(
+    `/owner/wellness/bookings/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}
+
+export function ownerGetReservations(page = 1) {
+  return request<{
+    reservations: Record<string, unknown>[];
+    total: number;
+    page: number;
+  }>(`/owner/reservations?page=${page}`);
+}
+
+export function ownerUpdateReservationStatus(id: number, status: string) {
+  return request<Record<string, unknown>>(
+    `/owner/reservations/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}
+
+/* ---- Delivery Addresses ---- */
+export function getDeliveryAddresses() {
+  return request<{
+    addresses: {
+      id: number;
+      label: string;
+      full_name: string;
+      phone: string;
+      address: string;
+      city: string;
+      postal_code: string;
+      country: string;
+      is_default: boolean;
+    }[];
+  }>("/addresses");
+}
+
+export function createDeliveryAddress(data: {
+  label?: string;
+  full_name: string;
+  phone?: string;
+  address: string;
+  city: string;
+  postal_code?: string;
+  country?: string;
+  is_default?: boolean;
+}) {
+  return request<Record<string, unknown>>("/addresses", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateDeliveryAddress(
+  id: number,
+  data: Record<string, unknown>,
+) {
+  return request<Record<string, unknown>>(`/addresses/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteDeliveryAddress(id: number) {
+  return request<Record<string, unknown>>(`/addresses/${id}`, {
+    method: "DELETE",
+  });
+}
+
+/* ---- Place Reservations ---- */
+export function createPlaceReservation(data: {
+  place_id: number;
+  date: string;
+  end_date?: string;
+  persons?: number;
+  notes?: string;
+}) {
+  return request<Record<string, unknown>>("/places/reservations", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getMyPlaceReservations() {
+  return request<{ reservations: Record<string, unknown>[] }>(
+    "/places/reservations",
+  );
+}
+
+export function cancelPlaceReservation(id: number) {
+  return request<Record<string, unknown>>(`/places/reservations/${id}/cancel`, {
+    method: "PUT",
+  });
+}
+
+/* ---- Order Tracking ---- */
+export function getOrderTracking(orderId: number) {
+  return request<{
+    order: Record<string, unknown>;
+    tracking: { step: string; label: string; done: boolean }[];
+  }>(`/orders/${orderId}/tracking`);
 }

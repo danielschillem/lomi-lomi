@@ -140,7 +140,7 @@ func (h *AdminHandler) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	updates := map[string]interface{}{}
-	if req.Role != nil && (*req.Role == "user" || *req.Role == "admin") {
+	if req.Role != nil && (*req.Role == "user" || *req.Role == "admin" || *req.Role == "owner") {
 		updates["role"] = *req.Role
 	}
 	if req.IsVerified != nil {
@@ -178,6 +178,14 @@ func (h *AdminHandler) CreateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom et prix requis"})
 	}
 
+	// Validate owner exists if specified
+	if product.OwnerID != 0 {
+		var owner models.User
+		if err := database.DB.First(&owner, product.OwnerID).Error; err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Propriétaire non trouvé"})
+		}
+	}
+
 	database.DB.Create(&product)
 	return c.Status(fiber.StatusCreated).JSON(product)
 }
@@ -201,6 +209,7 @@ func (h *AdminHandler) UpdateProduct(c *fiber.Ctx) error {
 		Category    *string  `json:"category"`
 		Stock       *int     `json:"stock"`
 		IsActive    *bool    `json:"is_active"`
+		OwnerID     *uint    `json:"owner_id"`
 	}
 	var req Req
 	if err := c.BodyParser(&req); err != nil {
@@ -228,6 +237,9 @@ func (h *AdminHandler) UpdateProduct(c *fiber.Ctx) error {
 	}
 	if req.IsActive != nil {
 		updates["is_active"] = *req.IsActive
+	}
+	if req.OwnerID != nil {
+		updates["owner_id"] = *req.OwnerID
 	}
 
 	if len(updates) > 0 {
@@ -262,6 +274,14 @@ func (h *AdminHandler) CreatePlace(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom requis"})
 	}
 
+	// Validate owner exists if specified
+	if place.OwnerID != 0 {
+		var owner models.User
+		if err := database.DB.First(&owner, place.OwnerID).Error; err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Propriétaire non trouvé"})
+		}
+	}
+
 	database.DB.Create(&place)
 	return c.Status(fiber.StatusCreated).JSON(place)
 }
@@ -290,6 +310,7 @@ func (h *AdminHandler) UpdatePlace(c *fiber.Ctx) error {
 		Website     *string  `json:"website"`
 		Rating      *float64 `json:"rating"`
 		IsPartner   *bool    `json:"is_partner"`
+		OwnerID     *uint    `json:"owner_id"`
 	}
 	var req Req
 	if err := c.BodyParser(&req); err != nil {
@@ -332,6 +353,9 @@ func (h *AdminHandler) UpdatePlace(c *fiber.Ctx) error {
 	}
 	if req.IsPartner != nil {
 		updates["is_partner"] = *req.IsPartner
+	}
+	if req.OwnerID != nil {
+		updates["owner_id"] = *req.OwnerID
 	}
 
 	if len(updates) > 0 {

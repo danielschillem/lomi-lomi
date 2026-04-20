@@ -13,6 +13,7 @@ type WellnessProvider struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
+	OwnerID        uint    `gorm:"index" json:"owner_id"`
 	Name           string  `gorm:"size:200;not null" json:"name"`
 	Description    string  `gorm:"type:text" json:"description"`
 	Category       string  `gorm:"size:100;index" json:"category"` // spa, massage_salon, massage_home, aesthetics, yoga, coaching
@@ -33,6 +34,7 @@ type WellnessProvider struct {
 
 	Services       []WellnessService      `gorm:"foreignKey:ProviderID" json:"services,omitempty"`
 	Availabilities []WellnessAvailability `gorm:"foreignKey:ProviderID" json:"availabilities,omitempty"`
+	Owner          User                   `gorm:"foreignKey:OwnerID" json:"owner,omitempty"`
 }
 
 // WellnessService represents a service offered by a provider

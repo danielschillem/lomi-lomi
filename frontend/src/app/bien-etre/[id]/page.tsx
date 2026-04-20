@@ -446,10 +446,14 @@ export default function ProviderPage() {
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
               {/* Date */}
               <div>
-                <label className="block text-xs text-zinc-500 mb-1.5">
+                <label
+                  htmlFor="booking-date"
+                  className="block text-xs text-zinc-500 mb-1.5"
+                >
                   Date
                 </label>
                 <input
+                  id="booking-date"
                   type="date"
                   min={minDate}
                   value={bookingDate}
@@ -463,11 +467,15 @@ export default function ProviderPage() {
 
               {/* Time */}
               <div>
-                <label className="block text-xs text-zinc-500 mb-1.5">
+                <label
+                  htmlFor="booking-time"
+                  className="block text-xs text-zinc-500 mb-1.5"
+                >
                   Heure
                 </label>
                 {timeSlots.length > 0 ? (
                   <select
+                    id="booking-time"
                     value={bookingTime}
                     onChange={(e) => setBookingTime(e.target.value)}
                     className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500/50 transition"
@@ -525,10 +533,14 @@ export default function ProviderPage() {
                 {/* Guest selection */}
                 {persons === 2 && matches.length > 0 && (
                   <div className="mt-3">
-                    <label className="block text-xs text-zinc-500 mb-1.5">
+                    <label
+                      htmlFor="guest-select"
+                      className="block text-xs text-zinc-500 mb-1.5"
+                    >
                       Inviter un match (optionnel)
                     </label>
                     <select
+                      id="guest-select"
                       value={guestId || ""}
                       onChange={(e) =>
                         setGuestId(

@@ -48,6 +48,20 @@ export default function CartePage() {
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
   const [selected, setSelected] = useState<Place | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(
+    null,
+  );
+
+  // Géolocalisation de l'utilisateur
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 },
+      );
+    }
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -104,7 +118,7 @@ export default function CartePage() {
       {/* Map + Sidebar */}
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Map */}
-        <div className="flex-1 relative min-h-[400px]">
+        <div className="flex-1 relative min-h-100">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
               <div className="animate-pulse text-zinc-400">
@@ -116,6 +130,7 @@ export default function CartePage() {
               places={places}
               onSelect={setSelected}
               selected={selected}
+              userLocation={userLocation}
             />
           )}
         </div>

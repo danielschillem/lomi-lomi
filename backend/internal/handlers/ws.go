@@ -123,6 +123,23 @@ func (h *WSHub) HandleWebSocket(c *websocket.Conn) {
 				}
 			}
 		}
+
+		// Handle real-time location sharing via WS (low-latency relay)
+		if incoming.Type == "location_update" {
+			if data, ok := incoming.Data.(map[string]interface{}); ok {
+				if toIDf, ok := data["to_user_id"].(float64); ok {
+					h.SendToUser(uint(toIDf), WSMessage{
+						Type: "location_update",
+						Data: map[string]interface{}{
+							"from_user_id": userID,
+							"share_id":     data["share_id"],
+							"latitude":     data["latitude"],
+							"longitude":    data["longitude"],
+						},
+					})
+				}
+			}
+		}
 	}
 }
 

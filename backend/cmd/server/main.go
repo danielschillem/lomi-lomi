@@ -59,8 +59,11 @@ func main() {
 	paymentHandler := handlers.NewPaymentHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
 	safetyHandler := handlers.NewSafetyHandler()
+	ownerHandler := handlers.NewOwnerHandler()
+	deliveryHandler := handlers.NewDeliveryHandler()
 	wsHub := handlers.NewWSHub(cfg)
 	messageHandler := handlers.NewMessageHandler(wsHub)
+	locationHandler := handlers.NewLocationHandler(wsHub)
 
 	// Public routes
 	api := app.Group("/api/v1")
@@ -114,6 +117,19 @@ func main() {
 	api.Put("/conversations/:id/read", jwt, messageHandler.MarkRead)
 	api.Get("/conversations/with/:userId", jwt, messageHandler.GetOrCreateConversation)
 
+	// Location sharing
+	api.Post("/location/share", jwt, locationHandler.StartLocationShare)
+	api.Put("/location/share/:id", jwt, locationHandler.UpdateLocation)
+	api.Delete("/location/share/:id", jwt, locationHandler.StopLocationShare)
+	api.Get("/location/shares", jwt, locationHandler.GetActiveShares)
+
+	// VTC Rides
+	api.Post("/vtc/rides", jwt, locationHandler.RequestVTCRide)
+	api.Get("/vtc/rides", jwt, locationHandler.GetMyVTCRides)
+	api.Get("/vtc/rides/:id", jwt, locationHandler.GetVTCRide)
+	api.Put("/vtc/rides/:id/status", jwt, locationHandler.UpdateVTCRideStatus)
+	api.Put("/vtc/rides/:id/driver-location", jwt, locationHandler.UpdateVTCDriverLocation)
+
 	// Shop
 	api.Post("/shop/orders", jwt, shopHandler.CreateOrder)
 	api.Get("/shop/orders", jwt, shopHandler.GetOrders)
@@ -146,6 +162,20 @@ func main() {
 	api.Delete("/blocks/:id", jwt, safetyHandler.UnblockUser)
 	api.Get("/blocks", jwt, safetyHandler.GetBlockedUsers)
 
+	// Delivery addresses
+	api.Get("/addresses", jwt, deliveryHandler.GetAddresses)
+	api.Post("/addresses", jwt, deliveryHandler.CreateAddress)
+	api.Put("/addresses/:id", jwt, deliveryHandler.UpdateAddress)
+	api.Delete("/addresses/:id", jwt, deliveryHandler.DeleteAddress)
+
+	// Place reservations (user side)
+	api.Post("/places/reservations", jwt, deliveryHandler.CreatePlaceReservation)
+	api.Get("/places/reservations", jwt, deliveryHandler.GetMyReservations)
+	api.Put("/places/reservations/:id/cancel", jwt, deliveryHandler.CancelReservation)
+
+	// Order tracking (user side)
+	api.Get("/orders/:id/tracking", jwt, deliveryHandler.GetOrderTracking)
+
 	// Static uploads directory
 	app.Static("/uploads", cfg.UploadDir)
 
@@ -160,6 +190,22 @@ func main() {
 
 	// Admin routes (requires JWT + admin role)
 	admin := api.Group("/admin", middleware.JWTAuth(cfg), middleware.RequireAdmin())
+
+	// Owner dashboard routes (requires JWT + owner or admin role)
+	owner := api.Group("/owner", middleware.JWTAuth(cfg), middleware.RequireOwner())
+	owner.Get("/stats", ownerHandler.GetStats)
+	owner.Get("/places", ownerHandler.GetMyPlaces)
+	owner.Put("/places/:id", ownerHandler.UpdateMyPlace)
+	owner.Get("/products", ownerHandler.GetMyProducts)
+	owner.Post("/products", ownerHandler.CreateMyProduct)
+	owner.Put("/products/:id", ownerHandler.UpdateMyProduct)
+	owner.Delete("/products/:id", ownerHandler.DeleteMyProduct)
+	owner.Get("/orders", ownerHandler.GetMyOrders)
+	owner.Put("/orders/:id/status", ownerHandler.UpdateOrderStatus)
+	owner.Get("/wellness/bookings", ownerHandler.GetMyWellnessBookings)
+	owner.Put("/wellness/bookings/:id/status", ownerHandler.UpdateBookingStatus)
+	owner.Get("/reservations", ownerHandler.GetMyPlaceReservations)
+	owner.Put("/reservations/:id/status", ownerHandler.UpdateReservationStatus)
 	admin.Get("/stats", adminHandler.GetStats)
 	admin.Get("/stats/timeline", adminHandler.GetStatsTimeline)
 	admin.Get("/users", adminHandler.ListUsers)

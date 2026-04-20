@@ -38,7 +38,31 @@ func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 	var conversations []models.Conversation
 	query.Order("updated_at DESC").Find(&conversations)
 
-	return c.JSON(conversations)
+	// Build enriched response with last_message and unread_count
+	type ConvResponse struct {
+		models.Conversation
+		LastMessage string `json:"last_message"`
+		UnreadCount int64  `json:"unread_count"`
+	}
+
+	var result []ConvResponse
+	for _, conv := range conversations {
+		var lastMsg models.Message
+		database.DB.Where("conversation_id = ?", conv.ID).Order("created_at DESC").First(&lastMsg)
+
+		var unread int64
+		database.DB.Model(&models.Message{}).
+			Where("conversation_id = ? AND sender_id != ? AND is_read = ?", conv.ID, userID, false).
+			Count(&unread)
+
+		result = append(result, ConvResponse{
+			Conversation: conv,
+			LastMessage:  lastMsg.Content,
+			UnreadCount:  unread,
+		})
+	}
+
+	return c.JSON(result)
 }
 
 func (h *MessageHandler) GetMessages(c *fiber.Ctx) error {

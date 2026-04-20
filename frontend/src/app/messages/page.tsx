@@ -1,29 +1,37 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MessageCircle, ArrowLeft, User, Circle } from "lucide-react";
 import { getConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useWS } from "@/lib/ws-context";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8888/ws";
+interface ConvUser {
+  id: number;
+  username: string;
+  avatar_url: string;
+  is_online: boolean;
+}
 
 interface Conversation {
   id: number;
   user1_id: number;
   user2_id: number;
+  user1: ConvUser;
+  user2: ConvUser;
   updated_at: string;
-  other_user?: { username: string; avatar_url: string; is_online: boolean };
   last_message?: string;
+  unread_count?: number;
 }
 
 export default function ConversationsPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { subscribe } = useWS();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const wsRef = useRef<WebSocket | null>(null);
 
   function loadConversations() {
     getConversations()
@@ -45,37 +53,39 @@ export default function ConversationsPage() {
   // WS: refresh list when a new message arrives
   useEffect(() => {
     if (!user) return;
-    const ws = new WebSocket(`${WS_URL}/${user.id}`);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "message") {
-          loadConversations();
-          // Browser notification
-          if (
-            document.hidden &&
-            typeof Notification !== "undefined" &&
-            Notification.permission === "granted"
-          ) {
-            const sender = data.data?.sender?.username || "Quelqu'un";
-            new Notification(`${sender} — Lomi Lomi`, {
-              body: data.data?.content || "Nouveau message",
-              icon: "/icon-192.png",
-            });
-          }
+    return subscribe((event) => {
+      if (event.type === "message") {
+        loadConversations();
+        // Browser notification
+        if (
+          document.hidden &&
+          typeof Notification !== "undefined" &&
+          Notification.permission === "granted"
+        ) {
+          const sender = (event.data as Record<string, unknown>)?.sender as
+            | Record<string, unknown>
+            | undefined;
+          const senderName = (sender?.username as string) || "Quelqu'un";
+          new Notification(`${senderName} — Lomi Lomi`, {
+            body:
+              ((event.data as Record<string, unknown>)?.content as string) ||
+              "Nouveau message",
+            icon: "/icon-192.png",
+          });
         }
-      } catch {
-        // ignore
       }
-    };
+    });
+  }, [user, subscribe]);
 
-    return () => {
-      ws.close();
-      wsRef.current = null;
-    };
-  }, [user]);
+  // Request notification permission
+  useEffect(() => {
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
+      Notification.requestPermission();
+    }
+  }, []);
 
   if (authLoading || loading) {
     return (
@@ -120,7 +130,9 @@ export default function ConversationsPage() {
         ) : (
           <div className="space-y-2">
             {conversations.map((conv) => {
-              const other = conv.other_user;
+              const other =
+                user && conv.user1_id === user.id ? conv.user2 : conv.user1;
+              const hasUnread = (conv.unread_count ?? 0) > 0;
               return (
                 <Link
                   key={conv.id}
@@ -145,16 +157,27 @@ export default function ConversationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm truncate">
+                      <span
+                        className={`font-semibold text-sm truncate ${hasUnread ? "text-white" : ""}`}
+                      >
                         {other?.username || `Utilisateur #${conv.user2_id}`}
                       </span>
                       <span className="text-xs text-zinc-500 shrink-0 ml-2">
                         {new Date(conv.updated_at).toLocaleDateString("fr-FR")}
                       </span>
                     </div>
-                    <p className="text-zinc-400 text-xs truncate mt-0.5">
-                      {conv.last_message || "Commencez la conversation..."}
-                    </p>
+                    <div className="flex items-center justify-between mt-0.5">
+                      <p
+                        className={`text-xs truncate ${hasUnread ? "text-zinc-200 font-medium" : "text-zinc-400"}`}
+                      >
+                        {conv.last_message || "Commencez la conversation..."}
+                      </p>
+                      {hasUnread && (
+                        <span className="shrink-0 ml-2 w-5 h-5 rounded-full bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center">
+                          {conv.unread_count}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </Link>
               );

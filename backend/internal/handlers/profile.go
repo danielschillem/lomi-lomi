@@ -142,22 +142,53 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 	var users []models.User
 	query.Limit(20).Find(&users)
 
-	// Filter by distance if user has location
-	if currentUser.Latitude != 0 && currentUser.Longitude != 0 {
-		var filtered []models.User
-		for _, u := range users {
-			if u.Latitude == 0 && u.Longitude == 0 {
-				continue
-			}
-			dist := haversine(currentUser.Latitude, currentUser.Longitude, u.Latitude, u.Longitude)
-			if dist <= float64(prefs.MaxDistance) {
-				filtered = append(filtered, u)
-			}
-		}
-		users = filtered
+	// Build enriched response with age, distance, interests
+	type DiscoverProfile struct {
+		models.User
+		Age       int     `json:"age"`
+		Distance  float64 `json:"distance"` // km, -1 if unknown
+		Interests string  `json:"interests"`
 	}
 
-	return c.JSON(users)
+	var results []DiscoverProfile
+	for _, u := range users {
+		dp := DiscoverProfile{User: u, Distance: -1}
+
+		// Calculate age
+		if u.BirthDate != nil {
+			now := time.Now()
+			age := now.Year() - u.BirthDate.Year()
+			if now.YearDay() < u.BirthDate.YearDay() {
+				age--
+			}
+			dp.Age = age
+		}
+
+		// Calculate distance
+		if currentUser.Latitude != 0 && currentUser.Longitude != 0 && u.Latitude != 0 && u.Longitude != 0 {
+			dp.Distance = math.Round(haversine(currentUser.Latitude, currentUser.Longitude, u.Latitude, u.Longitude)*10) / 10
+			if prefs.MaxDistance > 0 && dp.Distance > float64(prefs.MaxDistance) {
+				continue
+			}
+		} else if currentUser.Latitude != 0 && currentUser.Longitude != 0 {
+			// User has no location, skip if distance filter is active
+			continue
+		}
+
+		// Attach interests from target user's preferences
+		var targetPrefs models.UserPreference
+		if database.DB.Where("user_id = ?", u.ID).First(&targetPrefs).Error == nil {
+			dp.Interests = targetPrefs.Interests
+		}
+
+		results = append(results, dp)
+	}
+
+	if results == nil {
+		results = []DiscoverProfile{}
+	}
+
+	return c.JSON(results)
 }
 
 // haversine calculates distance in km between two coordinates

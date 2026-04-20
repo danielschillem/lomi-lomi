@@ -69,6 +69,18 @@ func RequireAdmin() fiber.Handler {
 	}
 }
 
+func RequireOwner() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		role, _ := c.Locals("role").(string)
+		if role != "owner" && role != "admin" {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Accès réservé aux propriétaires",
+			})
+		}
+		return c.Next()
+	}
+}
+
 func GenerateToken(cfg *config.Config, userID uint, username string, role string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":  userID,

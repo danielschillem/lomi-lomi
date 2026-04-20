@@ -26,7 +26,7 @@ type User struct {
 	IsVerified bool       `gorm:"default:false" json:"is_verified"`
 	IsOnline   bool       `gorm:"default:false" json:"is_online"`
 	LastSeenAt *time.Time `json:"last_seen_at"`
-	Role       string     `gorm:"size:20;default:user" json:"role"` // user, admin
+	Role       string     `gorm:"size:20;default:user" json:"role"` // user, owner, admin
 	Photos     []Photo    `gorm:"foreignKey:UserID" json:"photos,omitempty"`
 }
 
@@ -121,4 +121,43 @@ type OTP struct {
 	Code      string    `gorm:"size:6;not null" json:"-"`
 	ExpiresAt time.Time `json:"expires_at"`
 	Used      bool      `gorm:"default:false" json:"used"`
+}
+
+// LocationShare represents a live location sharing session between two users.
+type LocationShare struct {
+	ID        uint       `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
+	SenderID  uint       `gorm:"not null;index" json:"sender_id"`
+	ReceiverID uint      `gorm:"not null;index" json:"receiver_id"`
+	Latitude  float64    `json:"latitude"`
+	Longitude float64    `json:"longitude"`
+	IsActive  bool       `gorm:"default:true" json:"is_active"`
+	ExpiresAt time.Time  `json:"expires_at"`
+	Sender    User       `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
+	Receiver  User       `gorm:"foreignKey:ReceiverID" json:"receiver,omitempty"`
+}
+
+// VTCRide represents a VTC ride request between users or to a destination.
+type VTCRide struct {
+	ID             uint       `gorm:"primaryKey" json:"id"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	RequesterID    uint       `gorm:"not null;index" json:"requester_id"`
+	PassengerID    uint       `gorm:"not null;index" json:"passenger_id"`
+	DriverID       *uint      `gorm:"index" json:"driver_id"`
+	PickupLat      float64    `json:"pickup_lat"`
+	PickupLng      float64    `json:"pickup_lng"`
+	PickupAddress  string     `gorm:"size:500" json:"pickup_address"`
+	DropoffLat     float64    `json:"dropoff_lat"`
+	DropoffLng     float64    `json:"dropoff_lng"`
+	DropoffAddress string     `gorm:"size:500" json:"dropoff_address"`
+	Status         string     `gorm:"size:20;default:pending" json:"status"` // pending, accepted, in_progress, completed, cancelled
+	DriverLat      float64    `json:"driver_lat"`
+	DriverLng      float64    `json:"driver_lng"`
+	EstimatedPrice float64    `json:"estimated_price"`
+	Note           string     `gorm:"size:500" json:"note"`
+	Requester      User       `gorm:"foreignKey:RequesterID" json:"requester,omitempty"`
+	Passenger      User       `gorm:"foreignKey:PassengerID" json:"passenger,omitempty"`
+	Driver         *User      `gorm:"foreignKey:DriverID" json:"driver,omitempty"`
 }

@@ -665,8 +665,14 @@ export default function AdminWellnessPage() {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <label className="block text-xs text-zinc-500 mb-1">Nom</label>
+                <label
+                  htmlFor="provider-name"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
+                  Nom
+                </label>
                 <input
+                  id="provider-name"
                   value={providerForm.name}
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, name: e.target.value })
@@ -675,10 +681,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-desc"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Description
                 </label>
                 <textarea
+                  id="provider-desc"
                   value={providerForm.description}
                   onChange={(e) =>
                     setProviderForm({
@@ -691,10 +701,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-category"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Catégorie
                 </label>
                 <select
+                  id="provider-category"
                   value={providerForm.category}
                   onChange={(e) =>
                     setProviderForm({
@@ -712,10 +726,14 @@ export default function AdminWellnessPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-city"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Ville
                 </label>
                 <input
+                  id="provider-city"
                   value={providerForm.city}
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, city: e.target.value })
@@ -724,10 +742,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-address"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Adresse
                 </label>
                 <input
+                  id="provider-address"
                   value={providerForm.address}
                   onChange={(e) =>
                     setProviderForm({
@@ -739,10 +761,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-phone"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Téléphone
                 </label>
                 <input
+                  id="provider-phone"
                   value={providerForm.phone}
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, phone: e.target.value })
@@ -751,10 +777,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-email"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Email
                 </label>
                 <input
+                  id="provider-email"
                   type="email"
                   value={providerForm.email}
                   onChange={(e) =>
@@ -764,10 +794,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-website"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Site web
                 </label>
                 <input
+                  id="provider-website"
                   value={providerForm.website}
                   onChange={(e) =>
                     setProviderForm({
@@ -779,10 +813,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-image"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Image URL
                 </label>
                 <input
+                  id="provider-image"
                   value={providerForm.image_url}
                   onChange={(e) =>
                     setProviderForm({
@@ -794,10 +832,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-lat"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Latitude
                 </label>
                 <input
+                  id="provider-lat"
                   type="number"
                   step="any"
                   value={providerForm.latitude || ""}
@@ -811,10 +853,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="provider-lng"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Longitude
                 </label>
                 <input
+                  id="provider-lng"
                   type="number"
                   step="any"
                   value={providerForm.longitude || ""}
@@ -916,8 +962,14 @@ export default function AdminWellnessPage() {
             </h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">Nom</label>
+                <label
+                  htmlFor="service-name"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
+                  Nom
+                </label>
                 <input
+                  id="service-name"
                   value={serviceForm.name}
                   onChange={(e) =>
                     setServiceForm({ ...serviceForm, name: e.target.value })
@@ -926,10 +978,14 @@ export default function AdminWellnessPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="service-desc"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Description
                 </label>
                 <textarea
+                  id="service-desc"
                   value={serviceForm.description}
                   onChange={(e) =>
                     setServiceForm({
@@ -943,10 +999,14 @@ export default function AdminWellnessPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">
+                  <label
+                    htmlFor="service-duration"
+                    className="block text-xs text-zinc-500 mb-1"
+                  >
                     Durée (min)
                   </label>
                   <input
+                    id="service-duration"
                     type="number"
                     value={serviceForm.duration}
                     onChange={(e) =>
@@ -959,10 +1019,14 @@ export default function AdminWellnessPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-500 mb-1">
+                  <label
+                    htmlFor="service-price"
+                    className="block text-xs text-zinc-500 mb-1"
+                  >
                     Prix (€)
                   </label>
                   <input
+                    id="service-price"
                     type="number"
                     step="0.01"
                     value={serviceForm.price}
@@ -977,10 +1041,14 @@ export default function AdminWellnessPage() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label
+                  htmlFor="service-category"
+                  className="block text-xs text-zinc-500 mb-1"
+                >
                   Catégorie
                 </label>
                 <input
+                  id="service-category"
                   value={serviceForm.category}
                   onChange={(e) =>
                     setServiceForm({
@@ -1056,6 +1124,7 @@ export default function AdminWellnessPage() {
               {availSlots.map((slot, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <select
+                    title="Jour"
                     value={slot.day_of_week}
                     onChange={(e) => {
                       const updated = [...availSlots];
@@ -1071,6 +1140,7 @@ export default function AdminWellnessPage() {
                     ))}
                   </select>
                   <input
+                    title="Heure de début"
                     type="time"
                     value={slot.start_time}
                     onChange={(e) => {
@@ -1082,6 +1152,7 @@ export default function AdminWellnessPage() {
                   />
                   <span className="text-zinc-500 text-xs">—</span>
                   <input
+                    title="Heure de fin"
                     type="time"
                     value={slot.end_time}
                     onChange={(e) => {

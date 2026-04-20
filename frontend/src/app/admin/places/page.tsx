@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import {
   MapPin,
   Plus,
@@ -18,6 +19,10 @@ import {
   adminUpdatePlace,
   adminDeletePlace,
 } from "@/lib/api";
+
+const LocationPicker = dynamic(() => import("./location-picker"), {
+  ssr: false,
+});
 
 interface Place {
   id: number;
@@ -178,16 +183,22 @@ export default function AdminPlacesPage() {
             <textarea
               placeholder="Description"
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
               rows={3}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-zinc-500 mb-1 block">Catégorie</label>
+                <label className="text-xs text-zinc-500 mb-1 block">
+                  Catégorie
+                </label>
                 <select
                   value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, category: e.target.value })
+                  }
                   title="Catégorie"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
                 >
@@ -199,7 +210,9 @@ export default function AdminPlacesPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-zinc-500 mb-1 block">Ville</label>
+                <label className="text-xs text-zinc-500 mb-1 block">
+                  Ville
+                </label>
                 <input
                   placeholder="Ville"
                   value={form.city}
@@ -214,30 +227,13 @@ export default function AdminPlacesPage() {
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
             />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-zinc-500 mb-1 block">Latitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  title="Latitude"
-                  value={form.latitude}
-                  onChange={(e) => setForm({ ...form, latitude: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 mb-1 block">Longitude</label>
-                <input
-                  type="number"
-                  step="any"
-                  title="Longitude"
-                  value={form.longitude}
-                  onChange={(e) => setForm({ ...form, longitude: parseFloat(e.target.value) || 0 })}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
-                />
-              </div>
-            </div>
+            <LocationPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              onChange={(lat, lng) =>
+                setForm({ ...form, latitude: lat, longitude: lng })
+              }
+            />
             <input
               placeholder="Téléphone"
               value={form.phone}
@@ -260,7 +256,9 @@ export default function AdminPlacesPage() {
               <input
                 type="checkbox"
                 checked={form.is_partner}
-                onChange={(e) => setForm({ ...form, is_partner: e.target.checked })}
+                onChange={(e) =>
+                  setForm({ ...form, is_partner: e.target.checked })
+                }
                 className="rounded border-zinc-600"
               />
               Partenaire
@@ -301,13 +299,19 @@ export default function AdminPlacesPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500 animate-pulse">
+                <td
+                  colSpan={5}
+                  className="px-6 py-12 text-center text-zinc-500 animate-pulse"
+                >
                   Chargement...
                 </td>
               </tr>
             ) : places.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                <td
+                  colSpan={5}
+                  className="px-6 py-12 text-center text-zinc-500"
+                >
                   <MapPin className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
                   Aucun lieu enregistré.
                   <br />
@@ -345,7 +349,11 @@ export default function AdminPlacesPage() {
                           )}
                         </span>
                         <span className="text-xs text-zinc-500 flex items-center gap-2">
-                          {p.address && <span className="truncate max-w-40">{p.address}</span>}
+                          {p.address && (
+                            <span className="truncate max-w-40">
+                              {p.address}
+                            </span>
+                          )}
                           {p.phone && (
                             <span className="inline-flex items-center gap-0.5">
                               <Phone className="w-3 h-3" />
