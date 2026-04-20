@@ -2,6 +2,7 @@ package database
 
 import (
 	"log"
+	"os"
 
 	"github.com/glebarez/sqlite"
 	"github.com/lomilomi/backend/internal/config"
@@ -19,7 +20,11 @@ func Connect(cfg *config.Config) {
 
 	switch cfg.DBDriver {
 	case "postgres":
-		dialector = postgres.Open(cfg.DSN())
+		dsn := cfg.DSN()
+		if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
+			dsn = dbURL
+		}
+		dialector = postgres.Open(dsn)
 		log.Println("Using PostgreSQL database")
 	default:
 		dialector = sqlite.Open("lomilomi.db")
