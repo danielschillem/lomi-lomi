@@ -10,6 +10,7 @@ import {
   User,
   ShoppingBag,
   MapPin,
+  Sparkles,
 } from "lucide-react";
 import { getUnreadCount } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -70,6 +71,7 @@ export default function Navbar() {
       badge: unreadNotifs,
     },
     { href: "/boutique", icon: ShoppingBag, label: "Boutique" },
+    { href: "/bien-etre", icon: Sparkles, label: "Bien-être" },
     { href: "/carte", icon: MapPin, label: "Carte" },
     { href: "/profile", icon: User, label: "Profil" },
   ];

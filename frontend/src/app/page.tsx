@@ -128,14 +128,6 @@ export default function Home() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/15 rounded-full blur-3xl" />
 
           <div className="relative z-10 max-w-4xl mx-auto text-center px-6 pt-24">
-            <Image
-              src="/logo.png"
-              alt="Lomi Lomi"
-              width={120}
-              height={120}
-              className="mx-auto mb-8"
-              priority
-            />
             <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-medium tracking-wider uppercase">
               100% anonyme & sécurisé
             </div>

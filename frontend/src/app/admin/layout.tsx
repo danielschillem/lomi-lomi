@@ -11,6 +11,7 @@ import {
   MapPin,
   BarChart3,
   ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/users", label: "Utilisateurs", icon: Users },
   { href: "/admin/products", label: "Produits", icon: ShoppingBag },
   { href: "/admin/places", label: "Lieux", icon: MapPin },
+  { href: "/admin/wellness", label: "Bien-être", icon: Sparkles },
   { href: "/admin/stats", label: "Statistiques", icon: BarChart3 },
 ];
 

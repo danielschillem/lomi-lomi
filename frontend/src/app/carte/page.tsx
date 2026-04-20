@@ -10,6 +10,7 @@ import {
   Hotel,
   UtensilsCrossed,
   Sparkles,
+  Heart,
   Star,
   Phone,
   Globe,
@@ -39,6 +40,7 @@ const categories = [
   { value: "hotel", label: "Hôtels", icon: Hotel },
   { value: "restaurant", label: "Restaurants", icon: UtensilsCrossed },
   { value: "loisirs", label: "Loisirs", icon: Sparkles },
+  { value: "wellness", label: "Bien-être", icon: Heart },
 ];
 
 export default function CartePage() {

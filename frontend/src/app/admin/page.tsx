@@ -8,6 +8,8 @@ import {
   TrendingUp,
   MessageCircle,
   ShoppingCart,
+  Sparkles,
+  Calendar,
 } from "lucide-react";
 import { adminGetStats } from "@/lib/api";
 
@@ -18,6 +20,8 @@ interface Stats {
   messages: number;
   orders: number;
   revenue: number;
+  wellness_providers: number;
+  wellness_bookings: number;
 }
 
 export default function AdminDashboard() {
@@ -65,6 +69,18 @@ export default function AdminDashboard() {
       value: stats?.revenue != null ? `${stats.revenue.toFixed(2)} €` : "—",
       icon: TrendingUp,
       color: "text-emerald-400",
+    },
+    {
+      label: "Prestataires bien-être",
+      value: stats?.wellness_providers ?? "—",
+      icon: Sparkles,
+      color: "text-teal-400",
+    },
+    {
+      label: "Réservations bien-être",
+      value: stats?.wellness_bookings ?? "—",
+      icon: Calendar,
+      color: "text-cyan-400",
     },
   ];
 

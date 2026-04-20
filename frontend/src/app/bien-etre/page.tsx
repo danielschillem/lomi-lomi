@@ -145,8 +145,7 @@ export default function WellnessPage() {
               onChange={(e) => setMobileOnly(e.target.checked)}
               className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
             />
-            <MapPin className="w-3.5 h-3.5" />
-            À domicile uniquement
+            <MapPin className="w-3.5 h-3.5" />À domicile uniquement
           </label>
         </div>
 
@@ -190,8 +189,7 @@ export default function WellnessPage() {
                   )}
                   {provider.mobile_service && (
                     <span className="absolute top-3 left-3 bg-violet-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      À domicile
+                      <MapPin className="w-3 h-3" />À domicile
                     </span>
                   )}
                 </div>
