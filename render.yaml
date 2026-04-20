@@ -1,18 +1,23 @@
+# Lomi Lomi – Render Blueprint (preprod)
+# Service web déployé via Docker Hub image (schillem/lomilomi-api:latest)
+# DB PostgreSQL 16 – Frankfurt – basic_256mb
+
 databases:
   - name: lomilomi-db
-    plan: free
+    plan: basic_256mb
     databaseName: lomilomi
     user: lomilomi
     region: frankfurt
+    version: "16"
 
 services:
   - type: web
     name: lomilomi-api
-    runtime: docker
+    runtime: image
+    image:
+      url: docker.io/schillem/lomilomi-api:latest
     plan: free
     region: frankfurt
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
     healthCheckPath: /api/health
     envVars:
       - key: PORT
