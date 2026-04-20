@@ -2,7 +2,9 @@ package config
 
 import (
 	"log"
+	"net/url"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -58,6 +60,26 @@ func Load() *Config {
 
 	if cfg.JWTSecret == "change-me-in-production" {
 		log.Println("⚠️  WARNING: JWT_SECRET is using the default value. Set JWT_SECRET env var in production!")
+	}
+
+	// Support DATABASE_URL (Render, Heroku, etc.)
+	if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
+		cfg.DBDriver = "postgres"
+		if parsed, err := url.Parse(dbURL); err == nil {
+			cfg.DBHost = parsed.Hostname()
+			cfg.DBPort = parsed.Port()
+			if cfg.DBPort == "" {
+				cfg.DBPort = "5432"
+			}
+			cfg.DBUser = parsed.User.Username()
+			cfg.DBPass, _ = parsed.User.Password()
+			cfg.DBName = strings.TrimPrefix(parsed.Path, "/")
+			if parsed.Query().Get("sslmode") != "" {
+				cfg.DBSSLMode = parsed.Query().Get("sslmode")
+			} else {
+				cfg.DBSSLMode = "require"
+			}
+		}
 	}
 
 	return cfg

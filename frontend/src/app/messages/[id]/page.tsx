@@ -234,10 +234,7 @@ export default function ChatPage() {
       // Location sharing events
       if (event.type === "location_share_started") {
         const d = event.data as Record<string, unknown>;
-        if (
-          (d.sender_id as number) === receiverId ||
-          receiverId === 0
-        ) {
+        if ((d.sender_id as number) === receiverId || receiverId === 0) {
           setIncomingShare({
             id: d.share_id as number,
             sender_id: d.sender_id as number,
@@ -267,10 +264,7 @@ export default function ChatPage() {
         setIncomingShare((prev) =>
           prev && prev.id === (d.share_id as number) ? null : prev,
         );
-        if (
-          activeShare &&
-          activeShare.id === (d.share_id as number)
-        ) {
+        if (activeShare && activeShare.id === (d.share_id as number)) {
           stopSharingLocation();
         }
       }
@@ -278,10 +272,7 @@ export default function ChatPage() {
       // VTC events
       if (event.type === "vtc_ride_requested") {
         const d = event.data as Record<string, unknown>;
-        if (
-          (d.requester_id as number) === receiverId ||
-          receiverId === 0
-        ) {
+        if ((d.requester_id as number) === receiverId || receiverId === 0) {
           setActiveRide({
             id: d.ride_id as number,
             status: "pending",
@@ -342,7 +333,9 @@ export default function ChatPage() {
       .then((shares) => {
         const myShare = shares.find(
           (s) =>
-            s.sender_id === user.id && s.receiver_id === receiverId && s.is_active,
+            s.sender_id === user.id &&
+            s.receiver_id === receiverId &&
+            s.is_active,
         );
         if (myShare) {
           setActiveShare(myShare);
@@ -350,7 +343,9 @@ export default function ChatPage() {
         }
         const theirShare = shares.find(
           (s) =>
-            s.sender_id === receiverId && s.receiver_id === user.id && s.is_active,
+            s.sender_id === receiverId &&
+            s.receiver_id === user.id &&
+            s.is_active,
         );
         if (theirShare) {
           setIncomingShare({
@@ -420,7 +415,9 @@ export default function ChatPage() {
       },
       () => {
         setSharingLocation(false);
-        alert("Impossible d'accéder à votre position. Vérifiez les permissions.");
+        alert(
+          "Impossible d'accéder à votre position. Vérifiez les permissions.",
+        );
       },
       { enableHighAccuracy: true },
     );
@@ -439,10 +436,7 @@ export default function ChatPage() {
   }
 
   function openInMaps(lat: number, lng: number) {
-    window.open(
-      `https://www.google.com/maps?q=${lat},${lng}`,
-      "_blank",
-    );
+    window.open(`https://www.google.com/maps?q=${lat},${lng}`, "_blank");
   }
 
   // --- VTC functions ---
@@ -580,7 +574,9 @@ export default function ChatPage() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <h1 className="font-semibold text-sm truncate">{otherUser.username}</h1>
+                <h1 className="font-semibold text-sm truncate">
+                  {otherUser.username}
+                </h1>
                 <p className="text-xs text-zinc-500 flex items-center gap-1">
                   <Shield className="w-3 h-3" />
                   Messagerie sécurisée
@@ -613,7 +609,9 @@ export default function ChatPage() {
                   ? "bg-green-600 text-white"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-800"
               }`}
-              title={sharingLocation ? "Arrêter le partage" : "Partager ma position"}
+              title={
+                sharingLocation ? "Arrêter le partage" : "Partager ma position"
+              }
             >
               <Navigation className="w-4 h-4" />
             </button>
@@ -663,7 +661,10 @@ export default function ChatPage() {
               <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
               <MapPin className="w-4 h-4" />
               <span>
-                {incomingShare.username || otherUser?.username || "L'autre utilisateur"} partage sa position
+                {incomingShare.username ||
+                  otherUser?.username ||
+                  "L'autre utilisateur"}{" "}
+                partage sa position
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -709,7 +710,8 @@ export default function ChatPage() {
               </button>
             </div>
             <p className="text-xs text-zinc-500">
-              Envoyez un VTC chercher {otherUser?.username || "votre contact"} pour un rendez-vous
+              Envoyez un VTC chercher {otherUser?.username || "votre contact"}{" "}
+              pour un rendez-vous
             </p>
             <input
               type="text"

@@ -38,18 +38,55 @@ export default function DashboardPage() {
   }
 
   const cards = [
-    { label: "Lieux", value: stats.places, icon: MapPin, color: "bg-blue-50 text-blue-700" },
-    { label: "Produits", value: stats.products, icon: ShoppingBag, color: "bg-green-50 text-green-700" },
-    { label: "Wellness", value: stats.wellness, icon: Heart, color: "bg-pink-50 text-pink-700" },
-    { label: "Commandes", value: stats.orders, icon: ClipboardList, color: "bg-orange-50 text-orange-700" },
-    { label: "Revenus", value: `${stats.revenue.toFixed(2)} €`, icon: DollarSign, color: "bg-yellow-50 text-yellow-700" },
-    { label: "Réservations bien-être", value: stats.bookings, icon: Users, color: "bg-purple-50 text-purple-700" },
-    { label: "Réservations lieux", value: stats.reservations, icon: Calendar, color: "bg-indigo-50 text-indigo-700" },
+    {
+      label: "Lieux",
+      value: stats.places,
+      icon: MapPin,
+      color: "bg-blue-50 text-blue-700",
+    },
+    {
+      label: "Produits",
+      value: stats.products,
+      icon: ShoppingBag,
+      color: "bg-green-50 text-green-700",
+    },
+    {
+      label: "Wellness",
+      value: stats.wellness,
+      icon: Heart,
+      color: "bg-pink-50 text-pink-700",
+    },
+    {
+      label: "Commandes",
+      value: stats.orders,
+      icon: ClipboardList,
+      color: "bg-orange-50 text-orange-700",
+    },
+    {
+      label: "Revenus",
+      value: `${stats.revenue.toFixed(2)} €`,
+      icon: DollarSign,
+      color: "bg-yellow-50 text-yellow-700",
+    },
+    {
+      label: "Réservations bien-être",
+      value: stats.bookings,
+      icon: Users,
+      color: "bg-purple-50 text-purple-700",
+    },
+    {
+      label: "Réservations lieux",
+      value: stats.reservations,
+      icon: Calendar,
+      color: "bg-indigo-50 text-indigo-700",
+    },
   ];
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Vue d&apos;ensemble</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+        Vue d&apos;ensemble
+      </h1>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {cards.map((card) => (
           <div

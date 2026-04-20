@@ -37,7 +37,9 @@ export default function DashboardReservationsPage() {
   async function handleStatus(id: number, status: string) {
     try {
       await ownerUpdateReservationStatus(id, status);
-      setReservations((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+      setReservations((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status } : r)),
+      );
     } catch (err) {
       alert((err as Error).message);
     }
@@ -53,7 +55,9 @@ export default function DashboardReservationsPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Réservations de lieux</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+        Réservations de lieux
+      </h1>
 
       {reservations.length === 0 ? (
         <p className="text-gray-500">Aucune réservation de lieu.</p>
@@ -62,21 +66,37 @@ export default function DashboardReservationsPage() {
           {reservations.map((res) => {
             const sc = STATUS_CONFIG[res.status] || STATUS_CONFIG.pending;
             const dateStr = new Date(res.date).toLocaleDateString("fr-FR");
-            const endStr = res.end_date ? new Date(res.end_date).toLocaleDateString("fr-FR") : dateStr;
+            const endStr = res.end_date
+              ? new Date(res.end_date).toLocaleDateString("fr-FR")
+              : dateStr;
             return (
               <div key={res.id} className="rounded-xl bg-white p-5 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {res.place?.name} <span className="text-sm text-gray-500">({res.place?.category})</span>
+                      {res.place?.name}{" "}
+                      <span className="text-sm text-gray-500">
+                        ({res.place?.category})
+                      </span>
                     </p>
                     <p className="text-sm text-gray-500">
-                      {dateStr === endStr ? dateStr : `${dateStr} → ${endStr}`} • {res.persons} pers.
+                      {dateStr === endStr ? dateStr : `${dateStr} → ${endStr}`}{" "}
+                      • {res.persons} pers.
                     </p>
-                    <p className="text-sm text-gray-500">Client : {res.user?.username}</p>
-                    {res.notes && <p className="mt-1 text-sm text-gray-400 italic">{res.notes}</p>}
+                    <p className="text-sm text-gray-500">
+                      Client : {res.user?.username}
+                    </p>
+                    {res.notes && (
+                      <p className="mt-1 text-sm text-gray-400 italic">
+                        {res.notes}
+                      </p>
+                    )}
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${sc.color}`}>{sc.label}</span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${sc.color}`}
+                  >
+                    {sc.label}
+                  </span>
                 </div>
 
                 {res.status === "pending" && (

@@ -40,7 +40,9 @@ export default function DashboardWellnessPage() {
   async function handleStatus(id: number, status: string) {
     try {
       await ownerUpdateBookingStatus(id, status);
-      setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)));
+      setBookings((prev) =>
+        prev.map((b) => (b.id === id ? { ...b, status } : b)),
+      );
     } catch (err) {
       alert((err as Error).message);
     }
@@ -56,7 +58,9 @@ export default function DashboardWellnessPage() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Réservations bien-être</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+        Réservations bien-être
+      </h1>
 
       {bookings.length === 0 ? (
         <p className="text-gray-500">Aucune réservation bien-être.</p>
@@ -65,21 +69,35 @@ export default function DashboardWellnessPage() {
           {bookings.map((booking) => {
             const sc = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending;
             return (
-              <div key={booking.id} className="rounded-xl bg-white p-5 shadow-sm">
+              <div
+                key={booking.id}
+                className="rounded-xl bg-white p-5 shadow-sm"
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {booking.service?.name || "Service"} — {booking.provider?.name}
+                      {booking.service?.name || "Service"} —{" "}
+                      {booking.provider?.name}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {new Date(booking.date).toLocaleDateString("fr-FR")} • {booking.start_time} – {booking.end_time}
+                      {new Date(booking.date).toLocaleDateString("fr-FR")} •{" "}
+                      {booking.start_time} – {booking.end_time}
                     </p>
                     <p className="text-sm text-gray-500">
-                      Client : {booking.user?.username} • {booking.persons} pers. • {booking.total_price.toFixed(2)} €
+                      Client : {booking.user?.username} • {booking.persons}{" "}
+                      pers. • {booking.total_price.toFixed(2)} €
                     </p>
-                    {booking.notes && <p className="mt-1 text-sm text-gray-400 italic">{booking.notes}</p>}
+                    {booking.notes && (
+                      <p className="mt-1 text-sm text-gray-400 italic">
+                        {booking.notes}
+                      </p>
+                    )}
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${sc.color}`}>{sc.label}</span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${sc.color}`}
+                  >
+                    {sc.label}
+                  </span>
                 </div>
 
                 {booking.status === "pending" && (

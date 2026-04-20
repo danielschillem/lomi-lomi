@@ -34,7 +34,11 @@ export default function DashboardPlacesPage() {
   async function handleSave(id: number) {
     try {
       const updated = await ownerUpdatePlace(id, editData);
-      setPlaces((prev) => prev.map((p) => (p.id === id ? { ...p, ...updated } as unknown as Place : p)));
+      setPlaces((prev) =>
+        prev.map((p) =>
+          p.id === id ? ({ ...p, ...updated } as unknown as Place) : p,
+        ),
+      );
       setEditId(null);
     } catch (err) {
       alert((err as Error).message);
@@ -72,20 +76,26 @@ export default function DashboardPlacesPage() {
                     className="w-full rounded-lg border px-3 py-2 text-sm"
                     defaultValue={place.name}
                     placeholder="Nom"
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                    onChange={(e) =>
+                      setEditData({ ...editData, name: e.target.value })
+                    }
                   />
                   <textarea
                     className="w-full rounded-lg border px-3 py-2 text-sm"
                     defaultValue={place.description}
                     placeholder="Description"
                     rows={3}
-                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                    onChange={(e) =>
+                      setEditData({ ...editData, description: e.target.value })
+                    }
                   />
                   <input
                     className="w-full rounded-lg border px-3 py-2 text-sm"
                     defaultValue={place.phone}
                     placeholder="Téléphone"
-                    onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setEditData({ ...editData, phone: e.target.value })
+                    }
                   />
                   <div className="flex gap-2">
                     <button
@@ -106,8 +116,12 @@ export default function DashboardPlacesPage() {
                 <>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-gray-900">{place.name}</h3>
-                      <p className="text-sm text-gray-500">{place.category} • {place.city}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {place.name}
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        {place.category} • {place.city}
+                      </p>
                     </div>
                     <button
                       onClick={() => {
@@ -121,7 +135,9 @@ export default function DashboardPlacesPage() {
                     </button>
                   </div>
                   {place.description && (
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">{place.description}</p>
+                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                      {place.description}
+                    </p>
                   )}
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-gray-500">
                     {place.address && <span>📍 {place.address}</span>}

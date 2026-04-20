@@ -24,10 +24,12 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       DB_USER: lomilomi
-      DB_PASSWORD: lomilomi
+      DB_PASS: lomilomi
       DB_NAME: lomilomi
       JWT_SECRET: change-me-in-production
       CORS_ORIGIN: "http://localhost:3000"
+    volumes:
+      - uploads:/app/uploads
     depends_on:
       - db
 
@@ -44,3 +46,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

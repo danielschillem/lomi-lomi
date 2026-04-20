@@ -62,7 +62,10 @@ export default function OrderTrackingPage() {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
         <p className="text-red-600">{error || "Commande non trouvée"}</p>
-        <Link href="/boutique" className="mt-4 inline-block text-purple-700 underline">
+        <Link
+          href="/boutique"
+          className="mt-4 inline-block text-purple-700 underline"
+        >
           Retour à la boutique
         </Link>
       </div>
@@ -71,7 +74,10 @@ export default function OrderTrackingPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <Link href="/boutique" className="mb-6 flex items-center gap-2 text-sm text-purple-700 hover:underline">
+      <Link
+        href="/boutique"
+        className="mb-6 flex items-center gap-2 text-sm text-purple-700 hover:underline"
+      >
         <ArrowLeft size={16} /> Retour
       </Link>
 
@@ -79,12 +85,15 @@ export default function OrderTrackingPage() {
         Commande #{order.id}
       </h1>
       <p className="mb-6 text-sm text-gray-500">
-        Passée le {new Date(order.created_at).toLocaleDateString("fr-FR")} • {order.total_amount.toFixed(2)} €
+        Passée le {new Date(order.created_at).toLocaleDateString("fr-FR")} •{" "}
+        {order.total_amount.toFixed(2)} €
       </p>
 
       {/* Tracking steps */}
       <div className="mb-8 rounded-xl bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Suivi de livraison</h2>
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Suivi de livraison
+        </h2>
         <div className="space-y-0">
           {tracking.map((step, i) => (
             <div key={step.step} className="flex items-start gap-3">
@@ -139,12 +148,20 @@ export default function OrderTrackingPage() {
       {/* Delivery address */}
       {order.delivery_address && (
         <div className="rounded-xl bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-lg font-semibold text-gray-900">Adresse de livraison</h2>
-          <p className="text-sm text-gray-700">{order.delivery_address.full_name}</p>
-          <p className="text-sm text-gray-500">{order.delivery_address.address}</p>
+          <h2 className="mb-3 text-lg font-semibold text-gray-900">
+            Adresse de livraison
+          </h2>
+          <p className="text-sm text-gray-700">
+            {order.delivery_address.full_name}
+          </p>
+          <p className="text-sm text-gray-500">
+            {order.delivery_address.address}
+          </p>
           <p className="text-sm text-gray-500">{order.delivery_address.city}</p>
           {order.delivery_address.phone && (
-            <p className="text-sm text-gray-500">📞 {order.delivery_address.phone}</p>
+            <p className="text-sm text-gray-500">
+              📞 {order.delivery_address.phone}
+            </p>
           )}
         </div>
       )}

@@ -25,7 +25,13 @@ export default function DashboardProductsPage() {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [form, setForm] = useState({ name: "", description: "", price: "", category: "", stock: "0" });
+  const [form, setForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: "",
+    stock: "0",
+  });
 
   useEffect(() => {
     ownerGetProducts()
@@ -46,7 +52,13 @@ export default function DashboardProductsPage() {
       });
       setProducts((prev) => [p as unknown as Product, ...prev]);
       setShowCreate(false);
-      setForm({ name: "", description: "", price: "", category: "", stock: "0" });
+      setForm({
+        name: "",
+        description: "",
+        price: "",
+        category: "",
+        stock: "0",
+      });
     } catch (err) {
       alert((err as Error).message);
     }
@@ -61,7 +73,11 @@ export default function DashboardProductsPage() {
         category: form.category || undefined,
         stock: form.stock ? parseInt(form.stock) : undefined,
       });
-      setProducts((prev) => prev.map((pr) => (pr.id === id ? { ...pr, ...p } as unknown as Product : pr)));
+      setProducts((prev) =>
+        prev.map((pr) =>
+          pr.id === id ? ({ ...pr, ...p } as unknown as Product) : pr,
+        ),
+      );
       setEditId(null);
     } catch (err) {
       alert((err as Error).message);
@@ -99,7 +115,9 @@ export default function DashboardProductsPage() {
         placeholder="Description"
         rows={2}
         defaultValue={defaults?.description}
-        onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+        onChange={(e) =>
+          setForm((f) => ({ ...f, description: e.target.value }))
+        }
       />
       <div className="grid grid-cols-3 gap-2">
         <input
@@ -144,10 +162,16 @@ export default function DashboardProductsPage() {
           <h3 className="mb-3 font-semibold">Nouveau produit</h3>
           <FormFields />
           <div className="mt-3 flex gap-2">
-            <button onClick={handleCreate} className="flex items-center gap-1 rounded-lg bg-green-600 px-4 py-2 text-sm text-white">
+            <button
+              onClick={handleCreate}
+              className="flex items-center gap-1 rounded-lg bg-green-600 px-4 py-2 text-sm text-white"
+            >
               <Save size={14} /> Créer
             </button>
-            <button onClick={() => setShowCreate(false)} className="flex items-center gap-1 rounded-lg bg-gray-200 px-4 py-2 text-sm">
+            <button
+              onClick={() => setShowCreate(false)}
+              className="flex items-center gap-1 rounded-lg bg-gray-200 px-4 py-2 text-sm"
+            >
               <X size={14} /> Annuler
             </button>
           </div>
@@ -155,7 +179,9 @@ export default function DashboardProductsPage() {
       )}
 
       {products.length === 0 && !showCreate ? (
-        <p className="text-gray-500">Aucun produit. Cliquez sur &quot;Ajouter&quot; pour en créer.</p>
+        <p className="text-gray-500">
+          Aucun produit. Cliquez sur &quot;Ajouter&quot; pour en créer.
+        </p>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
@@ -164,10 +190,16 @@ export default function DashboardProductsPage() {
                 <>
                   <FormFields defaults={product} />
                   <div className="mt-3 flex gap-2">
-                    <button onClick={() => handleUpdate(product.id)} className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-sm text-white">
+                    <button
+                      onClick={() => handleUpdate(product.id)}
+                      className="flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-sm text-white"
+                    >
                       <Save size={14} /> Sauver
                     </button>
-                    <button onClick={() => setEditId(null)} className="flex items-center gap-1 rounded-lg bg-gray-200 px-3 py-2 text-sm">
+                    <button
+                      onClick={() => setEditId(null)}
+                      className="flex items-center gap-1 rounded-lg bg-gray-200 px-3 py-2 text-sm"
+                    >
                       <X size={14} /> Annuler
                     </button>
                   </div>
@@ -176,15 +208,25 @@ export default function DashboardProductsPage() {
                 <>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      <p className="text-sm text-purple-700 font-bold">{product.price.toFixed(2)} €</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-purple-700 font-bold">
+                        {product.price.toFixed(2)} €
+                      </p>
                     </div>
                     <div className="flex gap-1">
                       <button
                         title="Modifier"
                         onClick={() => {
                           setEditId(product.id);
-                          setForm({ name: product.name, description: product.description, price: String(product.price), category: product.category, stock: String(product.stock) });
+                          setForm({
+                            name: product.name,
+                            description: product.description,
+                            price: String(product.price),
+                            category: product.category,
+                            stock: String(product.stock),
+                          });
                         }}
                         className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                       >
@@ -200,12 +242,22 @@ export default function DashboardProductsPage() {
                     </div>
                   </div>
                   {product.description && (
-                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">{product.description}</p>
+                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                      {product.description}
+                    </p>
                   )}
                   <div className="mt-2 flex gap-2 text-xs text-gray-500">
-                    {product.category && <span className="rounded bg-gray-100 px-2 py-0.5">{product.category}</span>}
+                    {product.category && (
+                      <span className="rounded bg-gray-100 px-2 py-0.5">
+                        {product.category}
+                      </span>
+                    )}
                     <span>Stock: {product.stock}</span>
-                    <span className={product.is_active ? "text-green-600" : "text-red-600"}>
+                    <span
+                      className={
+                        product.is_active ? "text-green-600" : "text-red-600"
+                      }
+                    >
                       {product.is_active ? "Actif" : "Inactif"}
                     </span>
                   </div>

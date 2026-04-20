@@ -9,5 +9,6 @@ FROM alpine:3.20
 RUN apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=builder /app/server .
+RUN mkdir -p uploads
 EXPOSE 8888
 CMD ["./server"]

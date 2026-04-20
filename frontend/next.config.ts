@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         port: "8888",
       },
+      {
+        protocol: "https",
+        hostname: "*.onrender.com",
+      },
     ],
   },
   async headers() {

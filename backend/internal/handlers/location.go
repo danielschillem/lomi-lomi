@@ -241,12 +241,12 @@ func (h *LocationHandler) RequestVTCRide(c *fiber.Ctx) error {
 		h.WSHub.SendToUser(req.PassengerID, WSMessage{
 			Type: "vtc_ride_requested",
 			Data: map[string]interface{}{
-				"ride_id":        ride.ID,
-				"requester_id":   userID,
-				"username":       requester.Username,
-				"pickup_address": ride.PickupAddress,
+				"ride_id":         ride.ID,
+				"requester_id":    userID,
+				"username":        requester.Username,
+				"pickup_address":  ride.PickupAddress,
 				"dropoff_address": ride.DropoffAddress,
-				"note":           ride.Note,
+				"note":            ride.Note,
 			},
 		})
 	}

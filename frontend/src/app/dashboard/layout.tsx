@@ -22,16 +22,15 @@ const navItems = [
   { href: "/dashboard/reservations", label: "Réservations", icon: Calendar },
 ];
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && (!user || (user.role !== "owner" && user.role !== "admin"))) {
+    if (
+      !loading &&
+      (!user || (user.role !== "owner" && user.role !== "admin"))
+    ) {
       router.replace("/");
     }
   }, [user, loading, router]);
