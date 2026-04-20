@@ -422,3 +422,136 @@ export function adminUpdateReport(id: number, status: string) {
     body: JSON.stringify({ status }),
   });
 }
+
+/* ---- Wellness ---- */
+export function getWellnessProviders(params?: {
+  category?: string;
+  city?: string;
+  mobile?: boolean;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.category) qs.set("category", params.category);
+  if (params?.city) qs.set("city", params.city);
+  if (params?.mobile) qs.set("mobile", "true");
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(
+    `/wellness/providers${q ? `?${q}` : ""}`,
+  );
+}
+
+export function getWellnessProvider(id: number) {
+  return request<{
+    provider: Record<string, unknown>;
+    reviews: Record<string, unknown>[];
+  }>(`/wellness/providers/${id}`);
+}
+
+export function getWellnessService(id: number) {
+  return request<Record<string, unknown>>(`/wellness/services/${id}`);
+}
+
+export function createWellnessBooking(data: {
+  service_id: number;
+  date: string;
+  start_time: string;
+  persons: number;
+  guest_id?: number;
+  notes?: string;
+}) {
+  return request<Record<string, unknown>>("/wellness/bookings", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getWellnessBookings() {
+  return request<Record<string, unknown>[]>("/wellness/bookings");
+}
+
+export function cancelWellnessBooking(id: number) {
+  return request<{ message: string }>(`/wellness/bookings/${id}/cancel`, {
+    method: "PUT",
+  });
+}
+
+export function createWellnessReview(data: {
+  booking_id: number;
+  rating: number;
+  comment: string;
+}) {
+  return request<Record<string, unknown>>("/wellness/reviews", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/* ---- Admin Wellness ---- */
+export function adminCreateProvider(data: Record<string, unknown>) {
+  return request<Record<string, unknown>>("/admin/wellness/providers", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function adminUpdateProvider(id: number, data: Record<string, unknown>) {
+  return request<Record<string, unknown>>(`/admin/wellness/providers/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function adminDeleteProvider(id: number) {
+  return request<Record<string, unknown>>(`/admin/wellness/providers/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function adminCreateWellnessService(data: Record<string, unknown>) {
+  return request<Record<string, unknown>>("/admin/wellness/services", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function adminUpdateWellnessService(
+  id: number,
+  data: Record<string, unknown>,
+) {
+  return request<Record<string, unknown>>(`/admin/wellness/services/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function adminDeleteWellnessService(id: number) {
+  return request<Record<string, unknown>>(`/admin/wellness/services/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function adminSetProviderAvailability(
+  providerId: number,
+  slots: { day_of_week: number; start_time: string; end_time: string }[],
+) {
+  return request<Record<string, unknown>[]>(
+    `/admin/wellness/providers/${providerId}/availability`,
+    { method: "PUT", body: JSON.stringify(slots) },
+  );
+}
+
+export function adminListWellnessBookings(page = 1, status = "") {
+  const qs = new URLSearchParams({ page: String(page) });
+  if (status) qs.set("status", status);
+  return request<{
+    bookings: Record<string, unknown>[];
+    total: number;
+    page: number;
+  }>(`/admin/wellness/bookings?${qs}`);
+}
+
+export function adminUpdateWellnessBookingStatus(id: number, status: string) {
+  return request<Record<string, unknown>>(
+    `/admin/wellness/bookings/${id}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}

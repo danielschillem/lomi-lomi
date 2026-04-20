@@ -18,23 +18,27 @@ func NewAdminHandler() *AdminHandler {
 // ---- Stats ----
 
 func (h *AdminHandler) GetStats(c *fiber.Ctx) error {
-	var userCount, productCount, placeCount, orderCount, messageCount int64
+	var userCount, productCount, placeCount, orderCount, messageCount, wellnessProviderCount, wellnessBookingCount int64
 	database.DB.Model(&models.User{}).Count(&userCount)
 	database.DB.Model(&models.Product{}).Count(&productCount)
 	database.DB.Model(&models.Place{}).Count(&placeCount)
 	database.DB.Model(&models.Order{}).Count(&orderCount)
 	database.DB.Model(&models.Message{}).Count(&messageCount)
+	database.DB.Model(&models.WellnessProvider{}).Count(&wellnessProviderCount)
+	database.DB.Model(&models.WellnessBooking{}).Count(&wellnessBookingCount)
 
 	var revenue struct{ Total float64 }
 	database.DB.Model(&models.Order{}).Select("COALESCE(SUM(total_amount),0) as total").Scan(&revenue)
 
 	return c.JSON(fiber.Map{
-		"users":    userCount,
-		"products": productCount,
-		"places":   placeCount,
-		"orders":   orderCount,
-		"messages": messageCount,
-		"revenue":  revenue.Total,
+		"users":              userCount,
+		"products":           productCount,
+		"places":             placeCount,
+		"orders":             orderCount,
+		"messages":           messageCount,
+		"revenue":            revenue.Total,
+		"wellness_providers": wellnessProviderCount,
+		"wellness_bookings":  wellnessBookingCount,
 	})
 }
 

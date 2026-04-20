@@ -293,8 +293,8 @@ export default function ChatPage() {
         <div className="max-w-2xl mx-auto space-y-3">
           {messages.length === 0 ? (
             <div className="text-center text-zinc-500 text-sm py-12">
-              <Lock className="w-8 h-8 mx-auto mb-3 text-zinc-600" />
-              Envoyez le premier message. Vos échanges sont chiffrés.
+              <Shield className="w-8 h-8 mx-auto mb-3 text-zinc-600" />
+              Envoyez le premier message !
             </div>
           ) : (
             messages.map((msg) => {

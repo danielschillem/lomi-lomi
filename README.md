@@ -85,11 +85,11 @@ DEVBACKEND
 
 ## Version
 
-v1.4.0 — 20 avril 2026
+v1.5.0 — 20 avril 2026
 
 ### Changelog
 
-- **v1.4.0** — Sprint 14 : Flux Stripe Checkout complet (redirection paiement), historique commandes (section dépliante boutique, bouton "Payer maintenant" pour pending), transaction GORM stock atomique (anti race-condition), AuthContext enrichi (avatar_url, is_verified, role), confirmation mot de passe + CGU inscription, images produit dans panier, banners success/canceled Stripe
+- **v1.5.0** — Sprint 15 : WebSocket authentifié par JWT (token query param), support multi-onglets (map[uint]map[conn]bool), WSProvider React context (connexion unique partagée + reconnexion auto), Matches → message direct (bouton ouvre la conversation spécifique via GET /conversations/with/:userId), chat header enrichi (avatar + nom + statut online de l'interlocuteur, lien vers profil), suppression mention "chiffrement E2E" fictif, receiverId dérivé des métadonnées conversation
 - **v1.2.0** — Sprint 12 : Galerie photos (modèle Photo, upload/suppression, max 6/user), stats admin timeline (graphiques barres par jour, filtre 7/30/90j), validation email format (net/mail)
 - **v1.1.0** — Sprint 11 : PWA manifest, icônes, SEO OpenGraph/Twitter, metadataBase, page 404/error/loading, next.config (images, headers sécu, rewrites), .env.example backend + frontend, warning JWT_SECRET
 - **v1.0.0** — Sprints 1-10 : Auth, profiles, matching, messaging WS, Stripe, upload, sécurité, settings, search, navbar badges, unmatch, matches page, FAQ/CGU

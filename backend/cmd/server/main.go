@@ -54,6 +54,7 @@ func main() {
 	shopHandler := handlers.NewShopHandler()
 	placeHandler := handlers.NewPlaceHandler()
 	adminHandler := handlers.NewAdminHandler()
+	wellnessHandler := handlers.NewWellnessHandler()
 	matchHandler := handlers.NewMatchHandler()
 	paymentHandler := handlers.NewPaymentHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
@@ -72,6 +73,11 @@ func main() {
 	api.Get("/shop/products/:id", shopHandler.GetProduct)
 	api.Get("/places", placeHandler.GetPlaces)
 	api.Get("/places/:id", placeHandler.GetPlace)
+
+	// Public wellness
+	api.Get("/wellness/providers", wellnessHandler.GetProviders)
+	api.Get("/wellness/providers/:id", wellnessHandler.GetProvider)
+	api.Get("/wellness/services/:id", wellnessHandler.GetService)
 
 	// Protected routes
 	protected := api.Group("", middleware.JWTAuth(cfg))
@@ -125,6 +131,12 @@ func main() {
 	protected.Post("/auth/send-verification", uploadHandler.SendVerification)
 	api.Get("/auth/verify-email", uploadHandler.VerifyEmail)
 
+	// Wellness bookings & reviews
+	protected.Post("/wellness/bookings", wellnessHandler.CreateBooking)
+	protected.Get("/wellness/bookings", wellnessHandler.GetMyBookings)
+	protected.Put("/wellness/bookings/:id/cancel", wellnessHandler.CancelBooking)
+	protected.Post("/wellness/reviews", wellnessHandler.CreateReview)
+
 	// Safety: report & block
 	protected.Post("/reports", safetyHandler.CreateReport)
 	protected.Post("/blocks", safetyHandler.BlockUser)
@@ -157,6 +169,16 @@ func main() {
 	admin.Put("/places/:id", adminHandler.UpdatePlace)
 	admin.Delete("/places/:id", adminHandler.DeletePlace)
 	admin.Get("/orders", adminHandler.ListOrders)
+	// Admin wellness
+	admin.Post("/wellness/providers", wellnessHandler.AdminCreateProvider)
+	admin.Put("/wellness/providers/:id", wellnessHandler.AdminUpdateProvider)
+	admin.Delete("/wellness/providers/:id", wellnessHandler.AdminDeleteProvider)
+	admin.Post("/wellness/services", wellnessHandler.AdminCreateService)
+	admin.Put("/wellness/services/:id", wellnessHandler.AdminUpdateService)
+	admin.Delete("/wellness/services/:id", wellnessHandler.AdminDeleteService)
+	admin.Put("/wellness/providers/:id/availability", wellnessHandler.AdminSetAvailability)
+	admin.Get("/wellness/bookings", wellnessHandler.AdminListBookings)
+	admin.Put("/wellness/bookings/:id/status", wellnessHandler.AdminUpdateBookingStatus)
 	admin.Put("/orders/:id/status", adminHandler.UpdateOrderStatus)
 	admin.Get("/reports", safetyHandler.AdminListReports)
 	admin.Put("/reports/:id", safetyHandler.AdminUpdateReport)
