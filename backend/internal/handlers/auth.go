@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"net/mail"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/lomilomi/backend/internal/config"
 	"github.com/lomilomi/backend/internal/database"
@@ -45,6 +47,12 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	if len(req.Password) < 8 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Le mot de passe doit contenir au moins 8 caractères",
+		})
+	}
+
+	if _, err := mail.ParseAddress(req.Email); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Adresse email invalide",
 		})
 	}
 

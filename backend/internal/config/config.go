@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 )
 
@@ -27,7 +28,7 @@ type Config struct {
 }
 
 func Load() *Config {
-	return &Config{
+	cfg := &Config{
 		Port:             getEnv("PORT", "8888"),
 		DBDriver:         getEnv("DB_DRIVER", "sqlite"),
 		DBHost:           getEnv("DB_HOST", "localhost"),
@@ -48,6 +49,12 @@ func Load() *Config {
 		SMTPFrom:         getEnv("SMTP_FROM", "noreply@lomilomi.app"),
 		BaseURL:          getEnv("BASE_URL", "http://localhost:8888"),
 	}
+
+	if cfg.JWTSecret == "change-me-in-production" {
+		log.Println("⚠️  WARNING: JWT_SECRET is using the default value. Set JWT_SECRET env var in production!")
+	}
+
+	return cfg
 }
 
 func (c *Config) DSN() string {

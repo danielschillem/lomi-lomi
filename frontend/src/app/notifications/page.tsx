@@ -24,6 +24,7 @@ interface Notification {
   type: string;
   title: string;
   body: string;
+  data: string;
   is_read: boolean;
   created_at: string;
 }
@@ -85,6 +86,23 @@ export default function NotificationsPage() {
     }
   }
 
+  function linkFor(n: Notification): string | null {
+    try {
+      const d = n.data ? JSON.parse(n.data) : {};
+      if (n.type === "match" && d.match_user_id)
+        return `/users/${d.match_user_id}`;
+      if (n.type === "message" && d.conversation_id)
+        return `/messages/${d.conversation_id}`;
+      if (n.type === "order" && d.order_id) return `/boutique`;
+    } catch {
+      // ignore
+    }
+    if (n.type === "match") return "/matches";
+    if (n.type === "message") return "/messages";
+    if (n.type === "order") return "/boutique";
+    return null;
+  }
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -133,32 +151,45 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {notifs.map((n) => (
-              <div
-                key={n.id}
-                className={`flex items-start gap-4 p-4 rounded-xl border transition ${
-                  n.is_read
-                    ? "bg-zinc-900/40 border-zinc-800"
-                    : "bg-zinc-900/80 border-violet-500/30"
-                }`}
-              >
-                <div className="mt-0.5">{iconFor(n.type)}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm">{n.title}</p>
-                  <p className="text-zinc-400 text-sm mt-0.5">{n.body}</p>
-                  <p className="text-zinc-600 text-xs mt-1">
-                    {new Date(n.created_at).toLocaleString("fr-FR")}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDelete(n.id)}
-                  className="text-zinc-600 hover:text-red-400 transition"
-                  title="Supprimer"
+            {notifs.map((n) => {
+              const href = linkFor(n);
+              const content = (
+                <div
+                  className={`flex items-start gap-4 p-4 rounded-xl border transition ${
+                    n.is_read
+                      ? "bg-zinc-900/40 border-zinc-800"
+                      : "bg-zinc-900/80 border-violet-500/30"
+                  } ${href ? "hover:border-violet-500/50 cursor-pointer" : ""}`}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+                  <div className="mt-0.5">{iconFor(n.type)}</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm">{n.title}</p>
+                    <p className="text-zinc-400 text-sm mt-0.5">{n.body}</p>
+                    <p className="text-zinc-600 text-xs mt-1">
+                      {new Date(n.created_at).toLocaleString("fr-FR")}
+                    </p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(n.id);
+                    }}
+                    className="text-zinc-600 hover:text-red-400 transition"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              );
+              return href ? (
+                <Link key={n.id} href={href}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={n.id}>{content}</div>
+              );
+            })}
           </div>
         )}
       </div>

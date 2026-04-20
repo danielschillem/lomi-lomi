@@ -26,6 +26,15 @@ type User struct {
 	IsOnline   bool       `gorm:"default:false" json:"is_online"`
 	LastSeenAt *time.Time `json:"last_seen_at"`
 	Role       string     `gorm:"size:20;default:user" json:"role"` // user, admin
+	Photos     []Photo    `gorm:"foreignKey:UserID" json:"photos,omitempty"`
+}
+
+type Photo struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	URL       string    `gorm:"size:500;not null" json:"url"`
+	Position  int       `gorm:"default:0" json:"position"`
 }
 
 type UserPreference struct {
@@ -45,6 +54,13 @@ type Like struct {
 	LikedID   uint      `gorm:"not null;index" json:"liked_id"`
 	Liker     User      `gorm:"foreignKey:LikerID" json:"liker,omitempty"`
 	Liked     User      `gorm:"foreignKey:LikedID" json:"liked,omitempty"`
+}
+
+type Pass struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	PassedID  uint      `gorm:"not null;index" json:"passed_id"`
 }
 
 type Match struct {

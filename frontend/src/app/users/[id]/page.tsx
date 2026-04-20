@@ -10,11 +10,17 @@ import {
   BadgeCheck,
   Calendar,
   MessageCircle,
-  ShieldAlert,
-  Ban,
+  Flag,
+  ImageIcon,
 } from "lucide-react";
-import { getPublicProfile } from "@/lib/api";
+import { getPublicProfile, sendMessage, reportUser } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+
+interface Photo {
+  id: number;
+  url: string;
+  position: number;
+}
 
 interface Profile {
   id: number;
@@ -26,6 +32,7 @@ interface Profile {
   is_verified: boolean;
   is_online: boolean;
   created_at: string;
+  photos?: Photo[];
 }
 
 export default function UserProfilePage() {
@@ -37,6 +44,9 @@ export default function UserProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showReport, setShowReport] = useState(false);
+  const [reported, setReported] = useState(false);
+  const [messaging, setMessaging] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,6 +60,34 @@ export default function UserProfilePage() {
         .finally(() => setLoading(false));
     }
   }, [user, authLoading, router, userId]);
+
+  async function handleSendMessage() {
+    if (!profile) return;
+    setMessaging(true);
+    try {
+      const res = await sendMessage({
+        receiver_id: profile.id,
+        content: `Salut ${profile.username} !`,
+      });
+      const convId =
+        (res as Record<string, unknown>).conversation_id ??
+        (res as Record<string, unknown>).id;
+      router.push(`/messages/${convId}`);
+    } catch {
+      router.push("/messages");
+    }
+  }
+
+  async function handleReport(reason: string) {
+    if (!profile) return;
+    try {
+      await reportUser({ reported_id: profile.id, reason });
+      setReported(true);
+      setShowReport(false);
+    } catch {
+      // ignore
+    }
+  }
 
   if (authLoading || loading) {
     return (
@@ -77,6 +115,7 @@ export default function UserProfilePage() {
   }
 
   const isMe = user?.id === profile.id;
+  const photos = profile.photos ?? [];
 
   return (
     <div className="min-h-screen px-4 py-12">
@@ -147,23 +186,73 @@ export default function UserProfilePage() {
               </div>
             )}
 
+            {/* Photo gallery */}
+            {photos.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1 justify-center">
+                  <ImageIcon className="w-3 h-3" />
+                  Photos ({photos.length})
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {photos.map((photo) => (
+                    <div
+                      key={photo.id}
+                      className="aspect-square rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={photo.url}
+                        alt={`Photo ${photo.position + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Actions */}
             {!isMe && (
-              <div className="mt-6 flex gap-3">
-                <Link
-                  href="/messages"
-                  className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Message
-                </Link>
-                <Link
-                  href="/discover"
-                  className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
-                >
-                  <ShieldAlert className="w-4 h-4" />
-                  Signaler
-                </Link>
+              <div className="mt-6 space-y-3">
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={messaging}
+                    className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    {messaging ? "Envoi..." : "Message"}
+                  </button>
+                  <button
+                    onClick={() => setShowReport(!showReport)}
+                    disabled={reported}
+                    className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
+                  >
+                    <Flag className="w-4 h-4" />
+                    {reported ? "Signalé" : "Signaler"}
+                  </button>
+                </div>
+
+                {showReport && (
+                  <div className="bg-zinc-800/50 rounded-lg p-3 space-y-1">
+                    {["spam", "fake", "harassment", "inappropriate"].map(
+                      (r) => (
+                        <button
+                          key={r}
+                          onClick={() => handleReport(r)}
+                          className="w-full text-left px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-700 rounded transition capitalize"
+                        >
+                          {r === "harassment"
+                            ? "Harcèlement"
+                            : r === "fake"
+                              ? "Faux profil"
+                              : r === "inappropriate"
+                                ? "Inapproprié"
+                                : "Spam"}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

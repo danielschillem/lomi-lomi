@@ -35,6 +35,7 @@ interface Profile {
   avatar_url: string;
   is_verified: boolean;
   is_online: boolean;
+  photos?: { id: number; url: string; position: number }[];
 }
 
 export default function DiscoverPage() {
@@ -51,6 +52,7 @@ export default function DiscoverPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -91,10 +93,12 @@ export default function DiscoverPage() {
   }
 
   function handlePass() {
+    const profile = profiles[currentIndex];
     setAction("pass");
-    passUser().catch(() => {});
+    passUser(profile.id).catch(() => {});
     setTimeout(() => {
       setAction(null);
+      setPhotoIndex(0);
       setCurrentIndex((i) => i + 1);
     }, 300);
   }
@@ -106,6 +110,7 @@ export default function DiscoverPage() {
       const res = await likeUser(profile.id);
       setTimeout(() => {
         setAction(null);
+        setPhotoIndex(0);
         if (res.is_match) {
           setMatched(profile);
         } else {
@@ -118,7 +123,7 @@ export default function DiscoverPage() {
     }
   }
 
-  function closMatch() {
+  function closeMatch() {
     setMatched(null);
     setCurrentIndex((i) => i + 1);
   }
@@ -268,12 +273,24 @@ export default function DiscoverPage() {
           <div className="fixed inset-0 z-50 bg-zinc-950/90 flex items-center justify-center px-4">
             <div className="bg-zinc-900 border border-violet-500/50 rounded-2xl p-8 text-center max-w-sm w-full">
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-violet-500 flex items-center justify-center">
-                  <User className="w-8 h-8 text-violet-400" />
+                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-violet-500 flex items-center justify-center overflow-hidden">
+                  {user ? (
+                    <User className="w-8 h-8 text-violet-400" />
+                  ) : (
+                    <User className="w-8 h-8 text-violet-400" />
+                  )}
                 </div>
                 <Heart className="w-8 h-8 text-pink-500 animate-pulse" />
-                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-pink-500 flex items-center justify-center">
-                  <User className="w-8 h-8 text-pink-400" />
+                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-pink-500 flex items-center justify-center overflow-hidden">
+                  {matched.avatar_url ? (
+                    <img
+                      src={matched.avatar_url}
+                      alt={matched.username}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-8 h-8 text-pink-400" />
+                  )}
                 </div>
               </div>
               <h2 className="text-2xl font-bold bg-linear-to-r from-violet-400 to-pink-500 bg-clip-text text-transparent mb-2">
@@ -292,7 +309,7 @@ export default function DiscoverPage() {
                   Envoyer un message
                 </button>
                 <button
-                  onClick={closMatch}
+                  onClick={closeMatch}
                   className="px-4 text-zinc-400 hover:text-white transition text-sm"
                 >
                   Plus tard
@@ -328,17 +345,62 @@ export default function DiscoverPage() {
                   : ""
             }`}
           >
-            {/* Avatar area */}
-            <div className="relative h-72 bg-zinc-800 flex items-center justify-center">
-              {current.avatar_url ? (
-                <img
-                  src={current.avatar_url}
-                  alt={current.username}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User className="w-24 h-24 text-zinc-600" />
-              )}
+            {/* Photo carousel */}
+            <div className="relative h-80 bg-zinc-800 flex items-center justify-center">
+              {(() => {
+                const allImages = [
+                  ...(current.avatar_url ? [current.avatar_url] : []),
+                  ...(current.photos?.map((p) => p.url) ?? []),
+                ];
+                const img = allImages[photoIndex] || null;
+                return (
+                  <>
+                    {img ? (
+                      <img
+                        src={img}
+                        alt={current.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="w-24 h-24 text-zinc-600" />
+                    )}
+                    {allImages.length > 1 && (
+                      <>
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1">
+                          {allImages.map((_, i) => (
+                            <div
+                              key={i}
+                              className={`h-1 rounded-full transition-all ${
+                                i === photoIndex
+                                  ? "w-6 bg-white"
+                                  : "w-3 bg-white/40"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          onClick={() =>
+                            setPhotoIndex((i) =>
+                              i > 0 ? i - 1 : allImages.length - 1,
+                            )
+                          }
+                          className="absolute left-0 top-0 bottom-0 w-1/3 cursor-pointer"
+                          aria-label="Photo précédente"
+                        />
+                        <button
+                          onClick={() =>
+                            setPhotoIndex((i) =>
+                              i < allImages.length - 1 ? i + 1 : 0,
+                            )
+                          }
+                          className="absolute right-0 top-0 bottom-0 w-1/3 cursor-pointer"
+                          aria-label="Photo suivante"
+                        />
+                      </>
+                    )}
+                  </>
+                );
+              })()}
               {current.is_online && (
                 <span className="absolute top-4 right-4 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900" />
               )}

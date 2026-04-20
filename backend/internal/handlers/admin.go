@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lomilomi/backend/internal/database"
@@ -34,6 +35,52 @@ func (h *AdminHandler) GetStats(c *fiber.Ctx) error {
 		"orders":   orderCount,
 		"messages": messageCount,
 		"revenue":  revenue.Total,
+	})
+}
+
+func (h *AdminHandler) GetStatsTimeline(c *fiber.Ctx) error {
+	days := 30
+	if d, err := strconv.Atoi(c.Query("days", "30")); err == nil && d > 0 && d <= 90 {
+		days = d
+	}
+
+	type DayStat struct {
+		Day   string  `json:"day"`
+		Count int64   `json:"count"`
+		Total float64 `json:"total,omitempty"`
+	}
+
+	since := time.Now().AddDate(0, 0, -days)
+
+	var signups []DayStat
+	database.DB.Model(&models.User{}).
+		Select("DATE(created_at) as day, COUNT(*) as count").
+		Where("created_at >= ?", since).
+		Group("DATE(created_at)").Order("day ASC").Find(&signups)
+
+	var matches []DayStat
+	database.DB.Model(&models.Match{}).
+		Select("DATE(created_at) as day, COUNT(*) as count").
+		Where("created_at >= ?", since).
+		Group("DATE(created_at)").Order("day ASC").Find(&matches)
+
+	var messages []DayStat
+	database.DB.Model(&models.Message{}).
+		Select("DATE(created_at) as day, COUNT(*) as count").
+		Where("created_at >= ?", since).
+		Group("DATE(created_at)").Order("day ASC").Find(&messages)
+
+	var orders []DayStat
+	database.DB.Model(&models.Order{}).
+		Select("DATE(created_at) as day, COUNT(*) as count, COALESCE(SUM(total_amount),0) as total").
+		Where("created_at >= ?", since).
+		Group("DATE(created_at)").Order("day ASC").Find(&orders)
+
+	return c.JSON(fiber.Map{
+		"signups":  signups,
+		"matches":  matches,
+		"messages": messages,
+		"orders":   orders,
 	})
 }
 

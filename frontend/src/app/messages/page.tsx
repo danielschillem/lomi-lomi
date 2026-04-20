@@ -128,8 +128,16 @@ export default function ConversationsPage() {
                   className="flex items-center gap-4 bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/30 rounded-xl p-4 transition"
                 >
                   <div className="relative shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center">
-                      <User className="w-6 h-6 text-zinc-500" />
+                    <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+                      {other?.avatar_url ? (
+                        <img
+                          src={other.avatar_url}
+                          alt={other.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-6 h-6 text-zinc-500" />
+                      )}
                     </div>
                     {other?.is_online && (
                       <Circle className="absolute -bottom-0.5 -right-0.5 w-4 h-4 text-green-500 fill-green-500" />

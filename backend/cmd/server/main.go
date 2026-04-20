@@ -90,6 +90,7 @@ func main() {
 	protected.Post("/likes", matchHandler.LikeUser)
 	protected.Post("/pass", matchHandler.PassUser)
 	protected.Get("/matches", matchHandler.GetMatches)
+	protected.Delete("/matches/:id", matchHandler.Unmatch)
 
 	// Notifications
 	protected.Get("/notifications", matchHandler.GetNotifications)
@@ -113,6 +114,11 @@ func main() {
 
 	// Upload avatar
 	protected.Post("/upload/avatar", uploadHandler.UploadAvatar)
+
+	// Photo gallery
+	protected.Post("/photos", uploadHandler.UploadPhoto)
+	protected.Delete("/photos/:id", uploadHandler.DeletePhoto)
+	api.Get("/users/:id/photos", uploadHandler.GetPhotos)
 
 	// Email verification
 	protected.Post("/auth/send-verification", uploadHandler.SendVerification)
@@ -139,6 +145,7 @@ func main() {
 	// Admin routes (requires JWT + admin role)
 	admin := api.Group("/admin", middleware.JWTAuth(cfg), middleware.RequireAdmin())
 	admin.Get("/stats", adminHandler.GetStats)
+	admin.Get("/stats/timeline", adminHandler.GetStatsTimeline)
 	admin.Get("/users", adminHandler.ListUsers)
 	admin.Put("/users/:id", adminHandler.UpdateUser)
 	admin.Delete("/users/:id", adminHandler.DeleteUser)

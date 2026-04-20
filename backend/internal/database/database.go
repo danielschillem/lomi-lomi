@@ -40,7 +40,9 @@ func Migrate() {
 	err := DB.AutoMigrate(
 		&models.User{},
 		&models.UserPreference{},
+		&models.Photo{},
 		&models.Like{},
+		&models.Pass{},
 		&models.Match{},
 		&models.Notification{},
 		&models.EmailVerification{},

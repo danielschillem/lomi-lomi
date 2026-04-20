@@ -163,12 +163,21 @@ export function likeUser(likedId: number) {
   });
 }
 
-export function passUser() {
-  return request<{ passed: boolean }>("/pass", { method: "POST" });
+export function passUser(passedId: number) {
+  return request<{ passed: boolean }>("/pass", {
+    method: "POST",
+    body: JSON.stringify({ passed_id: passedId }),
+  });
 }
 
 export function getMatches() {
   return request<Record<string, unknown>[]>("/matches");
+}
+
+export function unmatch(matchId: number) {
+  return request<{ message: string }>(`/matches/${matchId}`, {
+    method: "DELETE",
+  });
 }
 
 /* ---- Notifications ---- */
@@ -220,6 +229,42 @@ export async function uploadAvatar(file: File) {
   return res.json() as Promise<{ avatar_url: string; message: string }>;
 }
 
+/* ---- Photo gallery ---- */
+export async function uploadPhoto(file: File) {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const formData = new FormData();
+  formData.append("photo", file);
+
+  const res = await fetch(`${API}/photos`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erreur ${res.status}`);
+  }
+  return res.json() as Promise<{
+    id: number;
+    url: string;
+    position: number;
+  }>;
+}
+
+export function getUserPhotos(userId: number) {
+  return request<{ id: number; url: string; position: number }[]>(
+    `/users/${userId}/photos`,
+  );
+}
+
+export function deletePhoto(photoId: number) {
+  return request<{ message: string }>(`/photos/${photoId}`, {
+    method: "DELETE",
+  });
+}
+
 /* ---- Email Verification ---- */
 export function sendVerification() {
   return request<{ message: string }>("/auth/send-verification", {
@@ -230,6 +275,15 @@ export function sendVerification() {
 /* ---- Admin ---- */
 export function adminGetStats() {
   return request<Record<string, unknown>>("/admin/stats");
+}
+
+export function adminGetStatsTimeline(days = 30) {
+  return request<{
+    signups: { day: string; count: number }[];
+    matches: { day: string; count: number }[];
+    messages: { day: string; count: number }[];
+    orders: { day: string; count: number; total: number }[];
+  }>(`/admin/stats/timeline?days=${days}`);
 }
 
 export function adminListUsers(page = 1, search = "") {

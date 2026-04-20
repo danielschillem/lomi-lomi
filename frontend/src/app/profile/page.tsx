@@ -14,12 +14,18 @@ import {
   Camera,
   Mail,
   CheckCircle,
+  Plus,
+  Trash2,
+  ImageIcon,
 } from "lucide-react";
 import {
   getProfile,
   updateProfile,
   uploadAvatar,
   sendVerification,
+  getUserPhotos,
+  uploadPhoto,
+  deletePhoto,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -52,6 +58,10 @@ export default function ProfilePage() {
   const [birthDate, setBirthDate] = useState("");
   const [uploading, setUploading] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [photos, setPhotos] = useState<
+    { id: number; url: string; position: number }[]
+  >([]);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -67,6 +77,9 @@ export default function ProfilePage() {
           setGender(p.gender || "");
           setCity(p.city || "");
           setBirthDate(p.birth_date ? p.birth_date.slice(0, 10) : "");
+          getUserPhotos(p.id)
+            .then(setPhotos)
+            .catch(() => {});
         })
         .catch(() => setError("Impossible de charger le profil"));
     }
@@ -131,6 +144,35 @@ export default function ProfilePage() {
       setError(err instanceof Error ? err.message : "Erreur vérification");
     } finally {
       setVerifying(false);
+    }
+  }
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPhoto(true);
+    setError("");
+    try {
+      const photo = await uploadPhoto(file);
+      setPhotos((prev) => [...prev, photo]);
+      setSuccess("Photo ajoutée");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
+  async function handleDeletePhoto(photoId: number) {
+    if (!confirm("Supprimer cette photo ?")) return;
+    try {
+      await deletePhoto(photoId);
+      setPhotos((prev) => prev.filter((p) => p.id !== photoId));
+      setSuccess("Photo supprimée");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur suppression");
     }
   }
 
@@ -356,6 +398,49 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
+
+            {/* Photo gallery */}
+            <div className="mt-6 pt-6 border-t border-zinc-800">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <ImageIcon className="w-5 h-5 text-violet-400" />
+                  Galerie photos
+                </h2>
+                <span className="text-xs text-zinc-500">{photos.length}/6</span>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                {photos.map((photo) => (
+                  <div key={photo.id} className="relative group aspect-square">
+                    <img
+                      src={photo.url}
+                      alt={`Photo ${photo.position + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => handleDeletePhoto(photo.id)}
+                      className="absolute top-1 right-1 w-6 h-6 bg-red-600/80 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                    >
+                      <Trash2 className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+                {photos.length < 6 && (
+                  <label className="aspect-square border-2 border-dashed border-zinc-700 hover:border-violet-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition">
+                    <Plus className="w-6 h-6 text-zinc-500" />
+                    <span className="text-xs text-zinc-500 mt-1">
+                      {uploadingPhoto ? "Upload..." : "Ajouter"}
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                      disabled={uploadingPhoto}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
 
             {/* Settings link */}
             <div className="mt-6 pt-6 border-t border-zinc-800">

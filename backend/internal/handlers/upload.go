@@ -7,6 +7,7 @@ import (
 	"net/smtp"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -131,4 +132,87 @@ func sendEmail(cfg *config.Config, to, subject, body string) {
 	)
 	addr := cfg.SMTPHost + ":" + cfg.SMTPPort
 	smtp.SendMail(addr, auth, cfg.SMTPFrom, []string{to}, []byte(msg))
+}
+
+// ---- Photo gallery ----
+
+func (h *UploadHandler) UploadPhoto(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	// Max 6 photos per user
+	var count int64
+	database.DB.Model(&models.Photo{}).Where("user_id = ?", userID).Count(&count)
+	if count >= 6 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Maximum 6 photos autorisées"})
+	}
+
+	file, err := c.FormFile("photo")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fichier photo requis"})
+	}
+
+	if file.Size > 5*1024*1024 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fichier trop volumineux (max 5 Mo)"})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
+	if !allowed[ext] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format non supporté (jpg, png, webp)"})
+	}
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	filename := fmt.Sprintf("photo_%d_%s%s", userID, hex.EncodeToString(b), ext)
+	savePath := filepath.Join(h.Config.UploadDir, filename)
+
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur lors de l'upload"})
+	}
+
+	photo := models.Photo{
+		UserID:   userID,
+		URL:      h.Config.BaseURL + "/uploads/" + filename,
+		Position: int(count),
+	}
+	database.DB.Create(&photo)
+
+	return c.Status(fiber.StatusCreated).JSON(photo)
+}
+
+func (h *UploadHandler) GetPhotos(c *fiber.Ctx) error {
+	uid, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	var photos []models.Photo
+	database.DB.Where("user_id = ?", uid).Order("position ASC").Find(&photos)
+
+	return c.JSON(photos)
+}
+
+func (h *UploadHandler) DeletePhoto(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	photoID, err := strconv.ParseUint(c.Params("id"), 10, 64)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	var photo models.Photo
+	if err := database.DB.First(&photo, photoID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Photo non trouvée"})
+	}
+
+	if photo.UserID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Non autorisé"})
+	}
+
+	// Delete file from disk
+	filename := filepath.Base(photo.URL)
+	os.Remove(filepath.Join(h.Config.UploadDir, filename))
+
+	database.DB.Delete(&photo)
+
+	return c.JSON(fiber.Map{"message": "Photo supprimée"})
 }

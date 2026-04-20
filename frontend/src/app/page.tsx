@@ -385,6 +385,11 @@ export default function Home() {
                     Carte interactive
                   </Link>
                 </li>
+                <li>
+                  <Link href="/matches" className="hover:text-white transition">
+                    Mes matches
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
@@ -399,9 +404,9 @@ export default function Home() {
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition">
-                    Sécurité
-                  </a>
+                  <Link href="/faq" className="hover:text-white transition">
+                    FAQ & Aide
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -409,24 +414,24 @@ export default function Home() {
               <h4 className="font-semibold mb-4 text-sm">Légal</h4>
               <ul className="space-y-2 text-sm text-zinc-500">
                 <li>
-                  <a href="#" className="hover:text-white transition">
+                  <Link href="/faq" className="hover:text-white transition">
                     Conditions d&apos;utilisation
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition">
+                  <Link href="/faq" className="hover:text-white transition">
                     Politique de confidentialité
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition">
+                  <Link href="/faq" className="hover:text-white transition">
                     Mentions légales
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition">
+                  <Link href="/faq" className="hover:text-white transition">
                     RGPD
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

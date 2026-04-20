@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/lomilomi/backend/internal/database"
@@ -25,7 +26,7 @@ func (h *ProfileHandler) GetProfile(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	if err := database.DB.First(&user, uint(id)).Error; err != nil {
+	if err := database.DB.Preload("Photos").First(&user, uint(id)).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Profil non trouvé",
 		})
@@ -109,10 +110,33 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 	excludeIDs := append(blockedIDs, blockerIDs...)
 	excludeIDs = append(excludeIDs, userID)
 
-	query := database.DB.Where("id NOT IN ?", excludeIDs)
+	// Exclude already liked users
+	var likedIDs []uint
+	database.DB.Model(&models.Like{}).Where("liker_id = ?", userID).Pluck("liked_id", &likedIDs)
+	excludeIDs = append(excludeIDs, likedIDs...)
+
+	// Exclude already passed users
+	var passedIDs []uint
+	database.DB.Model(&models.Pass{}).Where("user_id = ?", userID).Pluck("passed_id", &passedIDs)
+	excludeIDs = append(excludeIDs, passedIDs...)
+
+	query := database.DB.Preload("Photos").Where("id NOT IN ?", excludeIDs)
 
 	if prefs.Gender != "" {
 		query = query.Where("gender = ?", prefs.Gender)
+	}
+
+	// Age filter
+	if prefs.MinAge > 0 || prefs.MaxAge > 0 {
+		now := time.Now()
+		if prefs.MaxAge > 0 {
+			minBirth := now.AddDate(-prefs.MaxAge-1, 0, 0)
+			query = query.Where("birth_date >= ?", minBirth)
+		}
+		if prefs.MinAge > 0 {
+			maxBirth := now.AddDate(-prefs.MinAge, 0, 0)
+			query = query.Where("birth_date <= ?", maxBirth)
+		}
 	}
 
 	var users []models.User

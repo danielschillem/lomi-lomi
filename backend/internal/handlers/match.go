@@ -88,7 +88,19 @@ func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
 }
 
 func (h *MatchHandler) PassUser(c *fiber.Ctx) error {
-	// Just acknowledge — no persistence needed for pass
+	userID := c.Locals("userID").(uint)
+
+	type Req struct {
+		PassedID uint `json:"passed_id"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.PassedID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "passed_id requis"})
+	}
+
+	pass := models.Pass{UserID: userID, PassedID: req.PassedID}
+	database.DB.Create(&pass)
+
 	return c.JSON(fiber.Map{"passed": true})
 }
 
@@ -104,6 +116,33 @@ func (h *MatchHandler) GetMatches(c *fiber.Ctx) error {
 		Find(&matches)
 
 	return c.JSON(matches)
+}
+
+// Unmatch removes a match and deletes associated likes.
+func (h *MatchHandler) Unmatch(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	matchID, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	var match models.Match
+	if err := database.DB.First(&match, uint(matchID)).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Match non trouvé"})
+	}
+
+	if match.User1ID != userID && match.User2ID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+	}
+
+	// Delete mutual likes
+	database.DB.Where("(liker_id = ? AND liked_id = ?) OR (liker_id = ? AND liked_id = ?)",
+		match.User1ID, match.User2ID, match.User2ID, match.User1ID).Delete(&models.Like{})
+
+	// Delete the match
+	database.DB.Delete(&match)
+
+	return c.JSON(fiber.Map{"message": "Match supprimé"})
 }
 
 // ---- Notifications ----
