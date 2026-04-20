@@ -26,17 +26,29 @@ export function register(data: {
   email: string;
   password: string;
 }) {
-  return request<{ token: string; user: { id: number; username: string } }>(
-    "/auth/register",
-    { method: "POST", body: JSON.stringify(data) },
-  );
+  return request<{
+    token: string;
+    user: {
+      id: number;
+      username: string;
+      avatar_url: string;
+      is_verified: boolean;
+      role: string;
+    };
+  }>("/auth/register", { method: "POST", body: JSON.stringify(data) });
 }
 
 export function login(data: { email: string; password: string }) {
-  return request<{ token: string; user: { id: number; username: string } }>(
-    "/auth/login",
-    { method: "POST", body: JSON.stringify(data) },
-  );
+  return request<{
+    token: string;
+    user: {
+      id: number;
+      username: string;
+      avatar_url: string;
+      is_verified: boolean;
+      role: string;
+    };
+  }>("/auth/login", { method: "POST", body: JSON.stringify(data) });
 }
 
 /* ---- Profile ---- */
@@ -111,6 +123,10 @@ export function sendMessage(data: { receiver_id: number; content: string }) {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+export function getOrCreateConversation(userId: number) {
+  return request<Record<string, unknown>>(`/conversations/with/${userId}`);
 }
 
 export function markConversationRead(conversationId: number) {

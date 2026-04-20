@@ -102,9 +102,11 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"token": token,
 		"user": fiber.Map{
-			"id":       user.ID,
-			"username": user.Username,
-			"role":     user.Role,
+			"id":          user.ID,
+			"username":    user.Username,
+			"avatar_url":  user.AvatarURL,
+			"is_verified": user.IsVerified,
+			"role":        user.Role,
 		},
 	})
 }

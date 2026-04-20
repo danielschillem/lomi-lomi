@@ -12,6 +12,9 @@ import {
 interface User {
   id: number;
   username: string;
+  avatar_url?: string;
+  is_verified?: boolean;
+  role?: string;
 }
 
 interface AuthCtx {

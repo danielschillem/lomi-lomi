@@ -85,11 +85,11 @@ DEVBACKEND
 
 ## Version
 
-v1.3.0 — 20 avril 2026
+v1.4.0 — 20 avril 2026
 
 ### Changelog
 
-- **v1.3.0** — Sprint 13 : Carousel photos Discover, Preload Photos backend, PassUser persistant (modèle Pass), filtre âge Discover, photos profil public, notifications cliquables, lien message direct profil, avatars conversations, signalement profil public, correction typo closMatch
+- **v1.4.0** — Sprint 14 : Flux Stripe Checkout complet (redirection paiement), historique commandes (section dépliante boutique, bouton "Payer maintenant" pour pending), transaction GORM stock atomique (anti race-condition), AuthContext enrichi (avatar_url, is_verified, role), confirmation mot de passe + CGU inscription, images produit dans panier, banners success/canceled Stripe
 - **v1.2.0** — Sprint 12 : Galerie photos (modèle Photo, upload/suppression, max 6/user), stats admin timeline (graphiques barres par jour, filtre 7/30/90j), validation email format (net/mail)
 - **v1.1.0** — Sprint 11 : PWA manifest, icônes, SEO OpenGraph/Twitter, metadataBase, page 404/error/loading, next.config (images, headers sécu, rewrites), .env.example backend + frontend, warning JWT_SECRET
 - **v1.0.0** — Sprints 1-10 : Auth, profiles, matching, messaging WS, Stripe, upload, sécurité, settings, search, navbar badges, unmatch, matches page, FAQ/CGU

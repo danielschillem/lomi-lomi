@@ -203,3 +203,30 @@ func (h *MessageHandler) MarkRead(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "Messages marqués comme lus"})
 }
+
+// GetOrCreateConversation returns the conversation between the authenticated user and the given user_id.
+func (h *MessageHandler) GetOrCreateConversation(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	otherID, err := strconv.ParseUint(c.Params("userId"), 10, 32)
+	if err != nil || uint(otherID) == userID {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID utilisateur invalide"})
+	}
+
+	var conv models.Conversation
+	result := database.DB.
+		Preload("User1").Preload("User2").
+		Where("(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
+			userID, uint(otherID), uint(otherID), userID).
+		First(&conv)
+
+	if result.Error != nil {
+		conv = models.Conversation{
+			User1ID: userID,
+			User2ID: uint(otherID),
+		}
+		database.DB.Create(&conv)
+		database.DB.Preload("User1").Preload("User2").First(&conv, conv.ID)
+	}
+
+	return c.JSON(conv)
+}

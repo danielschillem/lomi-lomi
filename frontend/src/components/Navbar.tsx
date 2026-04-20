@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,15 +13,14 @@ import {
 } from "lucide-react";
 import { getUnreadCount } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8888/ws";
+import { useWS } from "@/lib/ws-context";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { subscribe } = useWS();
   const [unreadNotifs, setUnreadNotifs] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -34,30 +33,17 @@ export default function Navbar() {
   // WS: update badges in real-time
   useEffect(() => {
     if (!user) return;
-    const ws = new WebSocket(`${WS_URL}/${user.id}`);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (data.type === "message") {
-          if (!pathname.startsWith("/messages")) {
-            setUnreadMessages((c) => c + 1);
-          }
+    return subscribe((event) => {
+      if (event.type === "message") {
+        if (!pathname.startsWith("/messages")) {
+          setUnreadMessages((c) => c + 1);
         }
-        if (data.type === "notification" || data.type === "match") {
-          setUnreadNotifs((c) => c + 1);
-        }
-      } catch {
-        // ignore
       }
-    };
-
-    return () => {
-      ws.close();
-      wsRef.current = null;
-    };
-  }, [user, pathname]);
+      if (event.type === "notification" || event.type === "match") {
+        setUnreadNotifs((c) => c + 1);
+      }
+    });
+  }, [user, pathname, subscribe]);
 
   // Reset message badge when visiting messages
   useEffect(() => {

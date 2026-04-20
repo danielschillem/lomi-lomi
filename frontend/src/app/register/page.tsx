@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, UserPlus, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, UserPlus, ArrowLeft, ShieldCheck } from "lucide-react";
 import { register } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -14,13 +14,23 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPwd, setConfirmPwd] = useState("");
   const [showPwd, setShowPwd] = useState(false);
+  const [acceptCGU, setAcceptCGU] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    if (password !== confirmPwd) {
+      setError("Les mots de passe ne correspondent pas");
+      return;
+    }
+    if (!acceptCGU) {
+      setError("Vous devez accepter les conditions d'utilisation");
+      return;
+    }
     setLoading(true);
     try {
       const res = await register({ username, email, password });
@@ -121,6 +131,35 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                Confirmer le mot de passe
+              </label>
+              <input
+                type={showPwd ? "text" : "password"}
+                value={confirmPwd}
+                onChange={(e) => setConfirmPwd(e.target.value)}
+                required
+                minLength={8}
+                placeholder="Retapez votre mot de passe"
+                className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+              />
+            </div>
+
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={acceptCGU}
+                onChange={(e) => setAcceptCGU(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-violet-500 focus:ring-violet-500"
+              />
+              <span className="text-xs text-zinc-400 leading-relaxed">
+                <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-violet-400" />
+                J&apos;accepte les conditions d&apos;utilisation et la politique
+                de confidentialité de Lomi Lomi.
+              </span>
+            </label>
 
             <button
               type="submit"

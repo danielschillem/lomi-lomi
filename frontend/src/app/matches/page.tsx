@@ -12,7 +12,7 @@ import {
   MapPin,
   BadgeCheck,
 } from "lucide-react";
-import { getMatches, unmatch } from "@/lib/api";
+import { getMatches, unmatch, getOrCreateConversation } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface MatchUser {
@@ -39,6 +39,7 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<number | null>(null);
+  const [messaging, setMessaging] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -155,13 +156,25 @@ export default function MatchesPage() {
                       {new Date(match.created_at).toLocaleDateString("fr-FR")}
                     </p>
                     <div className="flex gap-2">
-                      <Link
-                        href="/messages"
-                        className="flex-1 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold py-1.5 rounded-lg transition flex items-center justify-center gap-1"
+                      <button
+                        onClick={async () => {
+                          setMessaging(other.id);
+                          try {
+                            const conv = (await getOrCreateConversation(
+                              other.id,
+                            )) as { id: number };
+                            router.push(`/messages/${conv.id}`);
+                          } catch {
+                            /* ignore */
+                          }
+                          setMessaging(null);
+                        }}
+                        disabled={messaging === other.id}
+                        className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-semibold py-1.5 rounded-lg transition flex items-center justify-center gap-1"
                       >
                         <MessageCircle className="w-3 h-3" />
-                        Message
-                      </Link>
+                        {messaging === other.id ? "..." : "Message"}
+                      </button>
                       <button
                         onClick={() => handleUnmatch(match.id)}
                         disabled={removing === match.id}

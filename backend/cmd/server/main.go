@@ -58,7 +58,7 @@ func main() {
 	paymentHandler := handlers.NewPaymentHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
 	safetyHandler := handlers.NewSafetyHandler()
-	wsHub := handlers.NewWSHub()
+	wsHub := handlers.NewWSHub(cfg)
 	messageHandler := handlers.NewMessageHandler(wsHub)
 
 	// Public routes
@@ -103,6 +103,7 @@ func main() {
 	protected.Get("/conversations/:id/messages", messageHandler.GetMessages)
 	protected.Post("/messages", messageHandler.SendMessage)
 	protected.Put("/conversations/:id/read", messageHandler.MarkRead)
+	protected.Get("/conversations/with/:userId", messageHandler.GetOrCreateConversation)
 
 	// Shop
 	protected.Post("/shop/orders", shopHandler.CreateOrder)
@@ -133,14 +134,14 @@ func main() {
 	// Static uploads directory
 	app.Static("/uploads", cfg.UploadDir)
 
-	// WebSocket endpoint
+	// WebSocket endpoint (authenticated via token query param)
 	app.Use("/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
 			return c.Next()
 		}
 		return fiber.ErrUpgradeRequired
 	})
-	app.Get("/ws/:userID", websocket.New(wsHub.HandleWebSocket))
+	app.Get("/ws", websocket.New(wsHub.HandleWebSocket))
 
 	// Admin routes (requires JWT + admin role)
 	admin := api.Group("/admin", middleware.JWTAuth(cfg), middleware.RequireAdmin())

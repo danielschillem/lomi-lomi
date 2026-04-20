@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ShoppingBag,
@@ -13,8 +14,12 @@ import {
   X,
   CreditCard,
   Check,
+  Clock,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
 } from "lucide-react";
-import { getProducts, createOrder } from "@/lib/api";
+import { getProducts, createOrder, createCheckout, getOrders } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface Product {
@@ -32,15 +37,35 @@ interface CartItem {
   quantity: number;
 }
 
+interface OrderItem {
+  id: number;
+  product: Product;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: number;
+  created_at: string;
+  total_amount: number;
+  status: string;
+  items: OrderItem[];
+}
+
 export default function BoutiquePage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [ordering, setOrdering] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderCanceled, setOrderCanceled] = useState(false);
   const [category, setCategory] = useState("");
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersOpen, setOrdersOpen] = useState(false);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
     getProducts()
@@ -48,6 +73,30 @@ export default function BoutiquePage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  // Stripe redirect params
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      setOrderSuccess(true);
+      setTimeout(() => setOrderSuccess(false), 6000);
+    }
+    if (searchParams.get("canceled") === "true") {
+      setOrderCanceled(true);
+      setTimeout(() => setOrderCanceled(false), 6000);
+    }
+  }, [searchParams]);
+
+  const loadOrders = useCallback(async () => {
+    if (!user) return;
+    setOrdersLoading(true);
+    try {
+      const res = await getOrders();
+      setOrders(res as unknown as Order[]);
+    } catch {
+      /* ignore */
+    }
+    setOrdersLoading(false);
+  }, [user]);
 
   const filtered = category
     ? products.filter((p) => p.category === category)
@@ -93,19 +142,16 @@ export default function BoutiquePage() {
     if (!user) return;
     setOrdering(true);
     try {
-      await createOrder({
+      const order = (await createOrder({
         items: cart.map((i) => ({
           product_id: i.product.id,
           quantity: i.quantity,
         })),
-      });
-      setCart([]);
-      setCartOpen(false);
-      setOrderSuccess(true);
-      setTimeout(() => setOrderSuccess(false), 5000);
+      })) as unknown as Order;
+      // Redirect to Stripe Checkout
+      const checkout = await createCheckout(order.id);
+      window.location.href = checkout.checkout_url;
     } catch {
-      // ignore
-    } finally {
       setOrdering(false);
     }
   }
@@ -144,7 +190,115 @@ export default function BoutiquePage() {
         {orderSuccess && (
           <div className="bg-green-500/10 border border-green-500/20 text-green-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
             <Check className="w-4 h-4" />
-            Commande passée avec succès ! Livraison discrète sous 48h.
+            Paiement confirmé ! Votre commande sera livrée sous 48h.
+          </div>
+        )}
+
+        {/* Order canceled */}
+        {orderCanceled && (
+          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+            <X className="w-4 h-4" />
+            Paiement annulé. Votre commande reste en attente.
+          </div>
+        )}
+
+        {/* Mes commandes */}
+        {user && (
+          <div className="mb-6">
+            <button
+              onClick={() => {
+                setOrdersOpen(!ordersOpen);
+                if (!ordersOpen && orders.length === 0) loadOrders();
+              }}
+              className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            >
+              <Clock className="w-4 h-4" />
+              Mes commandes
+              {ordersOpen ? (
+                <ChevronUp className="w-3 h-3" />
+              ) : (
+                <ChevronDown className="w-3 h-3" />
+              )}
+            </button>
+            {ordersOpen && (
+              <div className="mt-4 space-y-3">
+                {ordersLoading ? (
+                  <p className="text-zinc-500 text-sm animate-pulse">
+                    Chargement...
+                  </p>
+                ) : orders.length === 0 ? (
+                  <p className="text-zinc-500 text-sm">
+                    Aucune commande pour le moment.
+                  </p>
+                ) : (
+                  orders.map((o) => (
+                    <div
+                      key={o.id}
+                      className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-zinc-500">
+                          #{o.id} —{" "}
+                          {new Date(o.created_at).toLocaleDateString("fr-FR")}
+                        </span>
+                        <span
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                            o.status === "paid"
+                              ? "bg-green-500/10 text-green-400"
+                              : o.status === "pending"
+                                ? "bg-amber-500/10 text-amber-400"
+                                : "bg-zinc-800 text-zinc-400"
+                          }`}
+                        >
+                          {o.status === "paid"
+                            ? "Payée"
+                            : o.status === "pending"
+                              ? "En attente"
+                              : o.status}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        {o.items?.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex justify-between text-sm"
+                          >
+                            <span className="text-zinc-300">
+                              {item.product?.name || "Produit"} ×{" "}
+                              {item.quantity}
+                            </span>
+                            <span className="text-zinc-400">
+                              {(item.price * item.quantity).toFixed(2)}€
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
+                        <span className="text-sm font-semibold text-white">
+                          {o.total_amount.toFixed(2)}€
+                        </span>
+                        {o.status === "pending" && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const checkout = await createCheckout(o.id);
+                                window.location.href = checkout.checkout_url;
+                              } catch {
+                                /* ignore */
+                              }
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition"
+                          >
+                            <ExternalLink className="w-3 h-3" />
+                            Payer maintenant
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -279,8 +433,16 @@ export default function BoutiquePage() {
                     key={item.product.id}
                     className="flex items-center gap-4 bg-zinc-800/50 rounded-xl p-4"
                   >
-                    <div className="w-14 h-14 rounded-lg bg-zinc-800 shrink-0 flex items-center justify-center">
-                      <Package className="w-6 h-6 text-zinc-600" />
+                    <div className="w-14 h-14 rounded-lg bg-zinc-800 shrink-0 flex items-center justify-center overflow-hidden">
+                      {item.product.image_url ? (
+                        <img
+                          src={item.product.image_url}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Package className="w-6 h-6 text-zinc-600" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-semibold truncate">
@@ -336,7 +498,9 @@ export default function BoutiquePage() {
                     className="w-full inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition text-sm"
                   >
                     <CreditCard className="w-4 h-4" />
-                    {ordering ? "Commande en cours..." : "Commander"}
+                    {ordering
+                      ? "Redirection vers le paiement..."
+                      : "Payer par carte"}
                   </button>
                 )}
                 <p className="text-zinc-500 text-xs text-center mt-3 flex items-center justify-center gap-1">

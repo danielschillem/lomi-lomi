@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Heart,
   ShieldCheck,
@@ -77,7 +78,14 @@ export default function Home() {
       {/* NAVBAR */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800">
         <nav className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <Link href="/" className="text-2xl font-bold">
+          <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
+            <Image
+              src="/logo.png"
+              alt="Lomi Lomi"
+              width={36}
+              height={36}
+              className="rounded-lg"
+            />
             <span className="text-violet-500">Lomi</span>{" "}
             <span className="text-pink-500">Lomi</span>
           </Link>
@@ -120,6 +128,14 @@ export default function Home() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/15 rounded-full blur-3xl" />
 
           <div className="relative z-10 max-w-4xl mx-auto text-center px-6 pt-24">
+            <Image
+              src="/logo.png"
+              alt="Lomi Lomi"
+              width={120}
+              height={120}
+              className="mx-auto mb-8"
+              priority
+            />
             <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-medium tracking-wider uppercase">
               100% anonyme & sécurisé
             </div>

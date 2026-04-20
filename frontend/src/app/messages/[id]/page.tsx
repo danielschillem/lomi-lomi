@@ -9,9 +9,15 @@ import {
 } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Send, User, Lock, Check, CheckCheck } from "lucide-react";
-import { getMessages, sendMessage, markConversationRead } from "@/lib/api";
+import { ArrowLeft, Send, User, Shield, Check, CheckCheck } from "lucide-react";
+import {
+  getMessages,
+  sendMessage,
+  markConversationRead,
+  getConversations,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useWS } from "@/lib/ws-context";
 
 interface Message {
   id: number;
@@ -22,13 +28,19 @@ interface Message {
   sender?: { id: number; username: string; avatar_url?: string };
 }
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8888/ws";
+interface ConvUser {
+  id: number;
+  username: string;
+  avatar_url?: string;
+  is_online?: boolean;
+}
 
 export default function ChatPage() {
   const router = useRouter();
   const params = useParams();
   const conversationId = Number(params.id);
   const { user, loading: authLoading } = useAuth();
+  const { subscribe, send: wsSend } = useWS();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [content, setContent] = useState("");
@@ -36,19 +48,51 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [typingUser, setTypingUser] = useState<number | null>(null);
   const [receiverId, setReceiverId] = useState<number>(0);
+  const [otherUser, setOtherUser] = useState<ConvUser | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const typingSendRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Derive receiver ID from first message not sent by current user
+  // Load conversation metadata to get receiverId and other user info
+  useEffect(() => {
+    if (!user) return;
+    getConversations()
+      .then((convos) => {
+        const conv = (
+          convos as unknown as Array<{
+            id: number;
+            user1_id: number;
+            user2_id: number;
+            user1: ConvUser;
+            user2: ConvUser;
+          }>
+        ).find((c) => c.id === conversationId);
+        if (conv) {
+          const other = conv.user1_id === user.id ? conv.user2 : conv.user1;
+          setReceiverId(other.id);
+          setOtherUser(other);
+        }
+      })
+      .catch(() => {});
+  }, [user, conversationId]);
+
+  // Fallback: derive receiver from messages
   const deriveReceiver = useCallback(
     (msgs: Message[]) => {
-      if (!user) return;
+      if (!user || receiverId) return;
       const other = msgs.find((m) => m.sender_id !== user.id);
-      if (other) setReceiverId(other.sender_id);
+      if (other) {
+        setReceiverId(other.sender_id);
+        if (other.sender) {
+          setOtherUser({
+            id: other.sender.id,
+            username: other.sender.username,
+            avatar_url: other.sender.avatar_url,
+          });
+        }
+      }
     },
-    [user],
+    [user, receiverId],
   );
 
   // Load messages initially
@@ -76,74 +120,61 @@ export default function ChatPage() {
     }
   }
 
-  // WebSocket connection
+  // Listen for WS events via shared provider
   useEffect(() => {
     if (!user) return;
-
-    const ws = new WebSocket(`${WS_URL}/${user.id}`);
-    wsRef.current = ws;
-
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-
-        if (
-          data.type === "message" &&
-          data.data?.conversation_id === conversationId
-        ) {
-          const newMsg: Message = {
-            id: data.data.id,
-            sender_id: data.data.sender_id,
-            content: data.data.content,
-            created_at: data.data.created_at,
-            is_read: data.data.is_read,
-            sender: data.data.sender,
-          };
-          setMessages((prev) => [...prev, newMsg]);
-          // Mark as read immediately since we're viewing
-          markConversationRead(conversationId).catch(() => {});
-          // Browser notification if tab not focused
-          if (document.hidden && Notification.permission === "granted") {
-            const senderName = data.data.sender?.username || "Quelqu'un";
-            new Notification(`${senderName} — Lomi Lomi`, {
-              body: data.data.content,
-              icon: "/icon-192.png",
-            });
-          }
+    return subscribe((event) => {
+      if (
+        event.type === "message" &&
+        (event.data as Record<string, unknown>)?.conversation_id ===
+          conversationId
+      ) {
+        const d = event.data as Record<string, unknown>;
+        const newMsg: Message = {
+          id: d.id as number,
+          sender_id: d.sender_id as number,
+          content: d.content as string,
+          created_at: d.created_at as string,
+          is_read: d.is_read as boolean,
+          sender: d.sender as Message["sender"],
+        };
+        setMessages((prev) => [...prev, newMsg]);
+        markConversationRead(conversationId).catch(() => {});
+        if (document.hidden && Notification.permission === "granted") {
+          const senderName =
+            ((d.sender as Record<string, unknown>)?.username as string) ||
+            "Quelqu'un";
+          new Notification(`${senderName} — Lomi Lomi`, {
+            body: d.content as string,
+            icon: "/icon-192.png",
+          });
         }
-
-        if (data.type === "typing" && data.data?.from_user_id !== user.id) {
-          setTypingUser(data.data.from_user_id);
-          clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = setTimeout(
-            () => setTypingUser(null),
-            3000,
-          );
-        }
-
-        if (
-          data.type === "read_receipt" &&
-          data.data?.conversation_id === conversationId
-        ) {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === data.data.message_id ? { ...m, is_read: true } : m,
-            ),
-          );
-        }
-      } catch {
-        // ignore parse errors
       }
-    };
 
-    ws.onerror = () => {};
-    ws.onclose = () => {};
+      if (
+        event.type === "typing" &&
+        (event.data as Record<string, unknown>)?.from_user_id !== user.id
+      ) {
+        setTypingUser(
+          (event.data as Record<string, unknown>).from_user_id as number,
+        );
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => setTypingUser(null), 3000);
+      }
 
-    return () => {
-      ws.close();
-      wsRef.current = null;
-    };
-  }, [user, conversationId]);
+      if (
+        event.type === "read_receipt" &&
+        (event.data as Record<string, unknown>)?.conversation_id ===
+          conversationId
+      ) {
+        const msgId = (event.data as Record<string, unknown>)
+          .message_id as number;
+        setMessages((prev) =>
+          prev.map((m) => (m.id === msgId ? { ...m, is_read: true } : m)),
+        );
+      }
+    });
+  }, [user, conversationId, subscribe]);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -160,21 +191,14 @@ export default function ChatPage() {
     }
   }, []);
 
-  // Typing indicator — send via WS
+  // Typing indicator — send via shared WS
   function handleInputChange(value: string) {
     setContent(value);
-    if (
-      !wsRef.current ||
-      wsRef.current.readyState !== WebSocket.OPEN ||
-      !receiverId
-    )
-      return;
+    if (!receiverId) return;
 
     // Throttle: send at most once per second
     if (!typingSendRef.current) {
-      wsRef.current.send(
-        JSON.stringify({ type: "typing", data: { to_user_id: receiverId } }),
-      );
+      wsSend({ type: "typing", data: { to_user_id: receiverId } });
       typingSendRef.current = setTimeout(() => {
         typingSendRef.current = undefined;
       }, 1000);
@@ -220,16 +244,47 @@ export default function ChatPage() {
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center">
-            <User className="w-5 h-5 text-zinc-500" />
-          </div>
-          <div className="flex-1">
-            <h1 className="font-semibold text-sm">Conversation</h1>
-            <p className="text-xs text-zinc-500 flex items-center gap-1">
-              <Lock className="w-3 h-3" />
-              Chiffrement de bout en bout
-            </p>
-          </div>
+          {otherUser ? (
+            <Link
+              href={`/users/${otherUser.id}`}
+              className="flex items-center gap-3"
+            >
+              <div className="relative w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+                {otherUser.avatar_url ? (
+                  <img
+                    src={otherUser.avatar_url}
+                    alt={otherUser.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-5 h-5 text-zinc-500" />
+                )}
+                {otherUser.is_online && (
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-zinc-900" />
+                )}
+              </div>
+              <div className="flex-1">
+                <h1 className="font-semibold text-sm">{otherUser.username}</h1>
+                <p className="text-xs text-zinc-500 flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  Messagerie sécurisée
+                </p>
+              </div>
+            </Link>
+          ) : (
+            <>
+              <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center">
+                <User className="w-5 h-5 text-zinc-500" />
+              </div>
+              <div className="flex-1">
+                <h1 className="font-semibold text-sm">Conversation</h1>
+                <p className="text-xs text-zinc-500 flex items-center gap-1">
+                  <Shield className="w-3 h-3" />
+                  Messagerie sécurisée
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </header>
 

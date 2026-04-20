@@ -107,17 +107,28 @@ func (h *ShopHandler) CreateOrder(c *fiber.Ctx) error {
 		Items:       orderItems,
 	}
 
-	if err := database.DB.Create(&order).Error; err != nil {
+	// Transaction : création commande + décrémentation stock atomique
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&order).Error; err != nil {
+			return err
+		}
+		for _, item := range req.Items {
+			result := tx.Model(&models.Product{}).
+				Where("id = ? AND stock >= ?", item.ProductID, item.Quantity).
+				UpdateColumn("stock", gorm.Expr("stock - ?", item.Quantity))
+			if result.RowsAffected == 0 {
+				return fiber.NewError(fiber.StatusConflict, "Stock insuffisant (concurrence)")
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		if fe, ok := err.(*fiber.Error); ok {
+			return c.Status(fe.Code).JSON(fiber.Map{"error": fe.Message})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Impossible de créer la commande",
 		})
-	}
-
-	// Decrease stock
-	for _, item := range req.Items {
-		database.DB.Model(&models.Product{}).
-			Where("id = ?", item.ProductID).
-			UpdateColumn("stock", gorm.Expr("stock - ?", item.Quantity))
 	}
 
 	database.DB.Preload("Items.Product").First(&order, order.ID)
