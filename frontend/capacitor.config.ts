@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: "Lomi Lomi",
   webDir: "out",
   server: {
-    url: "https://lomilomi.netlify.app",
+    url: "https://clownfish-app-32jhu.ondigitalocean.app",
     cleartext: true,
   },
 };

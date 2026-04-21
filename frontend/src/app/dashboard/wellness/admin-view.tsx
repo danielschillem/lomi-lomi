@@ -153,7 +153,7 @@ export default function AdminWellnessView() {
         setGpsError(msgs[err.code] || "Erreur GPS");
         setGpsLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }
 
@@ -867,21 +867,33 @@ export default function AdminWellnessView() {
               </div>
               <div className="col-span-2">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs text-zinc-500">Localisation GPS</label>
+                  <label className="block text-xs text-zinc-500">
+                    Localisation GPS
+                  </label>
                   <button
                     type="button"
                     onClick={handleGeolocateProvider}
                     disabled={gpsLoading}
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 text-white text-xs font-medium rounded-lg transition-colors"
                   >
-                    <LocateFixed size={14} className={gpsLoading ? "animate-spin" : ""} />
+                    <LocateFixed
+                      size={14}
+                      className={gpsLoading ? "animate-spin" : ""}
+                    />
                     {gpsLoading ? "Localisation…" : "Ma position GPS"}
                   </button>
                 </div>
-                {gpsError && <p className="text-xs text-red-400 mb-1">{gpsError}</p>}
+                {gpsError && (
+                  <p className="text-xs text-red-400 mb-1">{gpsError}</p>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label htmlFor="provider-lat" className="block text-xs text-zinc-500 mb-1">Latitude</label>
+                    <label
+                      htmlFor="provider-lat"
+                      className="block text-xs text-zinc-500 mb-1"
+                    >
+                      Latitude
+                    </label>
                     <input
                       id="provider-lat"
                       type="number"
@@ -897,7 +909,12 @@ export default function AdminWellnessView() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="provider-lng" className="block text-xs text-zinc-500 mb-1">Longitude</label>
+                    <label
+                      htmlFor="provider-lng"
+                      className="block text-xs text-zinc-500 mb-1"
+                    >
+                      Longitude
+                    </label>
                     <input
                       id="provider-lng"
                       type="number"
