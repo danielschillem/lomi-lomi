@@ -29,3 +29,6 @@ Thumbs.db
 # Screenshots (root only)
 /Capture*
 backend/server.exe~
+
+# Local Netlify folder
+.netlify
