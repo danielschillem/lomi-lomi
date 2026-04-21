@@ -84,7 +84,7 @@ export default function LocationPicker({
         setGpsError(messages[err.code] || "Erreur de géolocalisation");
         setGpsLoading(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }
 
@@ -104,9 +104,7 @@ export default function LocationPicker({
           {gpsLoading ? "Localisation…" : "Ma position GPS"}
         </button>
       </div>
-      {gpsError && (
-        <p className="text-xs text-red-400">{gpsError}</p>
-      )}
+      {gpsError && <p className="text-xs text-red-400">{gpsError}</p>}
       <div className="rounded-lg overflow-hidden border border-zinc-700 h-56">
         <MapContainer
           center={center}

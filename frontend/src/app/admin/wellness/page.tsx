@@ -14,6 +14,7 @@ import {
   AlertCircle,
   MapPin,
   Users,
+  LocateFixed,
 } from "lucide-react";
 import {
   getWellnessProviders,
@@ -122,6 +123,39 @@ export default function AdminWellnessPage() {
     is_verified: false,
     is_active: true,
   });
+
+  // GPS state
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
+  function handleGeolocateProvider() {
+    if (!navigator.geolocation) {
+      setGpsError("Géolocalisation non supportée");
+      return;
+    }
+    setGpsLoading(true);
+    setGpsError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setProviderForm((f) => ({
+          ...f,
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        }));
+        setGpsLoading(false);
+      },
+      (err) => {
+        const msgs: Record<number, string> = {
+          1: "Permission refusée",
+          2: "Position indisponible",
+          3: "Délai dépassé",
+        };
+        setGpsError(msgs[err.code] || "Erreur GPS");
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   // Service modal
   const [showServiceModal, setShowServiceModal] = useState(false);
@@ -831,47 +865,54 @@ export default function AdminWellnessPage() {
                   className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="provider-lat"
-                  className="block text-xs text-zinc-500 mb-1"
-                >
-                  Latitude
-                </label>
-                <input
-                  id="provider-lat"
-                  type="number"
-                  step="any"
-                  value={providerForm.latitude || ""}
-                  onChange={(e) =>
-                    setProviderForm({
-                      ...providerForm,
-                      latitude: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="provider-lng"
-                  className="block text-xs text-zinc-500 mb-1"
-                >
-                  Longitude
-                </label>
-                <input
-                  id="provider-lng"
-                  type="number"
-                  step="any"
-                  value={providerForm.longitude || ""}
-                  onChange={(e) =>
-                    setProviderForm({
-                      ...providerForm,
-                      longitude: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
-                />
+              <div className="col-span-2">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs text-zinc-500">Localisation GPS</label>
+                  <button
+                    type="button"
+                    onClick={handleGeolocateProvider}
+                    disabled={gpsLoading}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 text-white text-xs font-medium rounded-lg transition-colors"
+                  >
+                    <LocateFixed size={14} className={gpsLoading ? "animate-spin" : ""} />
+                    {gpsLoading ? "Localisation…" : "Ma position GPS"}
+                  </button>
+                </div>
+                {gpsError && <p className="text-xs text-red-400 mb-1">{gpsError}</p>}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="provider-lat" className="block text-xs text-zinc-500 mb-1">Latitude</label>
+                    <input
+                      id="provider-lat"
+                      type="number"
+                      step="any"
+                      value={providerForm.latitude || ""}
+                      onChange={(e) =>
+                        setProviderForm({
+                          ...providerForm,
+                          latitude: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="provider-lng" className="block text-xs text-zinc-500 mb-1">Longitude</label>
+                    <input
+                      id="provider-lng"
+                      type="number"
+                      step="any"
+                      value={providerForm.longitude || ""}
+                      onChange={(e) =>
+                        setProviderForm({
+                          ...providerForm,
+                          longitude: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="col-span-2">
                 <label className="block text-xs text-zinc-500 mb-1">
