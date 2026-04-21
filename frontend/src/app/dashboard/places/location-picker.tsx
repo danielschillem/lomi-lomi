@@ -9,7 +9,8 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { LocateFixed } from "lucide-react";
 
 const pinIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -59,11 +60,51 @@ export default function LocationPicker({
     ? [latitude, longitude]
     : [48.8566, 2.3522];
 
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState<string | null>(null);
+
+  function handleGeolocate() {
+    if (!navigator.geolocation) {
+      setGpsError("Géolocalisation non supportée par ce navigateur");
+      return;
+    }
+    setGpsLoading(true);
+    setGpsError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        onChange(pos.coords.latitude, pos.coords.longitude);
+        setGpsLoading(false);
+      },
+      (err) => {
+        const messages: Record<number, string> = {
+          1: "Permission refusée — autorisez la localisation",
+          2: "Position indisponible",
+          3: "Délai dépassé",
+        };
+        setGpsError(messages[err.code] || "Erreur de géolocalisation");
+        setGpsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
+
   return (
     <div className="space-y-2">
-      <label className="text-xs text-zinc-500 block">
-        Cliquez sur la carte pour placer le lieu
-      </label>
+      <div className="flex items-center justify-between">
+        <label className="text-xs text-zinc-500 block">
+          Cliquez sur la carte ou utilisez le GPS
+        </label>
+        <button
+          type="button"
+          onClick={handleGeolocate}
+          disabled={gpsLoading}
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 text-white text-xs font-medium rounded-lg transition-colors"
+        >
+          <LocateFixed size={14} className={gpsLoading ? "animate-spin" : ""} />
+          {gpsLoading ? "Localisation…" : "Ma position GPS"}
+        </button>
+      </div>
+      {gpsError && <p className="text-xs text-red-400">{gpsError}</p>}
       <div className="rounded-lg overflow-hidden border border-zinc-700 h-56">
         <MapContainer
           center={center}
