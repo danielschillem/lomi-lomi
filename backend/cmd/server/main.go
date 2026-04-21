@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/gofiber/contrib/websocket"
@@ -34,10 +35,17 @@ func main() {
 	app.Use(recover.New())
 	app.Use(middleware.SecurityHeaders())
 	app.Use(middleware.RateLimitAPI())
+	// Normalize CORS origins: Fiber v2.52+ requires ", " (comma+space) separator
+	rawOrigins := strings.Split(cfg.CORSOrigin, ",")
+	for i := range rawOrigins {
+		rawOrigins[i] = strings.TrimSpace(rawOrigins[i])
+	}
+	corsOrigins := strings.Join(rawOrigins, ", ")
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: cfg.CORSOrigin,
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-		AllowMethods: "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowOrigins:     corsOrigins,
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowCredentials: true,
 	}))
 
 	// Health check
