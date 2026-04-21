@@ -48,6 +48,24 @@ func main() {
 		})
 	})
 
+	// Bootstrap admin (secured by ADMIN_SECRET env var)
+	app.Post("/api/bootstrap-admin", func(c *fiber.Ctx) error {
+		secret := os.Getenv("ADMIN_SECRET")
+		if secret == "" || c.Get("X-Admin-Secret") != secret {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "forbidden"})
+		}
+		var req struct {
+			Email string `json:"email"`
+		}
+		if err := c.BodyParser(&req); err != nil || req.Email == "" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email required"})
+		}
+		if err := database.DB.Exec("UPDATE users SET role = 'admin' WHERE email = ?", req.Email).Error; err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.JSON(fiber.Map{"ok": true, "message": req.Email + " promoted to admin"})
+	})
+
 	// Handlers
 	authHandler := handlers.NewAuthHandler(cfg)
 	profileHandler := handlers.NewProfileHandler()
