@@ -8,6 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { getProfile } from "@/lib/api";
 
 interface User {
   id: number;
@@ -45,6 +46,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (t && u) {
       setToken(t);
       setUser(JSON.parse(u));
+      // Refresh user from server to get latest role
+      getProfile()
+        .then((fresh) => {
+          const merged = { ...JSON.parse(u), ...fresh } as User;
+          localStorage.setItem("user", JSON.stringify(merged));
+          setUser(merged);
+        })
+        .catch(() => {
+          // Token expired or invalid
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setToken(null);
+          setUser(null);
+        });
     }
     setLoading(false);
   }, []);
