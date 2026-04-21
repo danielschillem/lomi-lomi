@@ -1,0 +1,41 @@
+{
+  "type": "web_service",
+  "autoDeploy": "yes",
+  "serviceDetails": {
+    "env": "image",
+    "healthCheckPath": "/api/health",
+    "region": "oregon",
+    "plan": "free"
+  },
+  "ownerId": "tea-d78s1h5actks73cq3e00",
+  "envVars": [
+    {
+      "value": "8888",
+      "key": "PORT"
+    },
+    {
+      "value": "postgres",
+      "key": "DB_DRIVER"
+    },
+    {
+      "value": "postgresql://lomilomi:fNUGuLLbUzO9ZWqmEKsVeMzZ3DriyjbS@dpg-d7j2fcbbc2fs739cmbog-a.frankfurt-postgres.render.com:5432/lomilomi",
+      "key": "DATABASE_URL"
+    },
+    {
+      "value": "ASxW3YK5IDJk26fjw4EqOemLap9vysF7",
+      "key": "JWT_SECRET"
+    },
+    {
+      "value": "https://lomilomi.netlify.app",
+      "key": "CORS_ORIGIN"
+    },
+    {
+      "value": "./uploads",
+      "key": "UPLOAD_DIR"
+    }
+  ],
+  "image": {
+    "imagePath": "docker.io/schillem/lomilomi-api:latest"
+  },
+  "name": "lomilomi-backend"
+}

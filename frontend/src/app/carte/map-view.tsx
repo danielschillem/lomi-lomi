@@ -82,8 +82,8 @@ export default function MapView({
     <MapContainer
       center={defaultCenter}
       zoom={12}
-      className="w-full h-full min-h-100"
-      style={{ background: "#18181b" }}
+      className="w-full h-full"
+      style={{ background: "#18181b", minHeight: "300px" }}
     >
       <ChangeView center={center} />
       <TileLayer

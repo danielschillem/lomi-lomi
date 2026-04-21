@@ -17,10 +17,10 @@ interface Reservation {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending: { label: "En attente", color: "bg-yellow-100 text-yellow-800" },
-  confirmed: { label: "Confirmée", color: "bg-blue-100 text-blue-800" },
-  completed: { label: "Terminée", color: "bg-green-100 text-green-800" },
-  canceled: { label: "Annulée", color: "bg-red-100 text-red-800" },
+  pending: { label: "En attente", color: "bg-yellow-500/10 text-yellow-400" },
+  confirmed: { label: "Confirmée", color: "bg-blue-500/10 text-blue-400" },
+  completed: { label: "Terminée", color: "bg-green-500/10 text-green-400" },
+  canceled: { label: "Annulée", color: "bg-red-500/100/10 text-red-400" },
 };
 
 export default function DashboardReservationsPage() {
@@ -48,19 +48,19 @@ export default function DashboardReservationsPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">
+      <h1 className="mb-6 text-2xl font-bold text-white">
         Réservations de lieux
       </h1>
 
       {reservations.length === 0 ? (
-        <p className="text-gray-500">Aucune réservation de lieu.</p>
+        <p className="text-zinc-400">Aucune réservation de lieu.</p>
       ) : (
         <div className="space-y-4">
           {reservations.map((res) => {
@@ -70,24 +70,24 @@ export default function DashboardReservationsPage() {
               ? new Date(res.end_date).toLocaleDateString("fr-FR")
               : dateStr;
             return (
-              <div key={res.id} className="rounded-xl bg-white p-5 shadow-sm">
+              <div key={res.id} className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 ">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-white">
                       {res.place?.name}{" "}
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-zinc-400">
                         ({res.place?.category})
                       </span>
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-zinc-400">
                       {dateStr === endStr ? dateStr : `${dateStr} → ${endStr}`}{" "}
                       • {res.persons} pers.
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-zinc-400">
                       Client : {res.user?.username}
                     </p>
                     {res.notes && (
-                      <p className="mt-1 text-sm text-gray-400 italic">
+                      <p className="mt-1 text-sm text-zinc-500 italic">
                         {res.notes}
                       </p>
                     )}
@@ -109,7 +109,7 @@ export default function DashboardReservationsPage() {
                     </button>
                     <button
                       onClick={() => handleStatus(res.id, "canceled")}
-                      className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"
+                      className="flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400"
                     >
                       <XCircle size={14} /> Refuser
                     </button>

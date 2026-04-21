@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -53,6 +53,14 @@ interface Order {
 }
 
 export default function BoutiquePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">Chargement...</div>}>
+      <BoutiqueContent />
+    </Suspense>
+  );
+}
+
+function BoutiqueContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);

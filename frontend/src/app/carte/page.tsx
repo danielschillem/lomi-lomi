@@ -72,7 +72,7 @@ export default function CartePage() {
   }, [category]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-screen flex flex-col">
       {/* Header */}
       <header className="shrink-0 bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 px-4 py-3 z-20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -118,7 +118,7 @@ export default function CartePage() {
       {/* Map + Sidebar */}
       <div className="flex-1 flex flex-col md:flex-row">
         {/* Map */}
-        <div className="flex-1 relative min-h-100">
+        <div className="flex-1 relative min-h-75">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
               <div className="animate-pulse text-zinc-400">
@@ -136,7 +136,7 @@ export default function CartePage() {
         </div>
 
         {/* Sidebar */}
-        <div className="md:w-96 shrink-0 border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-950 overflow-y-auto max-h-[50vh] md:max-h-none">
+        <div className="md:w-96 shrink-0 border-t md:border-t-0 md:border-l border-zinc-800 bg-zinc-950 overflow-y-auto max-h-[35vh] md:max-h-none">
           {selected ? (
             <div className="p-6">
               <button
