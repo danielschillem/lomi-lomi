@@ -87,7 +87,11 @@ export default function LoginPage() {
       const res = await verifyOTP(phone.trim(), otpCode.trim());
       if (res.action === "login" && res.token && res.user) {
         setSession(res.token, res.user);
-        router.push("/profile");
+        router.push(
+          res.user.role === "admin" || res.user.role === "owner"
+            ? "/dashboard"
+            : "/profile",
+        );
       } else {
         // No account yet → redirect to register
         router.push("/register");
@@ -106,7 +110,11 @@ export default function LoginPage() {
     try {
       const res = await login({ email, password });
       setSession(res.token, res.user);
-      router.push("/profile");
+      router.push(
+        res.user.role === "admin" || res.user.role === "owner"
+          ? "/dashboard"
+          : "/profile",
+      );
     } catch (err: unknown) {
       setError(
         err instanceof Error ? err.message : "Email ou mot de passe incorrect",

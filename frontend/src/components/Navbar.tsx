@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   MapPin,
   Sparkles,
+  LayoutDashboard,
 } from "lucide-react";
 import { getUnreadCount } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -56,7 +57,12 @@ export default function Navbar() {
   // Hide navbar on login/register or when not authenticated
   if (!user || pathname === "/login" || pathname === "/register") return null;
 
+  const isManager = user.role === "admin" || user.role === "owner";
+
   const links = [
+    ...(isManager
+      ? [{ href: "/dashboard", icon: LayoutDashboard, label: "Gestion" }]
+      : []),
     { href: "/discover", icon: Heart, label: "Découvrir" },
     {
       href: "/messages",
