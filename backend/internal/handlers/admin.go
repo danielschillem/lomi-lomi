@@ -170,6 +170,8 @@ func (h *AdminHandler) DeleteUser(c *fiber.Ctx) error {
 // ---- Products CRUD ----
 
 func (h *AdminHandler) CreateProduct(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
 	var product models.Product
 	if err := c.BodyParser(&product); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
@@ -178,15 +180,19 @@ func (h *AdminHandler) CreateProduct(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom et prix requis"})
 	}
 
-	// Validate owner exists if specified
-	if product.OwnerID != 0 {
+	// Assign owner: use provided OwnerID or default to current admin
+	if product.OwnerID == 0 {
+		product.OwnerID = userID
+	} else {
 		var owner models.User
 		if err := database.DB.First(&owner, product.OwnerID).Error; err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Propriétaire non trouvé"})
 		}
 	}
 
-	database.DB.Create(&product)
+	if err := database.DB.Omit("Owner").Create(&product).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le produit"})
+	}
 	return c.Status(fiber.StatusCreated).JSON(product)
 }
 
@@ -266,6 +272,8 @@ func (h *AdminHandler) DeleteProduct(c *fiber.Ctx) error {
 // ---- Places CRUD ----
 
 func (h *AdminHandler) CreatePlace(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
 	var place models.Place
 	if err := c.BodyParser(&place); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
@@ -274,15 +282,19 @@ func (h *AdminHandler) CreatePlace(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom requis"})
 	}
 
-	// Validate owner exists if specified
-	if place.OwnerID != 0 {
+	// Assign owner: use provided OwnerID or default to current admin
+	if place.OwnerID == 0 {
+		place.OwnerID = userID
+	} else {
 		var owner models.User
 		if err := database.DB.First(&owner, place.OwnerID).Error; err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Propriétaire non trouvé"})
 		}
 	}
 
-	database.DB.Create(&place)
+	if err := database.DB.Omit("Owner").Create(&place).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le lieu"})
+	}
 	return c.Status(fiber.StatusCreated).JSON(place)
 }
 

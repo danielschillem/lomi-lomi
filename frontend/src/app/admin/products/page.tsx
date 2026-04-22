@@ -44,6 +44,7 @@ export default function AdminProductsPage() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,6 +83,7 @@ export default function AdminProductsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
     try {
       if (editId) {
         await adminUpdateProduct(editId, form);
@@ -90,8 +92,10 @@ export default function AdminProductsPage() {
       }
       setShowForm(false);
       load();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement",
+      );
     }
   }
 
@@ -100,8 +104,10 @@ export default function AdminProductsPage() {
     try {
       await adminDeleteProduct(p.id);
       load();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la suppression",
+      );
     }
   }
 

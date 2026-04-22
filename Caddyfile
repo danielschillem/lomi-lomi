@@ -1,23 +1,24 @@
-# Remplace ces domaines par les tiens
-# Pour tester sans domaine, utilise l'IP du Droplet avec :80
+# Mode IP (pas de HTTPS automatique sans domaine)
+# Quand tu auras un domaine, remplace :80 par ton domaine
 
-# API backend
-api.lomilomi.app {
-	reverse_proxy backend:8888
+:80 {
+	# API backend — routes /api/*
+	handle /api/* {
+		reverse_proxy backend:8888
+	}
+
+	# WebSocket
+	handle /ws {
+		reverse_proxy backend:8888
+	}
 
 	# Uploads statiques
-	handle_path /uploads/* {
-		root * /app/uploads
-		file_server
+	handle /uploads/* {
+		reverse_proxy backend:8888
 	}
-}
 
-# Frontend Next.js
-lomilomi.app {
-	reverse_proxy frontend:3000
-}
-
-# Redirect www -> apex
-www.lomilomi.app {
-	redir https://lomilomi.app{uri} permanent
+	# Tout le reste -> frontend Next.js
+	handle {
+		reverse_proxy frontend:3000
+	}
 }

@@ -317,6 +317,8 @@ func (h *WellnessHandler) CreateReview(c *fiber.Ctx) error {
 
 // AdminCreateProvider creates a new wellness provider
 func (h *WellnessHandler) AdminCreateProvider(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
 	var provider models.WellnessProvider
 	if err := c.BodyParser(&provider); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
@@ -325,7 +327,13 @@ func (h *WellnessHandler) AdminCreateProvider(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom requis"})
 	}
 
-	database.DB.Create(&provider)
+	if provider.OwnerID == 0 {
+		provider.OwnerID = userID
+	}
+
+	if err := database.DB.Omit("Owner").Create(&provider).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le prestataire"})
+	}
 	return c.Status(fiber.StatusCreated).JSON(provider)
 }
 
@@ -450,7 +458,9 @@ func (h *WellnessHandler) AdminCreateService(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Prestataire non trouvé"})
 	}
 
-	database.DB.Create(&service)
+	if err := database.DB.Omit("Provider").Create(&service).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le service"})
+	}
 	return c.Status(fiber.StatusCreated).JSON(service)
 }
 
