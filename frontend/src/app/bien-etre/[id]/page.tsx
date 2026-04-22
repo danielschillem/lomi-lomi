@@ -407,7 +407,7 @@ export default function ProviderPage() {
               <div className="flex items-start justify-between gap-2 mb-2">
                 <h3 className="font-semibold text-sm">{service.name}</h3>
                 <span className="text-lg font-bold text-emerald-400 shrink-0">
-                  {service.price.toFixed(2)}€
+                  {Math.round(service.price)} FCFA
                 </span>
               </div>
               <p className="text-zinc-400 text-xs leading-relaxed mb-3">
@@ -526,7 +526,7 @@ export default function ProviderPage() {
                     }`}
                   >
                     <Users className="w-3.5 h-3.5" />
-                    Duo ({(selectedService.price * 2).toFixed(2)}€)
+                    Duo ({Math.round(selectedService.price * 2)} FCFA)
                   </button>
                 </div>
 
@@ -580,7 +580,7 @@ export default function ProviderPage() {
               <div>
                 <span className="text-zinc-500 text-sm">Total :</span>
                 <span className="text-xl font-bold text-white ml-2">
-                  {(selectedService.price * persons).toFixed(2)}€
+                  {Math.round(selectedService.price * persons)} FCFA
                 </span>
               </div>
               <button

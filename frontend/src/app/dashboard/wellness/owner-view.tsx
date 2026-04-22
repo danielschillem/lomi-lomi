@@ -85,7 +85,7 @@ export default function OwnerWellnessView() {
                     </p>
                     <p className="text-sm text-zinc-400">
                       Client : {booking.user?.username} • {booking.persons}{" "}
-                      pers. • {booking.total_price.toFixed(2)} €
+                      pers. • {Math.round(booking.total_price)} FCFA
                     </p>
                     {booking.notes && (
                       <p className="mt-1 text-sm text-zinc-500 italic">

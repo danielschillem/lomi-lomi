@@ -96,7 +96,7 @@ export default function DashboardPage() {
         },
         {
           label: "Revenus globaux",
-          value: `${adminStats.revenue.toFixed(2)} €`,
+          value: `${Math.round(adminStats.revenue)} FCFA`,
           icon: DollarSign,
           color: "bg-emerald-500/10 text-emerald-400",
         },
@@ -143,7 +143,7 @@ export default function DashboardPage() {
         },
         {
           label: "Revenus",
-          value: `${ownerStats.revenue.toFixed(2)} €`,
+          value: `${Math.round(ownerStats.revenue)} FCFA`,
           icon: DollarSign,
           color: "bg-yellow-500/10 text-yellow-400",
         },

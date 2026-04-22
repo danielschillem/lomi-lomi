@@ -131,7 +131,7 @@ export default function OwnerOrdersView() {
                       {statusInfo.label}
                     </span>
                     <span className="font-bold text-white">
-                      {order.total_amount.toFixed(2)} €
+                      {Math.round(order.total_amount)} FCFA
                     </span>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export default function OwnerOrdersView() {
                           {item.product?.name || `Produit #${item.product_id}`}{" "}
                           x{item.quantity}
                         </span>
-                        <span>{(item.price * item.quantity).toFixed(2)} €</span>
+                        <span>{Math.round(item.price * item.quantity)} FCFA</span>
                       </div>
                     ))}
                   </div>

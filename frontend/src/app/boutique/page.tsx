@@ -276,14 +276,14 @@ function BoutiqueContent() {
                               {item.quantity}
                             </span>
                             <span className="text-zinc-400">
-                              {(item.price * item.quantity).toFixed(2)}€
+                              {Math.round(item.price * item.quantity)} FCFA
                             </span>
                           </div>
                         ))}
                       </div>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
                         <span className="text-sm font-semibold text-white">
-                          {o.total_amount.toFixed(2)}€
+                          {Math.round(o.total_amount)} FCFA
                         </span>
                         {o.status === "pending" && (
                           <button
@@ -384,7 +384,7 @@ function BoutiqueContent() {
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <span className="text-lg font-bold text-violet-400">
-                      {product.price.toFixed(2)}€
+                      {Math.round(product.price)} FCFA
                     </span>
                     <button
                       onClick={() => addToCart(product)}
@@ -457,7 +457,7 @@ function BoutiqueContent() {
                         {item.product.name}
                       </h4>
                       <p className="text-violet-400 text-sm font-medium">
-                        {item.product.price.toFixed(2)}€
+                        {Math.round(item.product.price)} FCFA
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -489,7 +489,7 @@ function BoutiqueContent() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-zinc-400">Total</span>
                   <span className="text-xl font-bold text-white">
-                    {total.toFixed(2)}€
+                    {Math.round(total)} FCFA
                   </span>
                 </div>
                 {!user ? (

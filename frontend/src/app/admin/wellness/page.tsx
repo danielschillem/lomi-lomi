@@ -525,7 +525,7 @@ export default function AdminWellnessPage() {
                           <div>
                             <span className="text-sm">{s.name}</span>
                             <span className="text-xs text-zinc-500 ml-2">
-                              {s.duration}min — {s.price.toFixed(2)}€
+                              {s.duration}min — {Math.round(s.price)} FCFA
                               {s.is_duo ? " (duo)" : ""}
                             </span>
                           </div>
@@ -652,7 +652,7 @@ export default function AdminWellnessPage() {
                     </span>
                     <span>{b.persons === 2 ? "Duo" : "Solo"}</span>
                     <span className="font-medium text-white">
-                      {b.total_price.toFixed(2)}€
+                      {Math.round(b.total_price)} FCFA
                     </span>
                   </div>
                   <div className="flex gap-2">
@@ -1110,7 +1110,7 @@ export default function AdminWellnessPage() {
                     htmlFor="service-price"
                     className="block text-xs text-zinc-500 mb-1"
                   >
-                    Prix (€)
+                    Prix (FCFA)
                   </label>
                   <input
                     id="service-price"

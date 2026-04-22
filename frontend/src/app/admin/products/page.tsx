@@ -179,7 +179,7 @@ export default function AdminProductsPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-zinc-500 mb-1 block">
-                  Prix (€)
+                  Prix (FCFA)
                 </label>
                 <input
                   type="number"
@@ -328,7 +328,7 @@ export default function AdminProductsPage() {
                     {p.category || "—"}
                   </td>
                   <td className="px-6 py-4 font-medium text-pink-400">
-                    {p.price.toFixed(2)} €
+                    {Math.round(p.price)} FCFA
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
                     <span

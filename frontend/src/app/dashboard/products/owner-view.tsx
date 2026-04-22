@@ -122,7 +122,7 @@ export default function OwnerProductsView() {
       <div className="grid grid-cols-3 gap-2">
         <input
           className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
-          placeholder="Prix (€)"
+          placeholder="Prix (FCFA)"
           type="number"
           step="0.01"
           defaultValue={defaults?.price}
@@ -215,7 +215,7 @@ export default function OwnerProductsView() {
                         {product.name}
                       </h3>
                       <p className="text-sm text-violet-400 font-bold">
-                        {product.price.toFixed(2)} €
+                        {Math.round(product.price)} FCFA
                       </p>
                     </div>
                     <div className="flex gap-1">

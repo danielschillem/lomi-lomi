@@ -86,7 +86,7 @@ export default function OrderTrackingPage() {
       </h1>
       <p className="mb-6 text-sm text-gray-500">
         Passée le {new Date(order.created_at).toLocaleDateString("fr-FR")} •{" "}
-        {order.total_amount.toFixed(2)} €
+        {Math.round(order.total_amount)} FCFA
       </p>
 
       {/* Tracking steps */}
@@ -137,7 +137,7 @@ export default function OrderTrackingPage() {
                   <p className="text-xs text-gray-500">Qté : {item.quantity}</p>
                 </div>
                 <p className="text-sm font-medium text-gray-900">
-                  {(item.price * item.quantity).toFixed(2)} €
+                  {Math.round(item.price * item.quantity)} FCFA
                 </p>
               </div>
             ))}

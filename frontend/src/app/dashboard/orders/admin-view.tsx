@@ -145,7 +145,7 @@ export default function AdminOrdersView() {
                     {o.items?.length ?? 0} article(s)
                   </td>
                   <td className="px-6 py-4 font-medium text-green-400">
-                    {o.total_amount.toFixed(2)} €
+                    {Math.round(o.total_amount)} FCFA
                   </td>
                   <td className="px-6 py-4">
                     <select

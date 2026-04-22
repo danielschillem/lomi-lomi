@@ -46,11 +46,11 @@ func (h *PaymentHandler) CreateCheckout(c *fiber.Ctx) error {
 	for _, item := range order.Items {
 		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
 			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-				Currency: stripe.String("eur"),
+				Currency: stripe.String("xaf"),
 				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 					Name: stripe.String(item.Product.Name),
 				},
-				UnitAmount: stripe.Int64(int64(item.Price * 100)),
+				UnitAmount: stripe.Int64(int64(item.Price)),
 			},
 			Quantity: stripe.Int64(int64(item.Quantity)),
 		})

@@ -299,7 +299,7 @@ export default function ReservationsPage() {
 
                   <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
                     <span className="text-sm font-bold text-white">
-                      {booking.total_price.toFixed(2)}€
+                      {Math.round(booking.total_price)} FCFA
                     </span>
                     <div className="flex items-center gap-2">
                       {canReview && (

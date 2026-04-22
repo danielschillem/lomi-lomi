@@ -66,7 +66,7 @@ export default function AdminDashboard() {
     },
     {
       label: "Revenus",
-      value: stats?.revenue != null ? `${stats.revenue.toFixed(2)} €` : "—",
+      value: stats?.revenue != null ? `${Math.round(stats.revenue)} FCFA` : "—",
       icon: TrendingUp,
       color: "text-emerald-400",
     },

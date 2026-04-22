@@ -177,7 +177,7 @@ export default function AdminStatsPage() {
               <div className="mt-3 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-green-400" />
                 <span className="text-sm text-zinc-400">
-                  Revenus : {revenueTotal.toFixed(2)} €
+                  Revenus : {Math.round(revenueTotal)} FCFA
                 </span>
               </div>
             </>
