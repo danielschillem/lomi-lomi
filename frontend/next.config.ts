@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.onrender.com",
       },
+      {
+        protocol: "https",
+        hostname: "api.lomilomi.app",
+      },
     ],
   },
   async headers() {
