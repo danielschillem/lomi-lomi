@@ -82,7 +82,7 @@ func main() {
 	adminHandler := handlers.NewAdminHandler()
 	wellnessHandler := handlers.NewWellnessHandler()
 	matchHandler := handlers.NewMatchHandler()
-	paymentHandler := handlers.NewPaymentHandler(cfg)
+	paymentHandler := handlers.NewOrangeMoneyHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
 	safetyHandler := handlers.NewSafetyHandler()
 	ownerHandler := handlers.NewOwnerHandler()
@@ -161,9 +161,10 @@ func main() {
 	api.Post("/shop/orders", jwt, shopHandler.CreateOrder)
 	api.Get("/shop/orders", jwt, shopHandler.GetOrders)
 
-	// Stripe Checkout
-	api.Post("/checkout", jwt, paymentHandler.CreateCheckout)
-	api.Post("/stripe/webhook", paymentHandler.HandleWebhook)
+	// Orange Money
+	api.Post("/checkout", jwt, paymentHandler.InitiatePayment)
+	api.Post("/om/webhook", paymentHandler.HandleWebhook)
+	api.Get("/orders/:id/payment-status", jwt, paymentHandler.CheckPaymentStatus)
 
 	// Upload avatar
 	api.Post("/upload/avatar", jwt, uploadHandler.UploadAvatar)

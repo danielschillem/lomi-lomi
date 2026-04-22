@@ -19,7 +19,7 @@ import {
   ChevronUp,
   ExternalLink,
 } from "lucide-react";
-import { getProducts, createOrder, createCheckout, getOrders } from "@/lib/api";
+import { getProducts, createOrder, initiatePayment, getOrders } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface Product {
@@ -54,7 +54,13 @@ interface Order {
 
 export default function BoutiquePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">Chargement...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+          Chargement...
+        </div>
+      }
+    >
       <BoutiqueContent />
     </Suspense>
   );
@@ -82,7 +88,7 @@ function BoutiqueContent() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Stripe redirect params
+  // Orange Money redirect params
   useEffect(() => {
     if (searchParams.get("success") === "true") {
       setOrderSuccess(true);
@@ -156,9 +162,17 @@ function BoutiqueContent() {
           quantity: i.quantity,
         })),
       })) as unknown as Order;
-      // Redirect to Stripe Checkout
-      const checkout = await createCheckout(order.id);
-      window.location.href = checkout.checkout_url;
+      // Initiate Orange Money payment
+      const payment = await initiatePayment(order.id);
+      if (payment.payment_url) {
+        window.location.href = payment.payment_url;
+      } else {
+        // Dev mode: payment simulated
+        setCart([]);
+        setOrderSuccess(true);
+        setTimeout(() => setOrderSuccess(false), 6000);
+        setOrdering(false);
+      }
     } catch {
       setOrdering(false);
     }
@@ -289,8 +303,12 @@ function BoutiqueContent() {
                           <button
                             onClick={async () => {
                               try {
-                                const checkout = await createCheckout(o.id);
-                                window.location.href = checkout.checkout_url;
+                                const payment = await initiatePayment(o.id);
+                                if (payment.payment_url) {
+                                  window.location.href = payment.payment_url;
+                                } else {
+                                  window.location.reload();
+                                }
                               } catch {
                                 /* ignore */
                               }
@@ -298,7 +316,7 @@ function BoutiqueContent() {
                             className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition"
                           >
                             <ExternalLink className="w-3 h-3" />
-                            Payer maintenant
+                            Payer via Orange Money
                           </button>
                         )}
                       </div>

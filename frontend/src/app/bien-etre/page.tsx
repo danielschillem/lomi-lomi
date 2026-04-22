@@ -235,7 +235,8 @@ export default function WellnessPage() {
                     </span>
                     {minPrice(provider.services) !== null && (
                       <span className="text-sm font-bold text-emerald-400">
-                        À partir de {Math.round(minPrice(provider.services) || 0)} FCFA
+                        À partir de{" "}
+                        {Math.round(minPrice(provider.services) || 0)} FCFA
                       </span>
                     )}
                   </div>

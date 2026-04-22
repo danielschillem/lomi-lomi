@@ -369,12 +369,27 @@ export function deleteNotification(id: number) {
   });
 }
 
-/* ---- Stripe Checkout ---- */
-export function createCheckout(orderId: number) {
-  return request<{ checkout_url: string; session_id: string }>("/checkout", {
+/* ---- Orange Money Checkout ---- */
+export function initiatePayment(orderId: number, phone?: string) {
+  return request<{
+    payment_url: string;
+    transaction_id: string;
+    amount: number;
+    currency: string;
+    status: string;
+    message?: string;
+  }>("/checkout", {
     method: "POST",
-    body: JSON.stringify({ order_id: orderId }),
+    body: JSON.stringify({ order_id: orderId, phone: phone || "" }),
   });
+}
+
+export function checkPaymentStatus(orderId: number) {
+  return request<{
+    order_id: number;
+    status: string;
+    transaction_id: string;
+  }>(`/orders/${orderId}/payment-status`);
 }
 
 /* ---- Upload ---- */
