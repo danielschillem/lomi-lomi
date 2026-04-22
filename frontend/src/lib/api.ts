@@ -146,6 +146,21 @@ export function discover() {
   return request<Record<string, unknown>[]>("/discover");
 }
 
+export function nearbyUsers(radius: number = 10) {
+  return request<{
+    users: {
+      id: number;
+      username: string;
+      avatar_url: string;
+      is_online: boolean;
+      distance: number;
+      angle: number;
+    }[];
+    radius: number;
+    center: { latitude: number; longitude: number };
+  }>(`/nearby?radius=${radius}`);
+}
+
 export function searchProfiles(query: string) {
   return request<Record<string, unknown>[]>(
     `/search?q=${encodeURIComponent(query)}`,
@@ -267,10 +282,10 @@ export function updateVTCDriverLocation(
   rideId: number,
   data: { latitude: number; longitude: number },
 ) {
-  return request<{ updated: boolean }>(
-    `/vtc/rides/${rideId}/driver-location`,
-    { method: "PUT", body: JSON.stringify(data) },
-  );
+  return request<{ updated: boolean }>(`/vtc/rides/${rideId}/driver-location`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
 }
 
 /* ---- Shop ---- */
@@ -780,10 +795,10 @@ export function ownerGetReservations(page = 1) {
 }
 
 export function ownerUpdateReservationStatus(id: number, status: string) {
-  return request<Record<string, unknown>>(
-    `/owner/reservations/${id}/status`,
-    { method: "PUT", body: JSON.stringify({ status }) },
-  );
+  return request<Record<string, unknown>>(`/owner/reservations/${id}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
 }
 
 /* ---- Delivery Addresses ---- */

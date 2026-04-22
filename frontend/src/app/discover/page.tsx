@@ -18,6 +18,7 @@ import {
   Undo2,
   Navigation,
   Sparkles,
+  Radar as RadarIcon,
 } from "lucide-react";
 import {
   discover,
@@ -31,6 +32,7 @@ import {
   updatePreferences,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import Radar from "@/components/Radar";
 
 interface Profile {
   id: number;
@@ -69,6 +71,9 @@ export default function DiscoverPage() {
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+
+  // Radar
+  const [showRadar, setShowRadar] = useState(false);
 
   // Filters
   const [showFilters, setShowFilters] = useState(false);
@@ -378,6 +383,13 @@ export default function DiscoverPage() {
           </h1>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setShowRadar(!showRadar)}
+              className={`p-1.5 rounded-lg transition ${showRadar ? "bg-green-600 text-white" : "text-zinc-400 hover:text-white"}`}
+              title="Radar"
+            >
+              <RadarIcon className="w-5 h-5" />
+            </button>
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-1.5 rounded-lg transition ${showFilters ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
               title="Filtres"
@@ -504,6 +516,9 @@ export default function DiscoverPage() {
             </button>
           </div>
         )}
+
+        {/* Radar */}
+        {showRadar && <Radar className="mb-6 animate-in slide-in-from-top-2" />}
 
         {/* Search bar */}
         <div className="relative mb-6">

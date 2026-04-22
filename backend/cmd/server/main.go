@@ -122,6 +122,7 @@ func main() {
 	api.Get("/preferences", jwt, profileHandler.GetPreferences)
 	api.Put("/preferences", jwt, profileHandler.UpdatePreferences)
 	api.Get("/discover", jwt, profileHandler.Discover)
+	api.Get("/nearby", jwt, profileHandler.NearbyUsers)
 	api.Get("/search", jwt, profileHandler.SearchProfiles)
 
 	// Like / Match

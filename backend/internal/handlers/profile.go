@@ -203,6 +203,92 @@ func haversine(lat1, lon1, lat2, lon2 float64) float64 {
 	return R * c
 }
 
+// NearbyUsers returns online users within a radius (km) of the current user.
+func (h *ProfileHandler) NearbyUsers(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	radius, _ := strconv.ParseFloat(c.Query("radius", "10"), 64)
+	if radius <= 0 {
+		radius = 10
+	}
+	if radius > 200 {
+		radius = 200
+	}
+
+	var currentUser models.User
+	if err := database.DB.First(&currentUser, userID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+	}
+
+	if currentUser.Latitude == 0 && currentUser.Longitude == 0 {
+		return c.JSON(fiber.Map{"users": []fiber.Map{}, "radius": radius})
+	}
+
+	// Get blocked IDs (both directions)
+	var blockedIDs []uint
+	database.DB.Model(&models.Block{}).Where("blocker_id = ?", userID).Pluck("blocked_id", &blockedIDs)
+	var blockerIDs []uint
+	database.DB.Model(&models.Block{}).Where("blocked_id = ?", userID).Pluck("blocker_id", &blockerIDs)
+	excludeIDs := append(blockedIDs, blockerIDs...)
+	excludeIDs = append(excludeIDs, userID)
+
+	var users []models.User
+	database.DB.
+		Where("id NOT IN ? AND latitude != 0 AND longitude != 0", excludeIDs).
+		Find(&users)
+
+	type NearbyUser struct {
+		ID        uint    `json:"id"`
+		Username  string  `json:"username"`
+		AvatarURL string  `json:"avatar_url"`
+		IsOnline  bool    `json:"is_online"`
+		Distance  float64 `json:"distance"`
+		Angle     float64 `json:"angle"` // bearing in degrees from current user
+	}
+
+	var nearby []NearbyUser
+	for _, u := range users {
+		dist := haversine(currentUser.Latitude, currentUser.Longitude, u.Latitude, u.Longitude)
+		if dist > radius {
+			continue
+		}
+		// Calculate bearing angle
+		angle := bearing(currentUser.Latitude, currentUser.Longitude, u.Latitude, u.Longitude)
+		nearby = append(nearby, NearbyUser{
+			ID:        u.ID,
+			Username:  u.Username,
+			AvatarURL: u.AvatarURL,
+			IsOnline:  u.IsOnline,
+			Distance:  math.Round(dist*10) / 10,
+			Angle:     math.Round(angle*10) / 10,
+		})
+	}
+
+	if nearby == nil {
+		nearby = []NearbyUser{}
+	}
+
+	return c.JSON(fiber.Map{
+		"users":  nearby,
+		"radius": radius,
+		"center": fiber.Map{
+			"latitude":  currentUser.Latitude,
+			"longitude": currentUser.Longitude,
+		},
+	})
+}
+
+// bearing calculates the initial bearing from point 1 to point 2 in degrees.
+func bearing(lat1, lon1, lat2, lon2 float64) float64 {
+	dLon := (lon2 - lon1) * math.Pi / 180
+	lat1R := lat1 * math.Pi / 180
+	lat2R := lat2 * math.Pi / 180
+	x := math.Sin(dLon) * math.Cos(lat2R)
+	y := math.Cos(lat1R)*math.Sin(lat2R) - math.Sin(lat1R)*math.Cos(lat2R)*math.Cos(dLon)
+	brng := math.Atan2(x, y) * 180 / math.Pi
+	return math.Mod(brng+360, 360)
+}
+
 // GetPreferences returns the authenticated user's discovery preferences.
 func (h *ProfileHandler) GetPreferences(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)

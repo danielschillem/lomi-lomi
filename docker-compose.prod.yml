@@ -1,0 +1,79 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: lomilomi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-lomilomi}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME:-lomilomi}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  backend:
+    build: ./backend
+    container_name: lomilomi-api
+    restart: unless-stopped
+    environment:
+      PORT: "8888"
+      DB_DRIVER: postgres
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-lomilomi}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME:-lomilomi}
+      DB_SSLMODE: disable
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://lomilomi.app}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      BASE_URL: ${BASE_URL:-https://api.lomilomi.app}
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - internal
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.lomilomi.app/api/v1}
+    container_name: lomilomi-web
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-https://api.lomilomi.app/api/v1}
+    depends_on:
+      - backend
+    networks:
+      - internal
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: lomilomi-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - internal
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    driver: bridge
