@@ -23,7 +23,7 @@ services:
       DB_PASS: lomilomi
       DB_NAME: lomilomi
       JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
-      CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost}"
+      CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost,http://localhost:8081,http://localhost:8082,http://localhost:19006}"
       ADMIN_SECRET: "${ADMIN_SECRET:-LomiLomi2026!}"
       OM_BASE_URL: "${OM_BASE_URL:-https://api.orange.com/orange-money-webpay/dev/v1}"
       OM_API_KEY: "${OM_API_KEY:-}"

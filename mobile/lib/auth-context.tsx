@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import {
   login as apiLogin,
@@ -20,6 +21,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string, user: User) => Promise<void>;
   register: (
     username: string,
     email: string,
@@ -32,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   login: async () => {},
+  loginWithToken: async () => {},
   register: async () => {},
   logout: async () => {},
 });
@@ -43,7 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const token = await SecureStore.getItemAsync("token");
+        const token =
+          Platform.OS === "web"
+            ? localStorage.getItem("token")
+            : await SecureStore.getItemAsync("token");
         if (token) {
           const profile = await getProfile();
           setUser(profile as unknown as User);
@@ -59,6 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const res = await apiLogin({ email, password });
     await setToken(res.token);
     setUser(res.user);
+  };
+
+  const loginWithToken = async (token: string, userData: User) => {
+    await setToken(token);
+    setUser(userData);
   };
 
   const register = async (
@@ -77,7 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, loginWithToken, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

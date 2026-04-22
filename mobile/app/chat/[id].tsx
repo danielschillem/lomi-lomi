@@ -14,6 +14,7 @@ import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getMessages, sendMessage, markConversationRead } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useWS } from "@/lib/ws-context";
 
 interface Message {
   id: number;
@@ -23,27 +24,46 @@ interface Message {
 }
 
 export default function ChatScreen() {
-  const { id, name } = useLocalSearchParams<{ id: string; name: string }>();
+  const { id, name, recipientId } = useLocalSearchParams<{
+    id: string;
+    name: string;
+    recipientId: string;
+  }>();
   const { user } = useAuth();
+  const { onMessage } = useWS();
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const flatListRef = useRef<FlatList>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const conversationId = parseInt(id || "0", 10);
+  const otherUserId = parseInt(recipientId || "0", 10);
 
   useEffect(() => {
     loadMessages();
     markConversationRead(conversationId).catch(() => {});
-
-    // Poll for new messages every 3 seconds
-    pollRef.current = setInterval(loadMessages, 3000);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
   }, [conversationId]);
+
+  // Listen for real-time messages via WebSocket
+  useEffect(() => {
+    const unsub = onMessage((msg) => {
+      if (
+        msg.type === "new_message" &&
+        msg.conversation_id === conversationId
+      ) {
+        const newMsg = msg as unknown as { message: Message };
+        if (newMsg.message) {
+          setMessages((prev) => [newMsg.message, ...prev]);
+        } else {
+          // Fallback: reload
+          loadMessages();
+        }
+        markConversationRead(conversationId).catch(() => {});
+      }
+    });
+    return unsub;
+  }, [conversationId, onMessage]);
 
   const loadMessages = async () => {
     try {
@@ -59,15 +79,22 @@ export default function ChatScreen() {
     if (!text.trim() || sending) return;
     setSending(true);
     try {
-      // We need the other user's ID — extract from conversation
-      // The backend accepts receiver_id in the message endpoint
       const res = await sendMessage({
-        receiver_id: 0, // Backend uses conversation context
+        receiver_id: otherUserId,
         content: text.trim(),
       });
       if (res) {
+        const sent = res as unknown as Message;
+        setMessages((prev) => [
+          {
+            id: sent.id || Date.now(),
+            content: text.trim(),
+            sender_id: user?.id || 0,
+            created_at: new Date().toISOString(),
+          },
+          ...prev,
+        ]);
         setText("");
-        await loadMessages();
       }
     } catch {
       /* empty */

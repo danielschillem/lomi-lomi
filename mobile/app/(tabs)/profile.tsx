@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
 import { getProfile } from "@/lib/api";
@@ -38,6 +39,42 @@ export default function ProfileScreen() {
   }
 
   const p = profile || {};
+
+  const menuItems = [
+    {
+      icon: "create-outline" as const,
+      label: "Modifier le profil",
+      route: "/edit-profile",
+    },
+    { icon: "images-outline" as const, label: "Mes photos", route: "/photos" },
+    { icon: "bag-outline" as const, label: "Mes commandes", route: "/orders" },
+    {
+      icon: "calendar-outline" as const,
+      label: "Mes rendez-vous",
+      route: "/bookings",
+    },
+    {
+      icon: "restaurant-outline" as const,
+      label: "Mes réservations",
+      route: "/reservations",
+    },
+    {
+      icon: "location-outline" as const,
+      label: "Mes adresses",
+      route: "/addresses",
+    },
+    { icon: "car-outline" as const, label: "Mes courses", route: "/rides" },
+    {
+      icon: "settings-outline" as const,
+      label: "Paramètres",
+      route: "/settings",
+    },
+    {
+      icon: "ban-outline" as const,
+      label: "Utilisateurs bloqués",
+      route: "/blocked",
+    },
+  ];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -104,6 +141,21 @@ export default function ProfileScreen() {
             {(p.email as string) || user?.username}
           </Text>
         </View>
+      </View>
+
+      {/* Menu items */}
+      <View style={styles.menu}>
+        {menuItems.map((item) => (
+          <TouchableOpacity
+            key={item.route}
+            style={styles.menuItem}
+            onPress={() => router.push(item.route as `/${string}`)}
+          >
+            <Ionicons name={item.icon} size={22} color="#7c3aed" />
+            <Text style={styles.menuText}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={18} color="#444" />
+          </TouchableOpacity>
+        ))}
       </View>
 
       <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
@@ -177,11 +229,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     marginHorizontal: 16,
-    marginTop: 40,
+    marginTop: 16,
+    marginBottom: 40,
     paddingVertical: 14,
     borderWidth: 1,
     borderColor: "#ef4444",
     borderRadius: 12,
   },
   logoutText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
+  menu: {
+    marginTop: 24,
+    marginHorizontal: 16,
+    backgroundColor: "#111",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#1a1a1a",
+    gap: 12,
+  },
+  menuText: { flex: 1, color: "#ccc", fontSize: 15 },
 });

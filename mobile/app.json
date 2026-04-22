@@ -33,6 +33,12 @@
           "locationAlwaysAndWhenInUsePermission": "Lomi Lomi utilise votre position pour trouver des personnes proches de vous."
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Lomi Lomi a besoin d'accéder à vos photos pour votre profil."
+        }
+      ],
       "expo-asset",
       "expo-font"
     ],
