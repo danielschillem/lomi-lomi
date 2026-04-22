@@ -159,6 +159,19 @@ export default function AdminPlacesPage() {
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            onClick={() => setError(null)}
+            title="Fermer"
+            className="ml-2 text-red-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Modal Form */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">

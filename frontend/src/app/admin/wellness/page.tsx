@@ -184,6 +184,7 @@ export default function AdminWellnessPage() {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [bookingsStatus, setBookingsStatus] = useState("");
   const [loadingBookings, setLoadingBookings] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const loadProviders = useCallback(async () => {
     setLoadingProviders(true);
@@ -262,6 +263,7 @@ export default function AdminWellnessPage() {
   }
 
   async function saveProvider() {
+    setError(null);
     try {
       if (editProvider) {
         await adminUpdateProvider(editProvider.id, providerForm);
@@ -270,8 +272,10 @@ export default function AdminWellnessPage() {
       }
       setShowProviderModal(false);
       loadProviders();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement",
+      );
     }
   }
 
@@ -280,8 +284,10 @@ export default function AdminWellnessPage() {
     try {
       await adminDeleteProvider(id);
       loadProviders();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la suppression",
+      );
     }
   }
 
@@ -317,6 +323,7 @@ export default function AdminWellnessPage() {
   }
 
   async function saveService() {
+    setError(null);
     try {
       if (editService) {
         await adminUpdateWellnessService(editService.id, serviceForm);
@@ -328,8 +335,10 @@ export default function AdminWellnessPage() {
       }
       setShowServiceModal(false);
       loadProviders();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement",
+      );
     }
   }
 
@@ -338,8 +347,10 @@ export default function AdminWellnessPage() {
     try {
       await adminDeleteWellnessService(id);
       loadProviders();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la suppression",
+      );
     }
   }
 
@@ -357,12 +368,15 @@ export default function AdminWellnessPage() {
   }
 
   async function saveAvailability() {
+    setError(null);
     try {
       await adminSetProviderAvailability(availProviderId, availSlots);
       setShowAvailModal(false);
       loadProviders();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement",
+      );
     }
   }
 
@@ -371,8 +385,10 @@ export default function AdminWellnessPage() {
     try {
       await adminUpdateWellnessBookingStatus(id, status);
       loadBookings();
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Erreur lors de la mise à jour",
+      );
     }
   }
 
@@ -406,6 +422,19 @@ export default function AdminWellnessPage() {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm flex items-center justify-between">
+          <span>{error}</span>
+          <button
+            onClick={() => setError(null)}
+            title="Fermer"
+            className="ml-2 text-red-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* ========== PROVIDERS TAB ========== */}
       {tab === "providers" && (
