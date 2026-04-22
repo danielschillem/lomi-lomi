@@ -31,9 +31,6 @@ Thumbs.db
 /Capture*
 backend/server.exe~
 
-# Local Netlify folder
-.netlify
-
 # Clojure/LSP caches
 .clj-kondo/
 .lsp/

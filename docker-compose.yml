@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: lomilomi
       POSTGRES_PASSWORD: lomilomi
       POSTGRES_DB: lomilomi
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -16,8 +14,6 @@ services:
     build: ./backend
     container_name: lomilomi-api
     restart: unless-stopped
-    ports:
-      - "8888:8888"
     environment:
       PORT: "8888"
       DB_DRIVER: postgres
@@ -26,8 +22,12 @@ services:
       DB_USER: lomilomi
       DB_PASS: lomilomi
       DB_NAME: lomilomi
-      JWT_SECRET: change-me-in-production
-      CORS_ORIGIN: "http://localhost:3000"
+      JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
+      CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost}"
+      ADMIN_SECRET: "${ADMIN_SECRET:-LomiLomi2026!}"
+      OM_BASE_URL: "${OM_BASE_URL:-https://api.orange.com/orange-money-webpay/dev/v1}"
+      OM_API_KEY: "${OM_API_KEY:-}"
+      OM_PIN: "${OM_PIN:-}"
     volumes:
       - uploads:/app/uploads
     depends_on:
@@ -37,13 +37,28 @@ services:
     build: ./frontend
     container_name: lomilomi-web
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: "http://localhost:8888/api/v1"
+      NEXT_PUBLIC_API_URL: "http://backend:8888/api/v1"
     depends_on:
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: lomilomi-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
       - backend
 
 volumes:
   pgdata:
   uploads:
+  caddy_data:
+  caddy_config:

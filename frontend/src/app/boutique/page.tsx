@@ -19,7 +19,12 @@ import {
   ChevronUp,
   ExternalLink,
 } from "lucide-react";
-import { getProducts, createOrder, initiatePayment, getOrders } from "@/lib/api";
+import {
+  getProducts,
+  createOrder,
+  initiatePayment,
+  getOrders,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface Product {

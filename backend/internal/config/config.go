@@ -64,7 +64,7 @@ func Load() *Config {
 		log.Println("⚠️  WARNING: JWT_SECRET is using the default value. Set JWT_SECRET env var in production!")
 	}
 
-	// Support DATABASE_URL (Render, Heroku, etc.)
+	// Support DATABASE_URL (e.g. from docker-compose)
 	if dbURL := os.Getenv("DATABASE_URL"); dbURL != "" {
 		cfg.DBDriver = "postgres"
 		if parsed, err := url.Parse(dbURL); err == nil {

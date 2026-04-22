@@ -10,8 +10,8 @@ const nextConfig: NextConfig = {
         port: "8888",
       },
       {
-        protocol: "https",
-        hostname: "*.onrender.com",
+        protocol: "http",
+        hostname: "138.68.66.6",
       },
       {
         protocol: "https",

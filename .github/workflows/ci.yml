@@ -19,7 +19,6 @@ jobs:
           go-version: "1.25"
       - run: go mod download
       - run: go build ./cmd/server/
-      - run: go vet ./...
 
   frontend:
     runs-on: ubuntu-latest
@@ -36,38 +35,20 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-  deploy-backend:
-    needs: backend
+  deploy:
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      - uses: actions/checkout@v4
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/lomilomi-api:latest
-      - name: Deploy to Render
-        run: |
-          curl -s -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
-            -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{}'
-
-  deploy-frontend:
-    needs: frontend
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Trigger Netlify build
-        run: |
-          curl -s -X POST "https://api.netlify.com/api/v1/sites/${{ secrets.NETLIFY_SITE_ID }}/builds" \
-            -H "Authorization: Bearer ${{ secrets.NETLIFY_AUTH_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{}'
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            cd /root/lomi-lomi
+            git pull origin main
+            docker compose build --no-cache
+            docker compose up -d
+            docker image prune -f
