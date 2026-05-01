@@ -37,9 +37,11 @@ export default function MessagesScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getConversations();
-      setConversations(res as unknown as Conversation[]);
+      setConversations(
+        Array.isArray(res) ? (res as unknown as Conversation[]) : [],
+      );
     } catch {
-      /* empty */
+      setConversations([]);
     }
     setLoading(false);
     setRefreshing(false);

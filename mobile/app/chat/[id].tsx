@@ -68,9 +68,10 @@ export default function ChatScreen() {
   const loadMessages = async () => {
     try {
       const res = await getMessages(conversationId);
-      setMessages((res as unknown as Message[]).reverse());
+      const arr = Array.isArray(res) ? (res as unknown as Message[]) : [];
+      setMessages(arr.reverse());
     } catch {
-      /* empty */
+      setMessages([]);
     }
     setLoading(false);
   };

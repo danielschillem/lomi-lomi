@@ -30,9 +30,9 @@ export default function BookingsScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getMyWellnessBookings();
-      setBookings(res as unknown as Booking[]);
+      setBookings(Array.isArray(res) ? (res as unknown as Booking[]) : []);
     } catch {
-      /* empty */
+      setBookings([]);
     }
     setLoading(false);
     setRefreshing(false);

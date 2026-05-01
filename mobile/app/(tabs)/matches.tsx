@@ -33,9 +33,9 @@ export default function MatchesScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getMatches();
-      setMatches(res as unknown as Match[]);
+      setMatches(Array.isArray(res) ? (res as unknown as Match[]) : []);
     } catch {
-      /* empty */
+      setMatches([]);
     }
     setLoading(false);
     setRefreshing(false);

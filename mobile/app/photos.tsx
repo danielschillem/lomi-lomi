@@ -12,7 +12,13 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
-import { getPhotos, uploadPhoto, deletePhoto, uploadAvatar } from "@/lib/api";
+import {
+  getPhotos,
+  uploadPhoto,
+  deletePhoto,
+  uploadAvatar,
+  getProfile,
+} from "@/lib/api";
 
 interface Photo {
   id: number;
@@ -33,10 +39,10 @@ export default function PhotosScreen() {
     try {
       if (user?.id) {
         const res = await getPhotos(user.id);
-        setPhotos(res as unknown as Photo[]);
+        setPhotos(Array.isArray(res) ? (res as unknown as Photo[]) : []);
       }
     } catch {
-      /* empty */
+      setPhotos([]);
     }
     setLoading(false);
   };

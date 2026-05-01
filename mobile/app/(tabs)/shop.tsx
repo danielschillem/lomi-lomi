@@ -43,9 +43,9 @@ export default function ShopScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getProducts();
-      setProducts(res as unknown as Product[]);
+      setProducts(Array.isArray(res) ? (res as unknown as Product[]) : []);
     } catch {
-      /* empty */
+      setProducts([]);
     }
     setLoading(false);
     setRefreshing(false);

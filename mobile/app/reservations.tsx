@@ -29,9 +29,11 @@ export default function ReservationsScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getMyReservations();
-      setReservations(res as unknown as Reservation[]);
+      setReservations(
+        Array.isArray(res) ? (res as unknown as Reservation[]) : [],
+      );
     } catch {
-      /* empty */
+      setReservations([]);
     }
     setLoading(false);
     setRefreshing(false);

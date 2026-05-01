@@ -35,9 +35,9 @@ export default function AddressesScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getAddresses();
-      setAddresses(res as unknown as Address[]);
+      setAddresses(Array.isArray(res) ? (res as unknown as Address[]) : []);
     } catch {
-      /* empty */
+      setAddresses([]);
     }
     setLoading(false);
     setRefreshing(false);

@@ -29,9 +29,9 @@ export default function BlockedScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getBlockedUsers();
-      setUsers(res as unknown as BlockedUser[]);
+      setUsers(Array.isArray(res) ? (res as unknown as BlockedUser[]) : []);
     } catch {
-      /* empty */
+      setUsers([]);
     }
     setLoading(false);
     setRefreshing(false);

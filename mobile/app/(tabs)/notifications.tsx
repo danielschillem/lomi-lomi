@@ -34,9 +34,9 @@ export default function NotificationsScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getNotifications();
-      setNotifs(res as unknown as Notification[]);
+      setNotifs(Array.isArray(res) ? (res as unknown as Notification[]) : []);
     } catch {
-      /* empty */
+      setNotifs([]);
     }
     setLoading(false);
     setRefreshing(false);

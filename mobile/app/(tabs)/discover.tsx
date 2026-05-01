@@ -11,7 +11,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { discover, likeUser, passUser } from "@/lib/api";
+import { discover, likeUser, passUser, updateLocation } from "@/lib/api";
+import * as Location from "expo-location";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -23,6 +24,9 @@ interface Profile {
   bio?: string;
   age?: number;
   city?: string;
+  distance?: number;
+  interests?: string;
+  photos?: { id: number; url: string }[];
 }
 
 export default function DiscoverScreen() {
@@ -33,15 +37,32 @@ export default function DiscoverScreen() {
   const position = useRef(new Animated.ValueXY()).current;
 
   useEffect(() => {
+    // Update GPS location silently before loading profiles
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === "granted") {
+          const loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          await updateLocation({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          });
+        }
+      } catch {
+        /* GPS optional — continue without it */
+      }
+    })();
     loadProfiles();
   }, []);
 
   const loadProfiles = async () => {
     try {
       const res = await discover();
-      setProfiles(res as unknown as Profile[]);
+      setProfiles(Array.isArray(res) ? (res as unknown as Profile[]) : []);
     } catch {
-      /* empty */
+      setProfiles([]);
     }
     setLoading(false);
   };
@@ -204,13 +225,36 @@ export default function DiscoverScreen() {
             {current.username}
             {current.age ? `, ${current.age}` : ""}
           </Text>
-          {current.city ? (
-            <Text style={styles.city}>{current.city}</Text>
-          ) : null}
+          <View style={styles.metaRow}>
+            {current.city ? (
+              <Text style={styles.city}>
+                <Ionicons name="location-outline" size={14} color="#999" />{" "}
+                {current.city}
+              </Text>
+            ) : null}
+            {current.distance != null && current.distance >= 0 ? (
+              <Text style={styles.distance}>
+                <Ionicons name="navigate-outline" size={13} color="#7c3aed" />{" "}
+                {current.distance} km
+              </Text>
+            ) : null}
+          </View>
           {current.bio ? (
             <Text style={styles.bio} numberOfLines={2}>
               {current.bio}
             </Text>
+          ) : null}
+          {current.interests ? (
+            <View style={styles.tagsRow}>
+              {current.interests
+                .split(",")
+                .slice(0, 4)
+                .map((tag, i) => (
+                  <View key={i} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag.trim()}</Text>
+                  </View>
+                ))}
+            </View>
           ) : null}
         </View>
       </Animated.View>
@@ -253,10 +297,25 @@ const styles = StyleSheet.create({
     top: 0,
   },
   image: { width: "100%", height: "75%", backgroundColor: "#1a1a1a" },
-  info: { padding: 20 },
+  info: { padding: 16 },
   name: { fontSize: 24, fontWeight: "bold", color: "#fff" },
-  city: { fontSize: 16, color: "#999", marginTop: 2 },
-  bio: { fontSize: 14, color: "#ccc", marginTop: 8 },
+  metaRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+    alignItems: "center",
+  },
+  city: { fontSize: 14, color: "#999" },
+  distance: { fontSize: 13, color: "#7c3aed", fontWeight: "600" },
+  bio: { fontSize: 14, color: "#ccc", marginTop: 6 },
+  tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
+  tag: {
+    backgroundColor: "rgba(124,58,237,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  tagText: { color: "#a78bfa", fontSize: 12, fontWeight: "500" },
   stamp: {
     position: "absolute",
     top: 50,

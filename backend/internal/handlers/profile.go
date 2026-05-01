@@ -46,12 +46,15 @@ func (h *ProfileHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	type UpdateRequest struct {
-		Bio       *string  `json:"bio"`
-		AvatarURL *string  `json:"avatar_url"`
-		Gender    *string  `json:"gender"`
-		City      *string  `json:"city"`
-		Latitude  *float64 `json:"latitude"`
-		Longitude *float64 `json:"longitude"`
+		Username   *string  `json:"username"`
+		Bio        *string  `json:"bio"`
+		AvatarURL  *string  `json:"avatar_url"`
+		Gender     *string  `json:"gender"`
+		LookingFor *string  `json:"looking_for"`
+		City       *string  `json:"city"`
+		BirthDate  *string  `json:"birth_date"`
+		Latitude   *float64 `json:"latitude"`
+		Longitude  *float64 `json:"longitude"`
 	}
 
 	var req UpdateRequest
@@ -62,6 +65,9 @@ func (h *ProfileHandler) UpdateProfile(c *fiber.Ctx) error {
 	}
 
 	updates := map[string]interface{}{}
+	if req.Username != nil && *req.Username != "" {
+		updates["username"] = *req.Username
+	}
 	if req.Bio != nil {
 		updates["bio"] = *req.Bio
 	}
@@ -71,8 +77,17 @@ func (h *ProfileHandler) UpdateProfile(c *fiber.Ctx) error {
 	if req.Gender != nil {
 		updates["gender"] = *req.Gender
 	}
+	if req.LookingFor != nil {
+		updates["looking_for"] = *req.LookingFor
+	}
 	if req.City != nil {
 		updates["city"] = *req.City
+	}
+	if req.BirthDate != nil && *req.BirthDate != "" {
+		parsed, err := time.Parse("2006-01-02", *req.BirthDate)
+		if err == nil {
+			updates["birth_date"] = parsed
+		}
 	}
 	if req.Latitude != nil {
 		updates["latitude"] = *req.Latitude
@@ -312,6 +327,7 @@ func (h *ProfileHandler) UpdatePreferences(c *fiber.Ctx) error {
 		MaxDistance *int    `json:"max_distance"`
 		Gender      *string `json:"gender"`
 		Interests   *string `json:"interests"`
+		ShowOnline  *bool   `json:"show_online"`
 	}
 
 	var req Req
@@ -321,7 +337,7 @@ func (h *ProfileHandler) UpdatePreferences(c *fiber.Ctx) error {
 
 	var prefs models.UserPreference
 	if err := database.DB.Where("user_id = ?", userID).First(&prefs).Error; err != nil {
-		prefs = models.UserPreference{UserID: userID, MinAge: 18, MaxAge: 99, MaxDistance: 50}
+		prefs = models.UserPreference{UserID: userID, MinAge: 18, MaxAge: 99, MaxDistance: 50, ShowOnline: true}
 		database.DB.Create(&prefs)
 	}
 
@@ -340,6 +356,9 @@ func (h *ProfileHandler) UpdatePreferences(c *fiber.Ctx) error {
 	}
 	if req.Interests != nil {
 		updates["interests"] = *req.Interests
+	}
+	if req.ShowOnline != nil {
+		updates["show_online"] = *req.ShowOnline
 	}
 
 	if len(updates) > 0 {
@@ -375,4 +394,24 @@ func (h *ProfileHandler) SearchProfiles(c *fiber.Ctx) error {
 		Find(&users)
 
 	return c.JSON(users)
+}
+
+// UpdateMyLocation updates the authenticated user's GPS coordinates.
+func (h *ProfileHandler) UpdateMyLocation(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var req struct {
+		Latitude  float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
+	}
+
+	database.DB.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
+		"latitude":  req.Latitude,
+		"longitude": req.Longitude,
+	})
+
+	return c.JSON(fiber.Map{"message": "Position mise à jour"})
 }

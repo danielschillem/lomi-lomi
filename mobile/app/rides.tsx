@@ -29,9 +29,9 @@ export default function RidesScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getMyVTCRides();
-      setRides(res as unknown as Ride[]);
+      setRides(Array.isArray(res) ? (res as unknown as Ride[]) : []);
     } catch {
-      /* empty */
+      setRides([]);
     }
     setLoading(false);
     setRefreshing(false);

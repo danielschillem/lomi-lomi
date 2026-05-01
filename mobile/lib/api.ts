@@ -299,6 +299,7 @@ export function nearbyUsers(radius: number = 10) {
       avatar_url: string;
       is_online: boolean;
       distance: number;
+      angle: number;
     }[];
   }>(`/nearby?radius=${radius}`);
 }

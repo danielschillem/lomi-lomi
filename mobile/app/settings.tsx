@@ -76,8 +76,8 @@ export default function SettingsScreen() {
     try {
       await updatePreferences({
         max_distance: parseInt(maxDistance) || 50,
-        age_min: parseInt(ageMin) || 18,
-        age_max: parseInt(ageMax) || 50,
+        min_age: parseInt(ageMin) || 18,
+        max_age: parseInt(ageMax) || 50,
         show_online: showOnline,
       });
       Alert.alert("Succès", "Préférences mises à jour");

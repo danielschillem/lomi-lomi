@@ -108,6 +108,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="nearby"
+        options={{
+          title: "Radar",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="radio" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="matches"
         options={{
           title: "Matchs",

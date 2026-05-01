@@ -37,9 +37,9 @@ export default function UserProfileScreen() {
           getPhotos(userId).catch(() => []),
         ]);
         setProfile(p);
-        setPhotos(ph);
+        setPhotos(Array.isArray(ph) ? ph : []);
       } catch {
-        /* empty */
+        setPhotos([]);
       }
       setLoading(false);
     })();

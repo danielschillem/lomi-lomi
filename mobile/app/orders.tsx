@@ -29,9 +29,9 @@ export default function OrdersScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getOrders();
-      setOrders(res as unknown as Order[]);
+      setOrders(Array.isArray(res) ? (res as unknown as Order[]) : []);
     } catch {
-      /* empty */
+      setOrders([]);
     }
     setLoading(false);
     setRefreshing(false);
