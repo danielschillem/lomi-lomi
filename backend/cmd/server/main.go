@@ -24,6 +24,7 @@ func main() {
 	// Database
 	database.Connect(cfg)
 	database.Migrate()
+	database.Seed()
 
 	// Fiber app
 	app := fiber.New(fiber.Config{
