@@ -5,10 +5,15 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: lomilomi
-      POSTGRES_PASSWORD: lomilomi
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-lomilomi}"
       POSTGRES_DB: lomilomi
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lomilomi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
@@ -20,7 +25,7 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       DB_USER: lomilomi
-      DB_PASS: lomilomi
+      DB_PASS: "${DB_PASS:-lomilomi}"
       DB_NAME: lomilomi
       JWT_SECRET: "${JWT_SECRET:-change-me-in-production}"
       CORS_ORIGIN: "${CORS_ORIGIN:-http://localhost,http://localhost:8081,http://localhost:8082,http://localhost:19006}"
@@ -31,10 +36,14 @@ services:
     volumes:
       - uploads:/app/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "/api/v1"
     container_name: lomilomi-web
     restart: unless-stopped
     environment:

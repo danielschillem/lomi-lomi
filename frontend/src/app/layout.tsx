@@ -74,7 +74,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-zinc-950 text-white font-sans">
+      <body className="min-h-full flex flex-col bg-white text-foreground font-sans">
         <AuthProvider>
           <WSProvider>
             {children}
