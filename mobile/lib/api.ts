@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+﻿import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
@@ -64,7 +64,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return res.json();
 }
 
-/** Upload multipart (avatar, photos) — no Content-Type header (browser sets boundary) */
+/** Upload multipart (avatar, photos) - no Content-Type header (browser sets boundary) */
 async function uploadFile<T>(path: string, formData: FormData): Promise<T> {
   const token = await getToken();
   const headers: Record<string, string> = {};
@@ -260,7 +260,7 @@ export function getConversations() {
 }
 
 export function getMessages(conversationId: number) {
-  return request<Record<string, unknown>[]>(
+  return request<{ messages: Record<string, unknown>[]; has_more: boolean }>(
     `/conversations/${conversationId}/messages`,
   );
 }

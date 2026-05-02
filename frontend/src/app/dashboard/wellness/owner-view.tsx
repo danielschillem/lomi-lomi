@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { ownerGetWellnessBookings, ownerUpdateBookingStatus } from "@/lib/api";
@@ -81,7 +81,7 @@ export default function OwnerWellnessView() {
                     </p>
                     <p className="text-sm text-muted">
                       {new Date(booking.date).toLocaleDateString("fr-FR")} •{" "}
-                      {booking.start_time} – {booking.end_time}
+                      {booking.start_time} - {booking.end_time}
                     </p>
                     <p className="text-sm text-muted">
                       Client : {booking.user?.username} • {booking.persons}{" "}

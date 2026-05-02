@@ -1,4 +1,4 @@
-package main
+﻿package main
 
 import (
 	"log"
@@ -89,8 +89,11 @@ func main() {
 	ownerHandler := handlers.NewOwnerHandler()
 	deliveryHandler := handlers.NewDeliveryHandler()
 	pushHandler := handlers.NewPushHandler()
+	premiumHandler := handlers.NewPremiumHandler()
+	eventHandler := handlers.NewEventHandler()
+	profileExtHandler := handlers.NewProfileExtHandler(cfg)
 	wsHub := handlers.NewWSHub(cfg)
-	messageHandler := handlers.NewMessageHandler(wsHub)
+	messageHandler := handlers.NewMessageHandler(wsHub, cfg)
 	locationHandler := handlers.NewLocationHandler(wsHub)
 
 	// Public routes
@@ -101,12 +104,18 @@ func main() {
 	api.Post("/auth/send-otp", authRateLimit, authHandler.SendOTP)
 	api.Post("/auth/verify-otp", authRateLimit, authHandler.VerifyOTP)
 	api.Post("/auth/register-phone", authRateLimit, authHandler.RegisterPhone)
+	api.Post("/auth/forgot-password", authRateLimit, authHandler.ForgotPassword)
+	api.Post("/auth/reset-password", authRateLimit, authHandler.ResetPassword)
 
 	// Public shop & places
 	api.Get("/shop/products", shopHandler.GetProducts)
 	api.Get("/shop/products/:id", shopHandler.GetProduct)
 	api.Get("/places", placeHandler.GetPlaces)
 	api.Get("/places/:id", placeHandler.GetPlace)
+
+	// Public events
+	api.Get("/events", eventHandler.GetEvents)
+	api.Get("/events/:id", eventHandler.GetEvent)
 
 	// Public wellness
 	api.Get("/wellness/providers", wellnessHandler.GetProviders)
@@ -130,6 +139,9 @@ func main() {
 
 	// Like / Match
 	api.Post("/likes", jwt, matchHandler.LikeUser)
+	api.Post("/superlikes", jwt, matchHandler.SuperLike)
+	api.Get("/likes/me", jwt, matchHandler.WhoLikedMe)
+	api.Post("/rewind", jwt, matchHandler.Rewind)
 	api.Post("/pass", jwt, matchHandler.PassUser)
 	api.Get("/matches", jwt, matchHandler.GetMatches)
 	api.Delete("/matches/:id", jwt, matchHandler.Unmatch)
@@ -146,6 +158,10 @@ func main() {
 	api.Post("/messages", jwt, messageHandler.SendMessage)
 	api.Put("/conversations/:id/read", jwt, messageHandler.MarkRead)
 	api.Get("/conversations/with/:userId", jwt, messageHandler.GetOrCreateConversation)
+	api.Delete("/messages/:id", jwt, messageHandler.DeleteMessage)
+	api.Put("/messages/:id", jwt, messageHandler.EditMessage)
+	api.Get("/messages/search", jwt, messageHandler.SearchMessages)
+
 
 	// Location sharing
 	api.Post("/location/share", jwt, locationHandler.StartLocationShare)
@@ -173,8 +189,25 @@ func main() {
 	api.Post("/push/register", jwt, pushHandler.RegisterPushToken)
 	api.Delete("/push/register", jwt, pushHandler.UnregisterPushToken)
 
-	// Upload avatar
+	// Premium
+	api.Get("/premium/plans", premiumHandler.GetPlans)
+	api.Get("/premium/me", jwt, premiumHandler.GetMySubscription)
+	api.Post("/premium/subscribe", jwt, premiumHandler.Subscribe)
+	api.Delete("/premium/subscribe", jwt, premiumHandler.CancelSubscription)
+
+	// Events (authenticated)
+	api.Post("/events/:id/attend", jwt, eventHandler.AttendEvent)
+	api.Get("/events/me", jwt, eventHandler.GetMyEvents)
+
+	// Prompts & extended profile
+	api.Get("/prompts", jwt, profileExtHandler.GetPrompts)
+	api.Post("/prompts", jwt, profileExtHandler.SavePrompts)
+	api.Post("/onboarding/complete", jwt, profileExtHandler.CompleteOnboarding)
+
+	// Selfie verification
 	uploadRL := middleware.RateLimitUpload()
+	api.Post("/messages/upload-image", jwt, uploadRL, messageHandler.UploadMessageImage)
+	api.Post("/upload/selfie", jwt, uploadRL, profileExtHandler.UploadSelfie)
 	api.Post("/upload/avatar", jwt, uploadRL, uploadHandler.UploadAvatar)
 
 	// Photo gallery
@@ -269,6 +302,16 @@ func main() {
 	admin.Put("/reports/:id", safetyHandler.AdminUpdateReport)
 	admin.Put("/users/:id/ban", safetyHandler.AdminBanUser)
 	admin.Get("/users/:id/reports-count", safetyHandler.AdminGetReportCount)
+
+	// Admin premium & selfie
+	admin.Post("/premium/grant", premiumHandler.AdminGrantPremium)
+	admin.Get("/selfies", profileExtHandler.AdminListSelfies)
+	admin.Post("/selfies/review", profileExtHandler.AdminReviewSelfie)
+
+	// Admin events
+	admin.Post("/events", eventHandler.AdminCreateEvent)
+	admin.Put("/events/:id", eventHandler.AdminUpdateEvent)
+	admin.Delete("/events/:id", eventHandler.AdminDeleteEvent)
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

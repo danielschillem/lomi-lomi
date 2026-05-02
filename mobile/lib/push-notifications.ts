@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
@@ -72,7 +72,7 @@ export function usePushNotifications(isLoggedIn: boolean) {
     // Listen for incoming notifications (foreground)
     notificationListener.current =
       Notifications.addNotificationReceivedListener(() => {
-        // Notification received in foreground — handled by the handler above
+        // Notification received in foreground - handled by the handler above
       });
 
     // Listen for notification taps (user opens notification)

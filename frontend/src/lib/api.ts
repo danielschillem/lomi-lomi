@@ -1,4 +1,4 @@
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888/api/v1";
+﻿const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8888/api/v1";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token =
@@ -172,17 +172,59 @@ export function getConversations() {
   return request<Record<string, unknown>[]>("/conversations");
 }
 
-export function getMessages(conversationId: number) {
-  return request<Record<string, unknown>[]>(
-    `/conversations/${conversationId}/messages`,
+export function getMessages(
+  conversationId: number,
+  opts?: { limit?: number; before?: number },
+) {
+  const params = new URLSearchParams();
+  if (opts?.limit) params.set("limit", String(opts.limit));
+  if (opts?.before) params.set("before", String(opts.before));
+  const qs = params.toString();
+  return request<{ messages: Record<string, unknown>[]; has_more: boolean }>(
+    `/conversations/${conversationId}/messages${qs ? `?${qs}` : ""}`,
   );
 }
 
-export function sendMessage(data: { receiver_id: number; content: string }) {
+export function sendMessage(data: {
+  receiver_id: number;
+  content: string;
+  image_url?: string;
+}) {
   return request<Record<string, unknown>>("/messages", {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+export function deleteMessage(messageId: number) {
+  return request<Record<string, unknown>>(`/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export function editMessage(messageId: number, content: string) {
+  return request<Record<string, unknown>>(`/messages/${messageId}`, {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function searchMessages(conversationId: number, q: string) {
+  return request<{ messages: Record<string, unknown>[] }>(
+    `/messages/search?conversation_id=${conversationId}&q=${encodeURIComponent(q)}`,
+  );
+}
+
+export function uploadMessageImage(file: File) {
+  const formData = new FormData();
+  formData.append("image", file);
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  return fetch(`${API}/messages/upload-image`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  }).then((r) => r.json() as Promise<{ image_url: string }>);
 }
 
 export function getOrCreateConversation(userId: number) {
@@ -646,6 +688,166 @@ export function createWellnessBooking(data: {
 
 export function getWellnessBookings() {
   return request<Record<string, unknown>[]>("/wellness/bookings");
+}
+
+/* ---- Auth: Mot de passe oublié ---- */
+export function forgotPassword(email: string) {
+  return request<{ message: string; dev_token?: string }>(
+    "/auth/forgot-password",
+    {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    },
+  );
+}
+
+export function resetPassword(data: { token: string; password: string }) {
+  return request<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/* ---- Premium ---- */
+export function getPremiumPlans() {
+  return request<{
+    plans: {
+      id: string;
+      name: string;
+      price: number;
+      duration_days: number;
+      features: string[];
+    }[];
+  }>("/premium/plans");
+}
+
+export function getMySubscription() {
+  return request<{
+    is_premium: boolean;
+    plan?: string;
+    ends_at?: string;
+    status?: string;
+  }>("/premium/me");
+}
+
+export function subscribePremium(data: {
+  plan: string;
+  phone: string;
+  tx_id?: string;
+}) {
+  return request<{ message: string; ends_at: string }>("/premium/subscribe", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function cancelSubscription() {
+  return request<{ message: string }>("/premium/subscribe", {
+    method: "DELETE",
+  });
+}
+
+/* ---- Événements ---- */
+export function getEvents(params?: { city?: string; category?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.city) qs.set("city", params.city);
+  if (params?.category) qs.set("category", params.category);
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(`/events${q ? `?${q}` : ""}`);
+}
+
+export function getEvent(id: number) {
+  return request<Record<string, unknown>>(`/events/${id}`);
+}
+
+export function attendEvent(
+  id: number,
+  status: "going" | "interested" | "cancelled",
+) {
+  return request<{ message: string }>(`/events/${id}/attend`, {
+    method: "POST",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function getMyEvents() {
+  return request<Record<string, unknown>[]>("/events/me");
+}
+
+/* ---- Prompts profil ---- */
+export function getPrompts() {
+  return request<{ id: number; question: string; answer: string }[]>(
+    "/prompts",
+  );
+}
+
+export function savePrompts(prompts: { question: string; answer: string }[]) {
+  return request<{ id: number; question: string; answer: string }[]>(
+    "/prompts",
+    {
+      method: "POST",
+      body: JSON.stringify(prompts),
+    },
+  );
+}
+
+export function completeOnboarding() {
+  return request<{ message: string }>("/onboarding/complete", {
+    method: "POST",
+  });
+}
+
+export async function uploadSelfie(file: File) {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const formData = new FormData();
+  formData.append("selfie", file);
+
+  const res = await fetch(`${API}/upload/selfie`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erreur ${res.status}`);
+  }
+  return res.json() as Promise<{
+    selfie_url: string;
+    selfie_status: string;
+    message: string;
+  }>;
+}
+
+/* ---- Super Like / Rewind / Qui m'a liké ---- */
+export function superLike(likedId: number) {
+  return request<{ super_liked: boolean; is_match: boolean }>("/superlikes", {
+    method: "POST",
+    body: JSON.stringify({ liked_id: likedId }),
+  });
+}
+
+export function rewind() {
+  return request<{ rewound: string; user_id: number }>("/rewind", {
+    method: "POST",
+  });
+}
+
+export function whoLikedMe() {
+  return request<{
+    count: number;
+    profiles: {
+      id?: number;
+      username?: string;
+      avatar_url?: string;
+      city?: string;
+      type?: string;
+      blurred?: boolean;
+    }[];
+    upgrade: boolean;
+    message?: string;
+  }>("/likes/me");
 }
 
 export function cancelWellnessBooking(id: number) {

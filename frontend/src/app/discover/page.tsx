@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -19,12 +19,17 @@ import {
   Navigation,
   Sparkles,
   Radar as RadarIcon,
+  Star,
+  Crown,
 } from "lucide-react";
 import {
   discover,
   sendMessage,
   likeUser,
   passUser,
+  superLike,
+  rewind,
+  whoLikedMe,
   reportUser,
   blockUser,
   searchProfiles,
@@ -89,6 +94,15 @@ export default function DiscoverPage() {
     profile: Profile;
     index: number;
   } | null>(null);
+
+  // Who liked me
+  const [whoLikedTab, setWhoLikedTab] = useState(false);
+  const [whoLikedData, setWhoLikedData] = useState<{
+    count: number;
+    profiles: Record<string, unknown>[];
+    upgrade: boolean;
+  } | null>(null);
+  const [whoLikedLoading, setWhoLikedLoading] = useState(false);
 
   // Swipe
   const cardRef = useRef<HTMLDivElement>(null);
@@ -236,6 +250,56 @@ export default function DiscoverPage() {
     });
     setLastPassed(null);
     setPhotoIndex(0);
+  }
+
+  const handleSuperLike = useCallback(async () => {
+    const profile = profiles[currentIndex];
+    if (!profile || action) return;
+    setLastPassed(null);
+    setAction("like");
+    try {
+      await superLike(profile.id);
+      setTimeout(() => {
+        setAction(null);
+        setPhotoIndex(0);
+        setDragX(0);
+        setCurrentIndex((i) => i + 1);
+      }, 300);
+    } catch {
+      setAction(null);
+    }
+  }, [profiles, currentIndex, action]);
+
+  async function handleRewind() {
+    try {
+      await rewind();
+      // Reload profiles
+      const data = await discover();
+      setProfiles(data as Profile[]);
+      setCurrentIndex(0);
+    } catch {
+      // Premium required - redirect
+      window.location.href = "/premium";
+    }
+  }
+
+  async function loadWhoLikedMe() {
+    setWhoLikedLoading(true);
+    try {
+      const data = await whoLikedMe();
+      setWhoLikedData(data);
+    } finally {
+      setWhoLikedLoading(false);
+    }
+  }
+
+  function toggleWhoLiked() {
+    if (!whoLikedTab) {
+      setWhoLikedTab(true);
+      if (!whoLikedData) loadWhoLikedMe();
+    } else {
+      setWhoLikedTab(false);
+    }
   }
 
   function closeMatch() {
@@ -390,6 +454,18 @@ export default function DiscoverPage() {
               <RadarIcon className="w-5 h-5" />
             </button>
             <button
+              onClick={toggleWhoLiked}
+              className={`p-1.5 rounded-lg transition relative ${whoLikedTab ? "bg-pink-600 text-white" : "text-muted hover:text-foreground"}`}
+              title="Qui m'a liké"
+            >
+              <Crown className="w-5 h-5" />
+              {whoLikedData && whoLikedData.count > 0 && !whoLikedTab && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {whoLikedData.count > 9 ? "9+" : whoLikedData.count}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className={`p-1.5 rounded-lg transition ${showFilters ? "bg-violet-600 text-white" : "text-muted hover:text-foreground"}`}
               title="Filtres"
@@ -405,6 +481,78 @@ export default function DiscoverPage() {
             </button>
           </div>
         </div>
+
+        {/* Filters panel */}
+        {whoLikedTab && (
+          <div className="mb-6 bg-surface/80 border border-border rounded-2xl p-5 animate-in slide-in-from-top-2">
+            <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+              <Crown className="w-4 h-4 text-yellow-400" />
+              Qui m&apos;a liké
+            </h3>
+            {whoLikedLoading && (
+              <p className="text-muted text-sm">Chargement...</p>
+            )}
+            {whoLikedData && whoLikedData.upgrade && (
+              <div className="text-center py-4">
+                <p className="text-muted text-sm mb-3">
+                  {whoLikedData.count} personne(s) vous ont liké
+                </p>
+                <div className="flex gap-2 justify-center mb-4">
+                  {whoLikedData.profiles.slice(0, 5).map((_, i) => (
+                    <div
+                      key={i}
+                      className="w-12 h-12 rounded-full bg-gray-700 blur-sm"
+                    />
+                  ))}
+                </div>
+                <Link
+                  href="/premium"
+                  className="inline-flex items-center gap-2 bg-linear-to-r from-yellow-500 to-orange-500 text-white text-sm font-semibold px-4 py-2 rounded-full hover:opacity-90 transition"
+                >
+                  <Star className="w-4 h-4" /> Passer Premium pour voir
+                </Link>
+              </div>
+            )}
+            {whoLikedData && !whoLikedData.upgrade && (
+              <div className="space-y-2">
+                {whoLikedData.profiles.length === 0 && (
+                  <p className="text-muted text-sm">
+                    Personne encore - continuez à swiper !
+                  </p>
+                )}
+                {whoLikedData.profiles.map((p, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-surface-2 transition cursor-pointer"
+                    onClick={() => {
+                      /* open profile */
+                    }}
+                  >
+                    {p.avatar_url ? (
+                      <img
+                        src={p.avatar_url as string}
+                        alt={p.username as string}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-violet-600 flex items-center justify-center text-white font-bold">
+                        {(p.username as string)?.[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium">
+                        {p.username as string}
+                      </p>
+                      <p className="text-xs text-muted">
+                        {p.city as string} {p.type === "superlike" && ""}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Filters panel */}
         {showFilters && (
@@ -444,7 +592,7 @@ export default function DiscoverPage() {
             {/* Age range */}
             <div>
               <label className="text-xs text-muted mb-2 block">
-                Âge : {prefs.min_age} – {prefs.max_age} ans
+                Âge : {prefs.min_age} - {prefs.max_age} ans
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -865,21 +1013,28 @@ export default function DiscoverPage() {
 
                 {/* Actions */}
                 <div className="flex items-center justify-center gap-4 p-6 pt-0">
-                  {lastPassed && (
-                    <button
-                      onClick={handleUndo}
-                      className="w-12 h-12 rounded-full border-2 border-amber-700/50 hover:border-amber-500 flex items-center justify-center transition"
-                      title="Annuler (Ctrl+Z)"
-                    >
-                      <Undo2 className="w-5 h-5 text-amber-400" />
-                    </button>
-                  )}
+                  {/* Rewind (Premium) */}
+                  <button
+                    onClick={handleRewind}
+                    className="w-10 h-10 rounded-full border border-orange-700/40 hover:border-orange-500 flex items-center justify-center transition"
+                    title="Rewind (Premium)"
+                  >
+                    <Undo2 className="w-4 h-4 text-orange-400" />
+                  </button>
                   <button
                     onClick={handlePass}
                     className="w-16 h-16 rounded-full border-2 border-border hover:border-gray-300 flex items-center justify-center transition active:scale-90"
                     title="Passer (←)"
                   >
                     <X className="w-7 h-7 text-muted" />
+                  </button>
+                  {/* Super Like */}
+                  <button
+                    onClick={handleSuperLike}
+                    className="w-12 h-12 rounded-full bg-yellow-400/10 border-2 border-yellow-500/50 hover:bg-yellow-400/20 flex items-center justify-center transition active:scale-90"
+                    title="Super Like "
+                  >
+                    <Star className="w-6 h-6 text-yellow-400" />
                   </button>
                   <button
                     onClick={handleLike}

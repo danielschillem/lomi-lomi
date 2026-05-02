@@ -1,4 +1,4 @@
-package models
+﻿package models
 
 import (
 	"time"
@@ -31,7 +31,23 @@ type User struct {
 	LastSeenAt *time.Time `json:"last_seen_at"`
 	Role       string     `gorm:"size:20;default:user" json:"role"` // user, owner, admin
 	PushToken  string     `gorm:"size:255" json:"-"`
-	Photos     []Photo    `gorm:"foreignKey:UserID" json:"photos,omitempty"`
+	// Premium
+	IsPremium    bool       `gorm:"default:false" json:"is_premium"`
+	PremiumUntil *time.Time `json:"premium_until,omitempty"`
+	// Extended profile
+	Languages      string `gorm:"size:200" json:"languages,omitempty"`       // JSON array e.g. ["Français","Moore"]
+	LookingForType string `gorm:"size:50" json:"looking_for_type,omitempty"` // serious, casual, friendship
+	Height         int    `gorm:"default:0" json:"height,omitempty"`         // cm
+	HasChildren    string `gorm:"size:10" json:"has_children,omitempty"`     // yes, no, want
+	Religion       string `gorm:"size:50" json:"religion,omitempty"`
+	// Onboarding
+	OnboardingDone bool `gorm:"default:false" json:"onboarding_done"`
+	// Photo verification
+	SelfieURL    string `gorm:"size:500" json:"selfie_url,omitempty"`
+	SelfieStatus string `gorm:"size:20;default:none" json:"selfie_status"` // none, pending, approved, rejected
+
+	Photos  []Photo  `gorm:"foreignKey:UserID" json:"photos,omitempty"`
+	Prompts []Prompt `gorm:"foreignKey:UserID" json:"prompts,omitempty"`
 }
 
 type Photo struct {
@@ -58,6 +74,7 @@ type Like struct {
 	CreatedAt time.Time `json:"created_at"`
 	LikerID   uint      `gorm:"not null;index" json:"liker_id"`
 	LikedID   uint      `gorm:"not null;index" json:"liked_id"`
+	Type      string    `gorm:"size:20;default:like" json:"type"` // like, superlike
 	Liker     User      `gorm:"foreignKey:LikerID" json:"liker,omitempty"`
 	Liked     User      `gorm:"foreignKey:LikedID" json:"liked,omitempty"`
 }
@@ -165,4 +182,74 @@ type VTCRide struct {
 	Requester      User      `gorm:"foreignKey:RequesterID" json:"requester,omitempty"`
 	Passenger      User      `gorm:"foreignKey:PassengerID" json:"passenger,omitempty"`
 	Driver         *User     `gorm:"foreignKey:DriverID" json:"driver,omitempty"`
+}
+
+// PasswordReset holds a one-time token to reset a user's password.
+type PasswordReset struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Token     string    `gorm:"size:255;uniqueIndex;not null" json:"-"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Used      bool      `gorm:"default:false" json:"used"`
+}
+
+// Subscription tracks a user's premium plan.
+type Subscription struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Plan      string    `gorm:"size:20;not null" json:"plan"` // monthly, yearly
+	Amount    float64   `json:"amount"`
+	StartedAt time.Time `json:"started_at"`
+	EndsAt    time.Time `json:"ends_at"`
+	Status    string    `gorm:"size:20;default:active" json:"status"` // active, expired, cancelled
+	TxID      string    `gorm:"size:255" json:"tx_id"`
+	User      User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
+}
+
+// Prompt is a profile prompt answer (e.g. "Mon péché mignon: ...")
+type Prompt struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UserID    uint      `gorm:"not null;index" json:"user_id"`
+	Question  string    `gorm:"size:200;not null" json:"question"`
+	Answer    string    `gorm:"size:500;not null" json:"answer"`
+}
+
+// Event represents a social event linked to a place.
+type Event struct {
+	ID           uint            `gorm:"primaryKey" json:"id"`
+	CreatedAt    time.Time       `json:"created_at"`
+	UpdatedAt    time.Time       `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt  `gorm:"index" json:"-"`
+	OrganizerID  uint            `gorm:"not null;index" json:"organizer_id"`
+	PlaceID      *uint           `gorm:"index" json:"place_id,omitempty"`
+	Title        string          `gorm:"size:200;not null" json:"title"`
+	Description  string          `gorm:"size:2000" json:"description"`
+	ImageURL     string          `gorm:"size:500" json:"image_url"`
+	City         string          `gorm:"size:100" json:"city"`
+	Address      string          `gorm:"size:300" json:"address"`
+	Latitude     float64         `json:"latitude"`
+	Longitude    float64         `json:"longitude"`
+	StartsAt     time.Time       `json:"starts_at"`
+	EndsAt       *time.Time      `json:"ends_at,omitempty"`
+	MaxAttendees int             `gorm:"default:0" json:"max_attendees"` // 0 = unlimited
+	Price        float64         `gorm:"default:0" json:"price"`         // 0 = gratuit
+	Category     string          `gorm:"size:50" json:"category"`        // soiree, rencontre, atelier, sport
+	IsPublished  bool            `gorm:"default:true" json:"is_published"`
+	Organizer    User            `gorm:"foreignKey:OrganizerID" json:"organizer,omitempty"`
+	Place        *Place          `gorm:"foreignKey:PlaceID" json:"place,omitempty"`
+	Attendees    []EventAttendee `gorm:"foreignKey:EventID" json:"attendees,omitempty"`
+}
+
+// EventAttendee tracks who is attending an event.
+type EventAttendee struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	EventID   uint      `gorm:"not null;index:idx_event_user" json:"event_id"`
+	UserID    uint      `gorm:"not null;index:idx_event_user" json:"user_id"`
+	Status    string    `gorm:"size:20;default:going" json:"status"` // going, interested, cancelled
+	Event     Event     `gorm:"foreignKey:EventID" json:"event,omitempty"`
+	User      User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }

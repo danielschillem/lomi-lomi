@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -100,7 +100,7 @@ export default function MapView({
     ? userLocation
     : places.length > 0 && places[0].latitude
       ? [places[0].latitude, places[0].longitude]
-      : [48.8566, 2.3522];
+      : [12.3714, -1.5197];
 
   const center: [number, number] =
     selected && selected.latitude

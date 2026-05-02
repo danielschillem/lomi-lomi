@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,8 @@ import {
   Plus,
   Trash2,
   ImageIcon,
+  Star,
+  Shield,
 } from "lucide-react";
 import {
   getProfile,
@@ -26,6 +28,9 @@ import {
   getUserPhotos,
   uploadPhoto,
   deletePhoto,
+  getPrompts,
+  savePrompts,
+  uploadSelfie,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -63,6 +68,14 @@ export default function ProfilePage() {
   >([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
+  // Extended profile
+  const [prompts, setPrompts] = useState<
+    { question: string; answer: string }[]
+  >([]);
+  const [savingPrompts, setSavingPrompts] = useState(false);
+  const [selfieStatus, setSelfieStatus] = useState<string>("none");
+  const [uploadingSelfie, setUploadingSelfie] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
@@ -80,6 +93,12 @@ export default function ProfilePage() {
           getUserPhotos(p.id)
             .then(setPhotos)
             .catch(() => {});
+          getPrompts()
+            .then(setPrompts)
+            .catch(() => {});
+          // selfie_status from profile
+          const extended = p as unknown as { selfie_status?: string };
+          if (extended.selfie_status) setSelfieStatus(extended.selfie_status);
         })
         .catch(() => setError("Impossible de charger le profil"));
     }
@@ -173,6 +192,36 @@ export default function ProfilePage() {
       setTimeout(() => setSuccess(""), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erreur suppression");
+    }
+  }
+
+  async function handleSavePrompts() {
+    setSavingPrompts(true);
+    try {
+      const saved = await savePrompts(prompts.filter((p) => p.answer.trim()));
+      setPrompts(saved);
+      setSuccess("Prompts sauvegardés");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch {
+      setError("Erreur sauvegarde prompts");
+    } finally {
+      setSavingPrompts(false);
+    }
+  }
+
+  async function handleSelfieUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSelfie(true);
+    try {
+      const res = await uploadSelfie(file);
+      setSelfieStatus(res.selfie_status);
+      setSuccess("Selfie soumis pour vérification");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur upload selfie");
+    } finally {
+      setUploadingSelfie(false);
     }
   }
 
@@ -445,7 +494,118 @@ export default function ProfilePage() {
             </div>
 
             {/* Settings link */}
-            <div className="mt-6 pt-6 border-t border-border">
+            <div className="mt-6 pt-6 border-t border-border space-y-6">
+              {/* Selfie Verification */}
+              <div>
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-violet-400" />
+                  Vérification d&apos;identité
+                </h3>
+                <div
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mb-3 ${selfieStatus === "approved" ? "bg-green-500/10 text-green-400" : selfieStatus === "pending" ? "bg-yellow-500/10 text-yellow-400" : selfieStatus === "rejected" ? "bg-red-500/10 text-red-400" : "bg-gray-700 text-gray-400"}`}
+                >
+                  {selfieStatus === "approved"
+                    ? " Profil vérifié"
+                    : selfieStatus === "pending"
+                      ? " En attente de vérification"
+                      : selfieStatus === "rejected"
+                        ? " Refusé - réessayez"
+                        : "Non vérifié"}
+                </div>
+                {selfieStatus !== "approved" && (
+                  <label className="block cursor-pointer">
+                    <div className="flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300">
+                      <Camera className="w-4 h-4" />
+                      {uploadingSelfie
+                        ? "Upload..."
+                        : "Envoyer un selfie de vérification"}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSelfieUpload}
+                      disabled={uploadingSelfie}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Prompts */}
+              <div>
+                <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                  <Star className="w-4 h-4 text-yellow-400" />
+                  Vos prompts
+                </h3>
+                <div className="space-y-3">
+                  {prompts.map((p, i) => (
+                    <div
+                      key={i}
+                      className="bg-surface-2 rounded-xl p-3 space-y-2"
+                    >
+                      <input
+                        type="text"
+                        value={p.question}
+                        maxLength={200}
+                        onChange={(e) => {
+                          const updated = [...prompts];
+                          updated[i] = {
+                            ...updated[i],
+                            question: e.target.value,
+                          };
+                          setPrompts(updated);
+                        }}
+                        placeholder="Question..."
+                        className="w-full bg-transparent text-xs font-medium text-muted border-none outline-none"
+                      />
+                      <input
+                        type="text"
+                        value={p.answer}
+                        maxLength={300}
+                        onChange={(e) => {
+                          const updated = [...prompts];
+                          updated[i] = {
+                            ...updated[i],
+                            answer: e.target.value,
+                          };
+                          setPrompts(updated);
+                        }}
+                        placeholder="Votre réponse..."
+                        className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                      />
+                      <button
+                        onClick={() =>
+                          setPrompts(prompts.filter((_, idx) => idx !== i))
+                        }
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  ))}
+                  {prompts.length < 3 && (
+                    <button
+                      onClick={() =>
+                        setPrompts([
+                          ...prompts,
+                          { question: "Ma passion secrète", answer: "" },
+                        ])
+                      }
+                      className="text-sm text-violet-400 hover:text-violet-300 flex items-center gap-1"
+                    >
+                      <Plus className="w-4 h-4" /> Ajouter un prompt
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSavePrompts}
+                    disabled={savingPrompts}
+                    className="text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition"
+                  >
+                    {savingPrompts ? "..." : "Sauvegarder"}
+                  </button>
+                </div>
+              </div>
+
               <Link
                 href="/settings"
                 className="flex items-center gap-2 text-sm text-muted hover:text-violet-600 transition"

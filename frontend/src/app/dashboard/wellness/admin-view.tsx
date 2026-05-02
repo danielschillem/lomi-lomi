@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -445,7 +445,7 @@ export default function AdminWellnessView() {
                         )}
                         {p.is_verified && (
                           <span className="text-xs text-emerald-600">
-                            ✓ Vérifié
+                             Vérifié
                           </span>
                         )}
                       </h3>

@@ -1,4 +1,4 @@
-package handlers
+﻿package handlers
 
 import (
 	"crypto/rand"
@@ -100,7 +100,7 @@ func (h *UploadHandler) SendVerification(c *fiber.Ctx) error {
 	)
 
 	if h.Config.SMTPHost != "" {
-		go sendEmail(h.Config, user.Email, "Vérification email — Lomi Lomi", body)
+		go sendEmail(h.Config, user.Email, "Vérification email - Lomi Lomi", body)
 	}
 
 	return c.JSON(fiber.Map{"message": "Email de vérification envoyé"})

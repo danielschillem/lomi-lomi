@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -182,7 +182,7 @@ export default function RegisterScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        {/* ───── PHONE STEP ───── */}
+        {/* - PHONE STEP - */}
         {step === "phone" && (
           <>
             <View style={styles.phoneRow}>
@@ -229,14 +229,14 @@ export default function RegisterScreen() {
           </>
         )}
 
-        {/* ───── OTP STEP ───── */}
+        {/* - OTP STEP - */}
         {step === "otp" && (
           <>
             <Text style={styles.otpInfo}>
               Code envoyé au <Text style={{ color: "#fff" }}>{fullPhone}</Text>
             </Text>
             {devCode && (
-              <Text style={styles.devCode}>🔑 Code dev : {devCode}</Text>
+              <Text style={styles.devCode}> Code dev : {devCode}</Text>
             )}
 
             <TextInput
@@ -276,11 +276,11 @@ export default function RegisterScreen() {
           </>
         )}
 
-        {/* ───── PROFILE STEP (after OTP verified) ───── */}
+        {/* - PROFILE STEP (after OTP verified) - */}
         {step === "profile" && (
           <>
             <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}>✓ {verifiedPhone} vérifié</Text>
+              <Text style={styles.verifiedText}> {verifiedPhone} vérifié</Text>
             </View>
 
             <TextInput
@@ -315,7 +315,7 @@ export default function RegisterScreen() {
           </>
         )}
 
-        {/* ───── EMAIL STEP ───── */}
+        {/* - EMAIL STEP - */}
         {step === "email" && (
           <>
             <TextInput

@@ -1,4 +1,4 @@
-package config
+﻿package config
 
 import (
 	"log"
@@ -64,7 +64,7 @@ func Load() *Config {
 		if cfg.DBDriver == "postgres" {
 			log.Fatal("FATAL: JWT_SECRET must be set in production (DB_DRIVER=postgres). Refusing to start with default secret.")
 		}
-		log.Println("⚠️  WARNING: JWT_SECRET is using the default value. Set JWT_SECRET env var in production!")
+		log.Println("[WARNING] JWT_SECRET is using the default value. Set JWT_SECRET env var in production!")
 	}
 
 	// Support DATABASE_URL (e.g. from docker-compose)

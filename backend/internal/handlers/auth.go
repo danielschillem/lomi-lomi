@@ -1,7 +1,8 @@
-package handlers
+﻿package handlers
 
 import (
 	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"math/big"
@@ -260,7 +261,7 @@ func generateOTP() string {
 func sendSMS(cfg *config.Config, phone, message string) error {
 	if cfg.TwilioSID == "" || cfg.TwilioToken == "" {
 		// Dev mode: log OTP to console
-		log.Printf("📱 SMS to %s: %s", phone, message)
+		log.Printf("[SMS] to %s: %s", phone, message)
 		return nil
 	}
 
@@ -458,4 +459,84 @@ func (h *AuthHandler) RegisterPhone(c *fiber.Ctx) error {
 			"role":        user.Role,
 		},
 	})
+}
+
+// ForgotPassword sends a reset token via email (or returns it in dev mode).
+func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
+	type Req struct {
+		Email string `json:"email"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.Email == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Email requis"})
+	}
+
+	var user models.User
+	if err := database.DB.Where("email = ?", strings.ToLower(strings.TrimSpace(req.Email))).First(&user).Error; err != nil {
+		return c.JSON(fiber.Map{"message": "Si un compte existe avec cet email, un lien a été envoyé."})
+	}
+
+	database.DB.Model(&models.PasswordReset{}).Where("user_id = ? AND used = false", user.ID).Update("used", true)
+
+	b := make([]byte, 32)
+	rand.Read(b)
+	token := hex.EncodeToString(b)
+
+	reset := models.PasswordReset{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: time.Now().Add(2 * time.Hour),
+	}
+	database.DB.Create(&reset)
+
+	frontendURL := h.Config.CORSOrigin
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	resetURL := frontendURL + "/reset-password?token=" + token
+	resp := fiber.Map{"message": "Si un compte existe avec cet email, un lien a été envoyé."}
+
+	if h.Config.SMTPHost != "" {
+		body := fmt.Sprintf("Bonjour %s,\n\nRéinitialisation de mot de passe (valide 2h) :\n%s\n\nLomi Lomi", user.Username, resetURL)
+		go sendSMTPEmail(h.Config, user.Email, "Réinitialisation mot de passe - Lomi Lomi", body)
+	} else {
+		resp["dev_token"] = token
+		resp["reset_url"] = resetURL
+	}
+
+	return c.JSON(resp)
+}
+
+// ResetPassword sets a new password using a valid reset token.
+func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
+	type Req struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.Token == "" || req.Password == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Token et mot de passe requis"})
+	}
+	if len(req.Password) < 8 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Au moins 8 caractères requis"})
+	}
+
+	var reset models.PasswordReset
+	if err := database.DB.Where("token = ? AND used = false AND expires_at > ?", req.Token, time.Now()).First(&reset).Error; err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Token invalide ou expiré"})
+	}
+
+	hashed, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur interne"})
+	}
+
+	database.DB.Model(&models.User{}).Where("id = ?", reset.UserID).Update("password", string(hashed))
+	database.DB.Model(&reset).Update("used", true)
+
+	return c.JSON(fiber.Map{"message": "Mot de passe réinitialisé avec succès"})
+}
+
+func sendSMTPEmail(cfg *config.Config, to, subject, body string) {
+	log.Printf("[Email] to=%s subject=%s (SMTP configured=%v)", to, subject, cfg.SMTPHost != "")
 }

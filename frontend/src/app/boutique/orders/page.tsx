@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -167,7 +167,7 @@ export default function OrdersPage() {
                     {order.items.slice(0, 3).map((item, i) => (
                       <p key={i} className="text-xs text-muted">
                         {item.quantity}x{" "}
-                        {item.product?.name || `Produit #${item.product_id}`} —{" "}
+                        {item.product?.name || `Produit #${item.product_id}`} -{" "}
                         {item.price.toLocaleString("fr-FR")} FCFA
                       </p>
                     ))}

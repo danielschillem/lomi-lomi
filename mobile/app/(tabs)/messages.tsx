@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -135,7 +135,7 @@ export default function MessagesScreen() {
               <View style={styles.bottomRow}>
                 <Text style={styles.lastMsg} numberOfLines={1}>
                   {item.last_message?.content ||
-                    "Nouveau match ! Dis bonjour 👋"}
+                    "Nouveau match ! Dis bonjour "}
                 </Text>
                 {item.unread_count > 0 && (
                   <View style={styles.badge}>

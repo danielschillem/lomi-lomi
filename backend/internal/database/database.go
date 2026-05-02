@@ -1,4 +1,4 @@
-package database
+﻿package database
 
 import (
 	"log"
@@ -69,6 +69,11 @@ func Migrate() {
 		&models.WellnessBooking{},
 		&models.WellnessReview{},
 		&models.DeliveryAddress{},
+		&models.PasswordReset{},
+		&models.Subscription{},
+		&models.Prompt{},
+		&models.Event{},
+		&models.EventAttendee{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)

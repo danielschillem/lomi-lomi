@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   createContext,
@@ -38,6 +38,8 @@ export function WSProvider({ children }: { children: ReactNode }) {
   const listenersRef = useRef<Set<WSListener>>(new Set());
   const [connected, setConnected] = useState(false);
   const reconnectRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const backoffRef = useRef(1000); // start at 1s
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   const connect = useCallback(() => {
     if (!token || !user) return;
@@ -45,11 +47,25 @@ export function WSProvider({ children }: { children: ReactNode }) {
     const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
     wsRef.current = ws;
 
-    ws.onopen = () => setConnected(true);
+    ws.onopen = () => {
+      setConnected(true);
+      backoffRef.current = 1000; // reset backoff on successful connect
+
+      // Respond to server pings automatically (browser handles pong frames)
+      // But also send application-level pings as heartbeat
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: "ping", data: {} }));
+        }
+      }, 30000);
+    };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as WSEvent;
+        // Ignore pong responses
+        if (data.type === "pong") return;
         listenersRef.current.forEach((fn) => fn(data));
       } catch {
         // ignore
@@ -59,10 +75,13 @@ export function WSProvider({ children }: { children: ReactNode }) {
     ws.onclose = () => {
       setConnected(false);
       wsRef.current = null;
-      // Reconnect after 3s
+      clearInterval(pingIntervalRef.current);
+      // Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 30s
+      const delay = backoffRef.current;
+      backoffRef.current = Math.min(backoffRef.current * 2, 30000);
       reconnectRef.current = setTimeout(() => {
         connect();
-      }, 3000);
+      }, delay);
     };
 
     ws.onerror = () => {
@@ -74,6 +93,7 @@ export function WSProvider({ children }: { children: ReactNode }) {
     connect();
     return () => {
       clearTimeout(reconnectRef.current);
+      clearInterval(pingIntervalRef.current);
       wsRef.current?.close();
       wsRef.current = null;
     };

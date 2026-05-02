@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -51,7 +51,7 @@ export default function DiscoverScreen() {
           });
         }
       } catch {
-        /* GPS optional — continue without it */
+        /* GPS optional - continue without it */
       }
     })();
     loadProfiles();
@@ -182,7 +182,7 @@ export default function DiscoverScreen() {
       {/* Match popup */}
       {matchPopup && (
         <View style={styles.matchPopup}>
-          <Text style={styles.matchText}>🎉 Match avec {matchPopup} !</Text>
+          <Text style={styles.matchText}> Match avec {matchPopup} !</Text>
         </View>
       )}
 
@@ -204,7 +204,7 @@ export default function DiscoverScreen() {
         <Animated.View
           style={[styles.stamp, styles.likeStamp, { opacity: likeOpacity }]}
         >
-          <Text style={styles.stampText}>LIKE 💜</Text>
+          <Text style={styles.stampText}>LIKE </Text>
         </Animated.View>
         <Animated.View
           style={[styles.stamp, styles.nopeStamp, { opacity: nopeOpacity }]}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -283,9 +283,7 @@ export default function RegisterPage() {
                           >
                             <span>{c.flag}</span>
                             <span className="flex-1 truncate">{c.name}</span>
-                            <span className="text-muted text-xs">
-                              {c.dial}
-                            </span>
+                            <span className="text-muted text-xs">{c.dial}</span>
                           </button>
                         ))}
                       </div>
@@ -389,8 +387,23 @@ export default function RegisterPage() {
                 />
                 <span className="text-xs text-muted leading-relaxed">
                   <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-violet-600" />
-                  J&apos;accepte les conditions d&apos;utilisation et la
-                  politique de confidentialité de Lomi Lomi.
+                  J&apos;accepte les{" "}
+                  <a
+                    href="/cgu"
+                    target="_blank"
+                    className="text-violet-400 hover:underline"
+                  >
+                    conditions d&apos;utilisation
+                  </a>{" "}
+                  et la{" "}
+                  <a
+                    href="/confidentialite"
+                    target="_blank"
+                    className="text-violet-400 hover:underline"
+                  >
+                    politique de confidentialité
+                  </a>{" "}
+                  de Lomi Lomi.
                 </span>
               </label>
               <button
@@ -484,8 +497,23 @@ export default function RegisterPage() {
                 />
                 <span className="text-xs text-muted leading-relaxed">
                   <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-violet-600" />
-                  J&apos;accepte les conditions d&apos;utilisation et la
-                  politique de confidentialité de Lomi Lomi.
+                  J&apos;accepte les{" "}
+                  <a
+                    href="/cgu"
+                    target="_blank"
+                    className="text-violet-400 hover:underline"
+                  >
+                    conditions d&apos;utilisation
+                  </a>{" "}
+                  et la{" "}
+                  <a
+                    href="/confidentialite"
+                    target="_blank"
+                    className="text-violet-400 hover:underline"
+                  >
+                    politique de confidentialité
+                  </a>{" "}
+                  de Lomi Lomi.
                 </span>
               </label>
               <button

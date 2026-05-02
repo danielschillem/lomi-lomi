@@ -1,4 +1,4 @@
-package models
+﻿package models
 
 import (
 	"time"
@@ -27,7 +27,9 @@ type Message struct {
 	ConversationID uint   `gorm:"not null;index" json:"conversation_id"`
 	SenderID       uint   `gorm:"not null;index" json:"sender_id"`
 	Content        string `gorm:"type:text;not null" json:"content"`
+	ImageURL       string `gorm:"size:500" json:"image_url,omitempty"`
 	IsRead         bool   `gorm:"default:false" json:"is_read"`
+	IsEdited       bool   `gorm:"default:false" json:"is_edited"`
 
 	Sender User `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
 }

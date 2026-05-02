@@ -1,4 +1,4 @@
-package handlers
+﻿package handlers
 
 import (
 	"encoding/json"
@@ -77,7 +77,40 @@ func (h *WSHub) HandleWebSocket(c *websocket.Conn) {
 
 	log.Printf("WS: user %d connected (tabs: %d)", userID, connCount)
 
+	// Ping/Pong keep-alive
+	const (
+		pingInterval = 30 * time.Second
+		pongWait     = 60 * time.Second
+	)
+
+	c.SetReadDeadline(time.Now().Add(pongWait))
+	c.SetPongHandler(func(string) error {
+		c.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	// Start ping ticker in goroutine
+	done := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(pingInterval)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ticker.C:
+				h.mu.Lock()
+				err := c.WriteMessage(websocket.PingMessage, nil)
+				h.mu.Unlock()
+				if err != nil {
+					return
+				}
+			case <-done:
+				return
+			}
+		}
+	}()
+
 	defer func() {
+		close(done)
 		h.mu.Lock()
 		delete(h.clients[userID], c)
 		remaining := len(h.clients[userID])

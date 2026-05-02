@@ -1,8 +1,8 @@
-import type { MetadataRoute } from "next";
+﻿import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lomi Lomi — Rencontres discrètes",
+    name: "Lomi Lomi - Rencontres discrètes",
     short_name: "Lomi Lomi",
     description:
       "Plateforme de rencontres anonymes et sécurisées. Matching par affinités, messagerie chiffrée, profils vérifiés.",

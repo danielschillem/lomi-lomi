@@ -1,19 +1,30 @@
-package handlers
+﻿package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/lomilomi/backend/internal/config"
 	"github.com/lomilomi/backend/internal/database"
 	"github.com/lomilomi/backend/internal/models"
 )
 
+const maxMessageLength = 5000
+
 type MessageHandler struct {
-	WSHub *WSHub
+	WSHub  *WSHub
+	Config *config.Config
 }
 
-func NewMessageHandler(wsHub *WSHub) *MessageHandler {
-	return &MessageHandler{WSHub: wsHub}
+func NewMessageHandler(wsHub *WSHub, cfg *config.Config) *MessageHandler {
+	return &MessageHandler{WSHub: wsHub, Config: cfg}
 }
 
 func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
@@ -87,19 +98,40 @@ func (h *MessageHandler) GetMessages(c *fiber.Ctx) error {
 		})
 	}
 
-	var messages []models.Message
-	database.DB.
+	// Pagination: ?before=<msg_id>&limit=50
+	limit, _ := strconv.Atoi(c.Query("limit", "50"))
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
+	beforeID, _ := strconv.ParseUint(c.Query("before", "0"), 10, 64)
+
+	query := database.DB.
 		Preload("Sender").
-		Where("conversation_id = ?", uint(convID)).
-		Order("created_at ASC").
-		Find(&messages)
+		Where("conversation_id = ?", uint(convID))
+
+	if beforeID > 0 {
+		query = query.Where("id < ?", beforeID)
+	}
+
+	var messages []models.Message
+	query.Order("created_at DESC").Limit(limit).Find(&messages)
+
+	// Reverse for chronological order
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
 
 	// Mark messages as read
 	database.DB.Model(&models.Message{}).
 		Where("conversation_id = ? AND sender_id != ? AND is_read = ?", uint(convID), userID, false).
 		Update("is_read", true)
 
-	return c.JSON(messages)
+	hasMore := len(messages) == limit
+
+	return c.JSON(fiber.Map{
+		"messages": messages,
+		"has_more": hasMore,
+	})
 }
 
 func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
@@ -108,6 +140,7 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	type SendRequest struct {
 		ReceiverID uint   `json:"receiver_id"`
 		Content    string `json:"content"`
+		ImageURL   string `json:"image_url"`
 	}
 
 	var req SendRequest
@@ -117,9 +150,21 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		})
 	}
 
-	if req.Content == "" || req.ReceiverID == 0 {
+	if req.Content == "" && req.ImageURL == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Destinataire et contenu requis",
+			"error": "Contenu ou image requis",
+		})
+	}
+	if req.ReceiverID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Destinataire requis",
+		})
+	}
+
+	// Validate content length
+	if len(req.Content) > maxMessageLength {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": fmt.Sprintf("Message trop long (max %d caractères)", maxMessageLength),
 		})
 	}
 
@@ -154,6 +199,7 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		ConversationID: conv.ID,
 		SenderID:       userID,
 		Content:        req.Content,
+		ImageURL:       req.ImageURL,
 	}
 
 	if err := database.DB.Create(&msg).Error; err != nil {
@@ -176,6 +222,7 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 				"conversation_id": msg.ConversationID,
 				"sender_id":       msg.SenderID,
 				"content":         msg.Content,
+				"image_url":       msg.ImageURL,
 				"created_at":      msg.CreatedAt,
 				"is_read":         msg.IsRead,
 				"sender":          map[string]interface{}{"id": msg.Sender.ID, "username": msg.Sender.Username, "avatar_url": msg.Sender.AvatarURL},
@@ -184,7 +231,11 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	}
 
 	// Send push notification to receiver
-	SendPushToUser(req.ReceiverID, msg.Sender.Username, msg.Content, map[string]interface{}{
+	pushBody := msg.Content
+	if pushBody == "" && msg.ImageURL != "" {
+		pushBody = "Image"
+	}
+	SendPushToUser(req.ReceiverID, msg.Sender.Username, pushBody, map[string]interface{}{
 		"type":            "message",
 		"conversation_id": msg.ConversationID,
 		"sender_id":       msg.SenderID,
@@ -260,4 +311,185 @@ func (h *MessageHandler) GetOrCreateConversation(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(conv)
+}
+
+// DeleteMessage soft-deletes a message. Only the sender can delete.
+func (h *MessageHandler) DeleteMessage(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	msgID, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID message invalide"})
+	}
+
+	var msg models.Message
+	if err := database.DB.First(&msg, uint(msgID)).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Message non trouvé"})
+	}
+
+	if msg.SenderID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Seul l'expéditeur peut supprimer"})
+	}
+
+	database.DB.Delete(&msg)
+
+	// Notify the other party via WS
+	if h.WSHub != nil {
+		var conv models.Conversation
+		database.DB.First(&conv, msg.ConversationID)
+		receiverID := conv.User1ID
+		if receiverID == userID {
+			receiverID = conv.User2ID
+		}
+		h.WSHub.SendToUser(receiverID, WSMessage{
+			Type: "message_deleted",
+			Data: map[string]interface{}{
+				"message_id":      msg.ID,
+				"conversation_id": msg.ConversationID,
+			},
+		})
+	}
+
+	return c.JSON(fiber.Map{"message": "Message supprimé"})
+}
+
+// EditMessage allows the sender to edit a message's content.
+func (h *MessageHandler) EditMessage(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	msgID, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID message invalide"})
+	}
+
+	type EditReq struct {
+		Content string `json:"content"`
+	}
+	var req EditReq
+	if err := c.BodyParser(&req); err != nil || req.Content == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Contenu requis"})
+	}
+
+	if len(req.Content) > maxMessageLength {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": fmt.Sprintf("Message trop long (max %d caractères)", maxMessageLength),
+		})
+	}
+
+	var msg models.Message
+	if err := database.DB.First(&msg, uint(msgID)).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Message non trouvé"})
+	}
+
+	if msg.SenderID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Seul l'expéditeur peut modifier"})
+	}
+
+	// Only allow editing within 15 minutes
+	if time.Since(msg.CreatedAt) > 15*time.Minute {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Modification impossible après 15 minutes"})
+	}
+
+	database.DB.Model(&msg).Updates(map[string]interface{}{
+		"content":   req.Content,
+		"is_edited": true,
+	})
+
+	database.DB.Preload("Sender").First(&msg, msg.ID)
+
+	// Notify via WS
+	if h.WSHub != nil {
+		var conv models.Conversation
+		database.DB.First(&conv, msg.ConversationID)
+		receiverID := conv.User1ID
+		if receiverID == userID {
+			receiverID = conv.User2ID
+		}
+		h.WSHub.SendToUser(receiverID, WSMessage{
+			Type: "message_edited",
+			Data: map[string]interface{}{
+				"message_id":      msg.ID,
+				"conversation_id": msg.ConversationID,
+				"content":         msg.Content,
+				"is_edited":       true,
+			},
+		})
+	}
+
+	return c.JSON(msg)
+}
+
+// SearchMessages searches messages in a conversation.
+func (h *MessageHandler) SearchMessages(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	convID, err := strconv.ParseUint(c.Query("conversation_id", "0"), 10, 32)
+	if err != nil || convID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "conversation_id requis"})
+	}
+
+	q := strings.TrimSpace(c.Query("q"))
+	if q == "" || len(q) < 2 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Terme de recherche requis (min 2 caractères)"})
+	}
+
+	// Verify membership
+	var conv models.Conversation
+	if err := database.DB.First(&conv, uint(convID)).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Conversation non trouvée"})
+	}
+	if conv.User1ID != userID && conv.User2ID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+	}
+
+	var messages []models.Message
+	database.DB.
+		Preload("Sender").
+		Where("conversation_id = ? AND content ILIKE ?", uint(convID), "%"+q+"%").
+		Order("created_at DESC").
+		Limit(50).
+		Find(&messages)
+
+	return c.JSON(fiber.Map{"messages": messages})
+}
+
+// UploadMessageImage uploads an image for use in a chat message.
+func (h *MessageHandler) UploadMessageImage(c *fiber.Ctx) error {
+	_ = c.Locals("userID").(uint)
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Image requise"})
+	}
+
+	// Max 10MB
+	if file.Size > 10*1024*1024 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Image trop volumineuse (max 10 Mo)"})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true, ".gif": true}
+	if !allowed[ext] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format non supporté (jpg, png, webp, gif)"})
+	}
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	filename := fmt.Sprintf("msg_%s%s", hex.EncodeToString(b), ext)
+
+	uploadDir := "uploads"
+	if h.Config != nil {
+		uploadDir = h.Config.UploadDir
+	}
+	os.MkdirAll(uploadDir, 0755)
+	savePath := filepath.Join(uploadDir, filename)
+
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur lors de l'upload"})
+	}
+
+	baseURL := ""
+	if h.Config != nil {
+		baseURL = h.Config.BaseURL
+	}
+	imageURL := baseURL + "/uploads/" + filename
+
+	return c.JSON(fiber.Map{"image_url": imageURL})
 }

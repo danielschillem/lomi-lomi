@@ -1,4 +1,4 @@
-package handlers
+﻿package handlers
 
 import (
 	"encoding/json"
@@ -80,8 +80,8 @@ func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
 			})
 
 			// Send push notifications
-			SendPushToUser(likerID, "Nouveau match ! 💜", "Vous avez matché avec "+liked.Username, map[string]interface{}{"type": "match", "match_user_id": req.LikedID})
-			SendPushToUser(req.LikedID, "Nouveau match ! 💜", "Vous avez matché avec "+liker.Username, map[string]interface{}{"type": "match", "match_user_id": likerID})
+			SendPushToUser(likerID, "Nouveau match ! ", "Vous avez matché avec "+liked.Username, map[string]interface{}{"type": "match", "match_user_id": req.LikedID})
+			SendPushToUser(req.LikedID, "Nouveau match ! ", "Vous avez matché avec "+liker.Username, map[string]interface{}{"type": "match", "match_user_id": likerID})
 		}
 	}
 
@@ -195,4 +195,167 @@ func (h *MatchHandler) DeleteNotification(c *fiber.Ctx) error {
 	database.DB.Where("id = ? AND user_id = ?", uint(id), userID).Delete(&models.Notification{})
 
 	return c.JSON(fiber.Map{"message": "Notification supprimée"})
+}
+
+// SuperLike sends a super like to a user (premium).
+func (h *MatchHandler) SuperLike(c *fiber.Ctx) error {
+	likerID := c.Locals("userID").(uint)
+
+	type Req struct {
+		LikedID uint `json:"liked_id"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.LikedID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "liked_id requis"})
+	}
+	if likerID == req.LikedID {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Impossible"})
+	}
+
+	// Premium check (5 superlikes/day for free, unlimited for premium)
+	var user models.User
+	database.DB.First(&user, likerID)
+
+	if !user.IsPremium {
+		// Count today's superlikes
+		var count int64
+		database.DB.Model(&models.Like{}).
+			Where("liker_id = ? AND type = 'superlike' AND created_at > NOW() - INTERVAL '24 hours'", likerID).
+			Count(&count)
+		if count >= 5 {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Limite de 5 Super Likes par jour (Premium = illimité)", "upgrade": true})
+		}
+	}
+
+	// Check if already liked
+	var existing models.Like
+	if err := database.DB.Where("liker_id = ? AND liked_id = ?", likerID, req.LikedID).First(&existing).Error; err == nil {
+		// Update to superlike
+		database.DB.Model(&existing).Update("type", "superlike")
+	} else {
+		like := models.Like{LikerID: likerID, LikedID: req.LikedID, Type: "superlike"}
+		database.DB.Create(&like)
+	}
+
+	// Notify the liked user
+	var liker models.User
+	database.DB.First(&liker, likerID)
+	database.DB.Create(&models.Notification{
+		UserID: req.LikedID,
+		Type:   "superlike",
+		Title:  "Super Like reçu ! ",
+		Body:   liker.Username + " vous a Super Liké !",
+		Data:   `{"type":"superlike","user_id":` + strconv.FormatUint(uint64(likerID), 10) + `}`,
+	})
+	SendPushToUser(req.LikedID, "Super Like reçu ! ", liker.Username+" vous a Super Liké !", map[string]interface{}{"type": "superlike", "user_id": likerID})
+
+	// Check mutual
+	var reverse models.Like
+	isMatch := database.DB.Where("liker_id = ? AND liked_id = ?", req.LikedID, likerID).First(&reverse).Error == nil
+	if isMatch {
+		u1, u2 := likerID, req.LikedID
+		if u2 < u1 {
+			u1, u2 = u2, u1
+		}
+		var existingMatch models.Match
+		if database.DB.Where("user1_id = ? AND user2_id = ?", u1, u2).First(&existingMatch).Error != nil {
+			match := models.Match{User1ID: u1, User2ID: u2}
+			database.DB.Create(&match)
+			var liked models.User
+			database.DB.First(&liked, req.LikedID)
+			database.DB.Create(&models.Notification{UserID: likerID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liked.Username})
+			database.DB.Create(&models.Notification{UserID: req.LikedID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liker.Username})
+		}
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"super_liked": true, "is_match": isMatch})
+}
+
+// WhoLikedMe returns users who liked the current user (premium only).
+func (h *MatchHandler) WhoLikedMe(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var user models.User
+	database.DB.First(&user, userID)
+
+	var likes []models.Like
+	database.DB.Where("liked_id = ?", userID).
+		Preload("Liker").
+		Order("created_at DESC").
+		Limit(50).
+		Find(&likes)
+
+	if !user.IsPremium {
+		// Return count only, blur profiles
+		result := make([]fiber.Map, 0, len(likes))
+		for range likes {
+			result = append(result, fiber.Map{
+				"blurred":  true,
+				"is_match": false,
+			})
+		}
+		return c.JSON(fiber.Map{
+			"count":    len(likes),
+			"profiles": result,
+			"upgrade":  true,
+			"message":  "Passez Premium pour voir qui vous a liké",
+		})
+	}
+
+	result := make([]fiber.Map, 0, len(likes))
+	for _, like := range likes {
+		u := like.Liker
+		result = append(result, fiber.Map{
+			"id":         u.ID,
+			"username":   u.Username,
+			"avatar_url": u.AvatarURL,
+			"city":       u.City,
+			"type":       like.Type,
+			"liked_at":   like.CreatedAt,
+		})
+	}
+
+	return c.JSON(fiber.Map{"count": len(result), "profiles": result, "upgrade": false})
+}
+
+// Rewind undoes the last like or pass action (premium only).
+func (h *MatchHandler) Rewind(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var user models.User
+	database.DB.First(&user, userID)
+
+	if !user.IsPremium {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+			"error":   "Rewind disponible avec Lomi Pass Premium",
+			"upgrade": true,
+		})
+	}
+
+	// Find last like
+	var lastLike models.Like
+	likeErr := database.DB.Where("liker_id = ?", userID).Order("created_at DESC").First(&lastLike).Error
+
+	// Find last pass
+	var lastPass models.Pass
+	passErr := database.DB.Where("user_id = ?", userID).Order("created_at DESC").First(&lastPass).Error
+
+	if likeErr != nil && passErr != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Aucune action à annuler"})
+	}
+
+	// Delete the most recent one
+	if likeErr == nil && (passErr != nil || lastLike.CreatedAt.After(lastPass.CreatedAt)) {
+		// Also delete the match if it created one
+		u1, u2 := userID, lastLike.LikedID
+		if u2 < u1 {
+			u1, u2 = u2, u1
+		}
+		database.DB.Where("user1_id = ? AND user2_id = ?", u1, u2).Delete(&models.Match{})
+		database.DB.Delete(&lastLike)
+		return c.JSON(fiber.Map{"rewound": "like", "user_id": lastLike.LikedID})
+	}
+
+	database.DB.Delete(&lastPass)
+	return c.JSON(fiber.Map{"rewound": "pass", "user_id": lastPass.PassedID})
 }

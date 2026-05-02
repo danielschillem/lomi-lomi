@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -68,7 +68,8 @@ export default function ChatScreen() {
   const loadMessages = async () => {
     try {
       const res = await getMessages(conversationId);
-      const arr = Array.isArray(res) ? (res as unknown as Message[]) : [];
+      const msgs = (res as { messages?: unknown[] })?.messages;
+      const arr = Array.isArray(msgs) ? (msgs as unknown as Message[]) : [];
       setMessages(arr.reverse());
     } catch {
       setMessages([]);

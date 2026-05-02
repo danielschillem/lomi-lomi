@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -133,7 +133,7 @@ export default function LoginScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        {/* ───── PHONE MODE ───── */}
+        {/* - PHONE MODE - */}
         {mode === "phone" && (
           <>
             <View style={styles.phoneRow}>
@@ -180,14 +180,14 @@ export default function LoginScreen() {
           </>
         )}
 
-        {/* ───── OTP MODE ───── */}
+        {/* - OTP MODE - */}
         {mode === "otp" && (
           <>
             <Text style={styles.otpInfo}>
               Code envoyé au <Text style={{ color: "#fff" }}>{fullPhone}</Text>
             </Text>
             {devCode && (
-              <Text style={styles.devCode}>🔑 Code dev : {devCode}</Text>
+              <Text style={styles.devCode}> Code dev : {devCode}</Text>
             )}
 
             <TextInput
@@ -227,7 +227,7 @@ export default function LoginScreen() {
           </>
         )}
 
-        {/* ───── EMAIL MODE ───── */}
+        {/* - EMAIL MODE - */}
         {mode === "email" && (
           <>
             <TextInput

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -250,9 +250,7 @@ export default function LoginPage() {
                           >
                             <span>{c.flag}</span>
                             <span className="flex-1 truncate">{c.name}</span>
-                            <span className="text-muted text-xs">
-                              {c.dial}
-                            </span>
+                            <span className="text-muted text-xs">{c.dial}</span>
                           </button>
                         ))}
                       </div>
@@ -377,6 +375,14 @@ export default function LoginPage() {
               >
                 {loading ? "Connexion..." : "Se connecter"}
               </button>
+              <div className="text-center">
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-violet-400 hover:text-violet-300"
+                >
+                  Mot de passe oublié ?
+                </Link>
+              </div>
             </form>
           )}
 

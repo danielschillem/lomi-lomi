@@ -2,7 +2,7 @@
 # When you have a domain, comment out this block and uncomment the production block below.
 
 :80 {
-	# API backend — routes /api/*
+	# API backend - routes /api/*
 	handle /api/* {
 		reverse_proxy backend:8888
 	}

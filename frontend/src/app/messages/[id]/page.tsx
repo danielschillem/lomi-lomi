@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   useState,
@@ -22,6 +22,11 @@ import {
   X,
   Loader2,
   Phone,
+  Image as ImageIcon,
+  Search,
+  Trash2,
+  Pencil,
+  ChevronUp,
 } from "lucide-react";
 import {
   getMessages,
@@ -34,6 +39,10 @@ import {
   getActiveLocationShares,
   requestVTCRide,
   updateVTCRideStatus,
+  deleteMessage,
+  editMessage,
+  searchMessages,
+  uploadMessageImage,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWS } from "@/lib/ws-context";
@@ -42,8 +51,10 @@ interface Message {
   id: number;
   sender_id: number;
   content: string;
+  image_url?: string;
   created_at: string;
   is_read: boolean;
+  is_edited?: boolean;
   sender?: { id: number; username: string; avatar_url?: string };
 }
 
@@ -110,6 +121,28 @@ export default function ChatPage() {
     note: string;
   } | null>(null);
 
+  // Pagination state
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Search state
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Message[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  // Edit/Delete state
+  const [contextMenuMsg, setContextMenuMsg] = useState<number | null>(null);
+  const [editingMsg, setEditingMsg] = useState<{
+    id: number;
+    content: string;
+  } | null>(null);
+
+  // Image upload state
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   // Load conversation metadata to get receiverId and other user info
   useEffect(() => {
     if (!user) return;
@@ -165,15 +198,119 @@ export default function ChatPage() {
 
   async function loadMessages() {
     try {
-      const res = (await getMessages(conversationId)) as unknown as Message[];
-      setMessages(res);
-      deriveReceiver(res);
+      const res = await getMessages(conversationId, { limit: 50 });
+      const msgs = (res.messages ?? []) as unknown as Message[];
+      setMessages(msgs);
+      setHasMore(res.has_more ?? false);
+      deriveReceiver(msgs);
       // Mark as read
       markConversationRead(conversationId).catch(() => {});
     } catch {
       // ignore
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Load older messages (infinite scroll)
+  async function loadOlderMessages() {
+    if (loadingMore || !hasMore || messages.length === 0) return;
+    setLoadingMore(true);
+    try {
+      const oldestId = messages[0].id;
+      const container = scrollContainerRef.current;
+      const prevHeight = container?.scrollHeight ?? 0;
+      const res = await getMessages(conversationId, {
+        limit: 50,
+        before: oldestId,
+      });
+      const older = (res.messages ?? []) as unknown as Message[];
+      setMessages((prev) => [...older, ...prev]);
+      setHasMore(res.has_more ?? false);
+      // Maintain scroll position
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight - prevHeight;
+        }
+      });
+    } catch {
+      // ignore
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  // Handle scroll to top for loading older messages
+  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    if (el.scrollTop < 80 && hasMore && !loadingMore) {
+      loadOlderMessages();
+    }
+  }
+
+  // Search messages
+  async function handleSearch() {
+    if (!searchQuery.trim() || searchQuery.length < 2) return;
+    setSearching(true);
+    try {
+      const res = await searchMessages(conversationId, searchQuery);
+      setSearchResults((res.messages ?? []) as unknown as Message[]);
+    } catch {
+      // ignore
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  // Delete message
+  async function handleDeleteMessage(msgId: number) {
+    try {
+      await deleteMessage(msgId);
+      setMessages((prev) => prev.filter((m) => m.id !== msgId));
+    } catch {
+      // ignore
+    }
+    setContextMenuMsg(null);
+  }
+
+  // Edit message
+  async function handleEditMessage() {
+    if (!editingMsg || !editingMsg.content.trim()) return;
+    try {
+      await editMessage(editingMsg.id, editingMsg.content);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === editingMsg.id
+            ? { ...m, content: editingMsg.content, is_edited: true }
+            : m,
+        ),
+      );
+    } catch {
+      // ignore
+    }
+    setEditingMsg(null);
+    setContextMenuMsg(null);
+  }
+
+  // Image upload
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !receiverId) return;
+    setUploadingImage(true);
+    try {
+      const { image_url } = await uploadMessageImage(file);
+      const res = (await sendMessage({
+        receiver_id: receiverId,
+        content: "",
+        image_url,
+      })) as unknown as Message;
+      setMessages((prev) => [...prev, res]);
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch {
+      // ignore
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   }
 
@@ -229,6 +366,30 @@ export default function ChatPage() {
         setMessages((prev) =>
           prev.map((m) => (m.id === msgId ? { ...m, is_read: true } : m)),
         );
+      }
+
+      // Message deleted via WS
+      if (event.type === "message_deleted") {
+        const d = event.data as Record<string, unknown>;
+        if ((d.conversation_id as number) === conversationId) {
+          setMessages((prev) =>
+            prev.filter((m) => m.id !== (d.message_id as number)),
+          );
+        }
+      }
+
+      // Message edited via WS
+      if (event.type === "message_edited") {
+        const d = event.data as Record<string, unknown>;
+        if ((d.conversation_id as number) === conversationId) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === (d.message_id as number)
+                ? { ...m, content: d.content as string, is_edited: true }
+                : m,
+            ),
+          );
+        }
       }
 
       // Location sharing events
@@ -601,6 +762,23 @@ export default function ChatPage() {
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={() => {
+                setShowSearch(!showSearch);
+                if (showSearch) {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }
+              }}
+              className={`p-2 rounded-lg transition ${
+                showSearch
+                  ? "bg-violet-600 text-white"
+                  : "text-muted hover:text-foreground hover:bg-gray-100"
+              }`}
+              title="Rechercher"
+            >
+              <Search className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
                 if (sharingLocation) stopSharingLocation();
                 else startSharing();
               }}
@@ -632,6 +810,72 @@ export default function ChatPage() {
           </div>
         </div>
       </header>
+
+      {/* Search bar */}
+      {showSearch && (
+        <div className="shrink-0 bg-surface border-b border-border px-4 py-2.5">
+          <div className="max-w-2xl mx-auto">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch();
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher dans la conversation..."
+                className="flex-1 bg-surface-2 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={searching || searchQuery.length < 2}
+                className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg transition"
+              >
+                {searching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Search className="w-4 h-4" />
+                )}
+              </button>
+            </form>
+            {searchResults.length > 0 && (
+              <div className="mt-2 max-h-40 overflow-y-auto space-y-1">
+                {searchResults.map((r) => (
+                  <button
+                    key={r.id}
+                    className="w-full text-left text-xs bg-surface-2 hover:bg-surface-2/80 rounded-lg px-3 py-2 transition"
+                    onClick={() => {
+                      const el = document.getElementById(`msg-${r.id}`);
+                      if (el) {
+                        el.scrollIntoView({
+                          behavior: "smooth",
+                          block: "center",
+                        });
+                        el.classList.add("ring-2", "ring-violet-400");
+                        setTimeout(
+                          () =>
+                            el.classList.remove("ring-2", "ring-violet-400"),
+                          2000,
+                        );
+                      }
+                    }}
+                  >
+                    <span className="text-muted">
+                      {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                    </span>{" "}
+                    - {r.content.slice(0, 80)}
+                    {r.content.length > 80 ? "..." : ""}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Location sharing banner */}
       {sharingLocation && activeShare && (
@@ -785,7 +1029,7 @@ export default function ChatPage() {
                 {activeRide.status === "pending"
                   ? "..."
                   : activeRide.status === "accepted"
-                    ? "✓"
+                    ? ""
                     : activeRide.status === "in_progress"
                       ? ">"
                       : "•"}{" "}
@@ -853,8 +1097,28 @@ export default function ChatPage() {
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-6"
+        onScroll={handleScroll}
+      >
         <div className="max-w-2xl mx-auto space-y-3">
+          {/* Load more indicator */}
+          {hasMore && (
+            <div className="text-center py-2">
+              {loadingMore ? (
+                <Loader2 className="w-5 h-5 animate-spin mx-auto text-muted" />
+              ) : (
+                <button
+                  onClick={loadOlderMessages}
+                  className="text-xs text-violet-600 hover:text-violet-700 flex items-center gap-1 mx-auto"
+                >
+                  <ChevronUp className="w-3 h-3" />
+                  Charger les messages précédents
+                </button>
+              )}
+            </div>
+          )}
           {messages.length === 0 ? (
             <div className="text-center text-muted text-sm py-12">
               <Shield className="w-8 h-8 mx-auto mb-3 text-muted/60" />
@@ -866,8 +1130,50 @@ export default function ChatPage() {
               return (
                 <div
                   key={msg.id}
-                  className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                  id={`msg-${msg.id}`}
+                  className={`flex ${isMine ? "justify-end" : "justify-start"} group relative`}
+                  onContextMenu={(e) => {
+                    if (isMine) {
+                      e.preventDefault();
+                      setContextMenuMsg(
+                        contextMenuMsg === msg.id ? null : msg.id,
+                      );
+                    }
+                  }}
                 >
+                  {/* Context menu for own messages */}
+                  {isMine && contextMenuMsg === msg.id && (
+                    <div className="absolute right-0 top-0 -mt-8 bg-surface border border-border rounded-lg shadow-lg flex items-center gap-1 px-1 py-0.5 z-10">
+                      <button
+                        onClick={() => {
+                          setEditingMsg({
+                            id: msg.id,
+                            content: msg.content,
+                          });
+                          setContextMenuMsg(null);
+                        }}
+                        className="p-1.5 rounded hover:bg-surface-2 text-muted hover:text-foreground transition"
+                        title="Modifier"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        className="p-1.5 rounded hover:bg-red-50 text-muted hover:text-red-600 transition"
+                        title="Supprimer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setContextMenuMsg(null)}
+                        className="p-1.5 rounded hover:bg-surface-2 text-muted hover:text-foreground transition"
+                        title="Fermer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                       isMine
@@ -875,7 +1181,62 @@ export default function ChatPage() {
                         : "bg-surface-2 text-foreground rounded-bl-md"
                     }`}
                   >
-                    <p>{msg.content}</p>
+                    {/* Edit mode */}
+                    {editingMsg?.id === msg.id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={editingMsg.content}
+                          onChange={(e) =>
+                            setEditingMsg({
+                              ...editingMsg,
+                              content: e.target.value,
+                            })
+                          }
+                          className="w-full bg-white/20 rounded px-2 py-1 text-sm outline-none"
+                          autoFocus
+                          placeholder="Modifier le message..."
+                          title="Modifier le message"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleEditMessage();
+                            if (e.key === "Escape") setEditingMsg(null);
+                          }}
+                        />
+                        <div className="flex gap-1 justify-end">
+                          <button
+                            onClick={() => setEditingMsg(null)}
+                            className="text-[10px] opacity-70 hover:opacity-100"
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            onClick={handleEditMessage}
+                            className="text-[10px] font-medium"
+                          >
+                            Enregistrer
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Image in message */}
+                        {msg.image_url && (
+                          <a
+                            href={msg.image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block mb-1"
+                          >
+                            <img
+                              src={msg.image_url}
+                              alt="Image"
+                              className="max-w-full rounded-lg max-h-60 object-cover"
+                            />
+                          </a>
+                        )}
+                        {msg.content && <p>{msg.content}</p>}
+                      </>
+                    )}
                     <div
                       className={`flex items-center gap-1 mt-1 ${
                         isMine ? "justify-end" : ""
@@ -891,6 +1252,15 @@ export default function ChatPage() {
                           minute: "2-digit",
                         })}
                       </span>
+                      {msg.is_edited && (
+                        <span
+                          className={`text-[9px] ${
+                            isMine ? "text-violet-200" : "text-muted"
+                          }`}
+                        >
+                          (modifié)
+                        </span>
+                      )}
                       {isMine &&
                         (msg.is_read ? (
                           <CheckCheck className="w-3.5 h-3.5 text-violet-600" />
@@ -920,6 +1290,28 @@ export default function ChatPage() {
           onSubmit={handleSend}
           className="max-w-2xl mx-auto flex items-center gap-3"
         >
+          {/* Image upload button */}
+          <input
+            type="file"
+            ref={imageInputRef}
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={handleImageUpload}
+            title="Envoyer une image"
+          />
+          <button
+            type="button"
+            onClick={() => imageInputRef.current?.click()}
+            disabled={uploadingImage}
+            title="Envoyer une image"
+            className="w-10 h-10 rounded-full text-muted hover:text-violet-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
+          >
+            {uploadingImage ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ImageIcon className="w-4 h-4" />
+            )}
+          </button>
           <input
             type="text"
             value={content}

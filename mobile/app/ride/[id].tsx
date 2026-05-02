@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -91,7 +91,7 @@ export default function RideDetailScreen() {
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Statut</Text>
-        <Text style={styles.status}>{(r.status as string) || "—"}</Text>
+        <Text style={styles.status}>{(r.status as string) || "-"}</Text>
       </View>
 
       {r.driver_name && (
