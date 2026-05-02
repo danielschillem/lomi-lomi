@@ -99,9 +99,7 @@ export default function OwnerOrdersView() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-white">
-        Commandes reçues
-      </h1>
+      <h1 className="mb-6 text-2xl font-bold text-white">Commandes reçues</h1>
 
       {orders.length === 0 ? (
         <p className="text-muted">Aucune commande pour le moment.</p>
@@ -112,7 +110,10 @@ export default function OwnerOrdersView() {
               STATUS_LABELS[order.status] || STATUS_LABELS.pending;
             const nextStatus = NEXT_STATUS[order.status];
             return (
-              <div key={order.id} className="rounded-xl bg-white/90 border border-border p-5 ">
+              <div
+                key={order.id}
+                className="rounded-xl bg-white/90 border border-border p-5 "
+              >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-white">
@@ -148,7 +149,9 @@ export default function OwnerOrdersView() {
                           {item.product?.name || `Produit #${item.product_id}`}{" "}
                           x{item.quantity}
                         </span>
-                        <span>{Math.round(item.price * item.quantity)} FCFA</span>
+                        <span>
+                          {Math.round(item.price * item.quantity)} FCFA
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -157,14 +160,14 @@ export default function OwnerOrdersView() {
                 {/* Delivery address */}
                 {order.delivery_address && (
                   <div className="mt-3 rounded-lg bg-surface p-3 text-sm">
-                    <p className="font-medium">📦 Livraison</p>
+                    <p className="font-medium">Livraison</p>
                     <p>{order.delivery_address.full_name}</p>
                     <p>
                       {order.delivery_address.address},{" "}
                       {order.delivery_address.city}
                     </p>
                     {order.delivery_address.phone && (
-                      <p>📞 {order.delivery_address.phone}</p>
+                      <p>{order.delivery_address.phone}</p>
                     )}
                   </div>
                 )}

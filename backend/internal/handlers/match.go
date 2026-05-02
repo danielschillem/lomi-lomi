@@ -78,6 +78,10 @@ func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
 				Body:   "Vous avez matché avec " + liker.Username,
 				Data:   string(matchData2),
 			})
+
+			// Send push notifications
+			SendPushToUser(likerID, "Nouveau match ! 💜", "Vous avez matché avec "+liked.Username, map[string]interface{}{"type": "match", "match_user_id": req.LikedID})
+			SendPushToUser(req.LikedID, "Nouveau match ! 💜", "Vous avez matché avec "+liker.Username, map[string]interface{}{"type": "match", "match_user_id": likerID})
 		}
 	}
 

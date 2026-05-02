@@ -104,7 +104,7 @@ export default function MapView({
                 <strong>{place.name}</strong>
                 <br />
                 <span className="text-xs">
-                  {place.category} — {place.city}
+                  {place.category} - {place.city}
                 </span>
               </div>
             </Popup>

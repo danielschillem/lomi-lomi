@@ -76,7 +76,7 @@ export default function OwnerWellnessView() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-white">
-                      {booking.service?.name || "Service"} —{" "}
+                      {booking.service?.name || "Service"} -{" "}
                       {booking.provider?.name}
                     </p>
                     <p className="text-sm text-muted">

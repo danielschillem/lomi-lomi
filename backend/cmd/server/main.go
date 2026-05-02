@@ -88,6 +88,7 @@ func main() {
 	safetyHandler := handlers.NewSafetyHandler()
 	ownerHandler := handlers.NewOwnerHandler()
 	deliveryHandler := handlers.NewDeliveryHandler()
+	pushHandler := handlers.NewPushHandler()
 	wsHub := handlers.NewWSHub(cfg)
 	messageHandler := handlers.NewMessageHandler(wsHub)
 	locationHandler := handlers.NewLocationHandler(wsHub)
@@ -168,11 +169,16 @@ func main() {
 	api.Post("/om/webhook", paymentHandler.HandleWebhook)
 	api.Get("/orders/:id/payment-status", jwt, paymentHandler.CheckPaymentStatus)
 
+	// Push notifications
+	api.Post("/push/register", jwt, pushHandler.RegisterPushToken)
+	api.Delete("/push/register", jwt, pushHandler.UnregisterPushToken)
+
 	// Upload avatar
-	api.Post("/upload/avatar", jwt, uploadHandler.UploadAvatar)
+	uploadRL := middleware.RateLimitUpload()
+	api.Post("/upload/avatar", jwt, uploadRL, uploadHandler.UploadAvatar)
 
 	// Photo gallery
-	api.Post("/photos", jwt, uploadHandler.UploadPhoto)
+	api.Post("/photos", jwt, uploadRL, uploadHandler.UploadPhoto)
 	api.Delete("/photos/:id", jwt, uploadHandler.DeletePhoto)
 	api.Get("/users/:id/photos", uploadHandler.GetPhotos)
 

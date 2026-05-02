@@ -176,9 +176,7 @@ export default function AdminProductsView() {
                 />
               </div>
               <div>
-                <label className="text-xs text-muted mb-1 block">
-                  Stock
-                </label>
+                <label className="text-xs text-muted mb-1 block">Stock</label>
                 <input
                   type="number"
                   min="0"
@@ -259,10 +257,7 @@ export default function AdminProductsView() {
               </tr>
             ) : products.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-12 text-center text-muted"
-                >
+                <td colSpan={5} className="px-6 py-12 text-center text-muted">
                   <Package className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucun produit dans la boutique.
                   <br />
@@ -306,7 +301,7 @@ export default function AdminProductsView() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-muted hidden sm:table-cell">
-                    {p.category || "—"}
+                    {p.category || "-"}
                   </td>
                   <td className="px-6 py-4 font-medium text-pink-500">
                     {Math.round(p.price)} FCFA

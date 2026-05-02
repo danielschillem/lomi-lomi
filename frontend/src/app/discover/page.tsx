@@ -541,9 +541,7 @@ export default function DiscoverPage() {
                 Recherche...
               </p>
             ) : searchResults.length === 0 ? (
-              <p className="text-sm text-muted text-center">
-                Aucun résultat
-              </p>
+              <p className="text-sm text-muted text-center">Aucun résultat</p>
             ) : (
               searchResults.map((p) => (
                 <a
@@ -656,7 +654,7 @@ export default function DiscoverPage() {
                       className="absolute top-6 left-6 z-30 bg-green-500/90 text-white px-4 py-1.5 rounded-full text-sm font-bold rotate-[-15deg] transition-opacity"
                       style={{ opacity: Math.min(1, dragX / 100) }}
                     >
-                      LIKE ❤️
+                      LIKE
                     </div>
                   )}
                   {dragX < -30 && (

@@ -201,7 +201,7 @@ export default function ChatPage() {
           const senderName =
             ((d.sender as Record<string, unknown>)?.username as string) ||
             "Quelqu'un";
-          new Notification(`${senderName} — Lomi Lomi`, {
+          new Notification(`${senderName} - Lomi Lomi`, {
             body: d.content as string,
             icon: "/icon-192.png",
           });
@@ -501,7 +501,7 @@ export default function ChatPage() {
     }
   }
 
-  // Typing indicator — send via shared WS
+  // Typing indicator - send via shared WS
   function handleInputChange(value: string) {
     setContent(value);
     if (!receiverId) return;
@@ -761,7 +761,7 @@ export default function ChatPage() {
               <div className="flex items-center gap-2 text-sm text-violet-600">
                 <Car className="w-4 h-4" />
                 <span className="font-medium">
-                  Course VTC —{" "}
+                  Course VTC -{" "}
                   {activeRide.status === "pending"
                     ? "En attente"
                     : activeRide.status === "accepted"
@@ -783,11 +783,11 @@ export default function ChatPage() {
                 }`}
               >
                 {activeRide.status === "pending"
-                  ? "⏳"
+                  ? "..."
                   : activeRide.status === "accepted"
                     ? "✓"
                     : activeRide.status === "in_progress"
-                      ? "🚗"
+                      ? ">"
                       : "•"}{" "}
                 {activeRide.status}
               </span>

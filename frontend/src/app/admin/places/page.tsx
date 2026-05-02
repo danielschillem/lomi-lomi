@@ -229,9 +229,7 @@ export default function AdminPlacesPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-muted mb-1 block">
-                  Ville
-                </label>
+                <label className="text-xs text-muted mb-1 block">Ville</label>
                 <input
                   placeholder="Ville"
                   value={form.city}
@@ -327,10 +325,7 @@ export default function AdminPlacesPage() {
               </tr>
             ) : places.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-12 text-center text-muted"
-                >
+                <td colSpan={5} className="px-6 py-12 text-center text-muted">
                   <MapPin className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucun lieu enregistré.
                   <br />
@@ -391,7 +386,7 @@ export default function AdminPlacesPage() {
                     {categories[p.category] || p.category}
                   </td>
                   <td className="px-6 py-4 text-muted hidden md:table-cell">
-                    {p.city || "—"}
+                    {p.city || "-"}
                   </td>
                   <td className="px-6 py-4">
                     <span className="flex items-center gap-1 text-yellow-600">

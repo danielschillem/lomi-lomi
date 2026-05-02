@@ -150,9 +150,7 @@ export default function ReservationsPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
-        <p className="text-muted">
-          Connectez-vous pour voir vos réservations.
-        </p>
+        <p className="text-muted">Connectez-vous pour voir vos réservations.</p>
         <Link
           href="/login"
           className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-6 py-3 rounded-lg transition text-sm"
@@ -278,7 +276,7 @@ export default function ReservationsPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {booking.start_time} — {booking.end_time}
+                      {booking.start_time} - {booking.end_time}
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="w-3 h-3" />
@@ -350,7 +348,7 @@ export default function ReservationsPage() {
 
             <h3 className="text-lg font-bold mb-1">Laisser un avis</h3>
             <p className="text-sm text-muted mb-4">
-              {reviewBooking.service?.name} — {reviewBooking.provider?.name}
+              {reviewBooking.service?.name} - {reviewBooking.provider?.name}
             </p>
 
             {/* Rating */}

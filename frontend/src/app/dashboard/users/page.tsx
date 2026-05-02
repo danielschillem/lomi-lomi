@@ -144,10 +144,7 @@ export default function AdminUsersPage() {
               </tr>
             ) : users.length === 0 ? (
               <tr>
-                <td
-                  colSpan={5}
-                  className="px-6 py-12 text-center text-muted"
-                >
+                <td colSpan={5} className="px-6 py-12 text-center text-muted">
                   <Users className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucun utilisateur trouvé.
                 </td>
@@ -181,7 +178,7 @@ export default function AdminUsersPage() {
                           )}
                         </span>
                         <span className="text-xs text-muted block">
-                          #{u.id} —{" "}
+                          #{u.id} -{" "}
                           {new Date(u.created_at).toLocaleDateString("fr-FR")}
                         </span>
                       </div>
@@ -191,7 +188,7 @@ export default function AdminUsersPage() {
                     {u.email}
                   </td>
                   <td className="px-6 py-4 text-muted hidden sm:table-cell">
-                    {u.city || "—"}
+                    {u.city || "-"}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5">

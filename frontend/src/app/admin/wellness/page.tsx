@@ -479,7 +479,7 @@ export default function AdminWellnessPage() {
                         )}
                       </h3>
                       <span className="text-xs text-muted capitalize">
-                        {p.category.replace("_", " ")} — {p.city || "Ville N/A"}
+                        {p.category.replace("_", " ")} - {p.city || "Ville N/A"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -525,7 +525,7 @@ export default function AdminWellnessPage() {
                           <div>
                             <span className="text-sm">{s.name}</span>
                             <span className="text-xs text-muted ml-2">
-                              {s.duration}min — {Math.round(s.price)} FCFA
+                              {s.duration}min - {Math.round(s.price)} FCFA
                               {s.is_duo ? " (duo)" : ""}
                             </span>
                           </div>
@@ -623,12 +623,10 @@ export default function AdminWellnessPage() {
                       <span className="text-sm font-semibold">
                         {b.service?.name}
                       </span>
-                      <span className="text-xs text-muted ml-2">
-                        #{b.id}
-                      </span>
+                      <span className="text-xs text-muted ml-2">#{b.id}</span>
                       <br />
                       <span className="text-xs text-muted">
-                        par {b.user?.username} — {b.provider?.name}
+                        par {b.user?.username} - {b.provider?.name}
                       </span>
                     </div>
                     <span
@@ -648,7 +646,7 @@ export default function AdminWellnessPage() {
                   <div className="flex items-center gap-4 text-xs text-muted mb-3">
                     <span>{new Date(b.date).toLocaleDateString("fr-FR")}</span>
                     <span>
-                      {b.start_time} — {b.end_time}
+                      {b.start_time} - {b.end_time}
                     </span>
                     <span>{b.persons === 2 ? "Duo" : "Solo"}</span>
                     <span className="font-medium text-white">
@@ -692,9 +690,7 @@ export default function AdminWellnessPage() {
                 >
                   ← Précédent
                 </button>
-                <span className="text-xs text-muted">
-                  Page {bookingsPage}
-                </span>
+                <span className="text-xs text-muted">Page {bookingsPage}</span>
                 <button
                   onClick={() => setBookingsPage((p) => p + 1)}
                   disabled={bookings.length < 20}
@@ -1237,7 +1233,7 @@ export default function AdminWellnessPage() {
                     }}
                     className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
                   />
-                  <span className="text-muted text-xs">—</span>
+                  <span className="text-muted text-xs">-</span>
                   <input
                     title="Heure de fin"
                     type="time"

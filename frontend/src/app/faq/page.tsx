@@ -105,35 +105,35 @@ export default function FaqPage() {
           </h2>
           <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
             <p>
-              <strong className="text-white">1. Objet</strong> — Les présentes
+              <strong className="text-white">1. Objet :</strong> Les présentes
               CGU régissent l&apos;utilisation de la plateforme Lomi Lomi,
               accessible via le site web et les applications associées.
             </p>
             <p>
-              <strong className="text-white">2. Inscription</strong> —
+              <strong className="text-white">2. Inscription :</strong>{" "}
               L&apos;utilisateur doit être âgé d&apos;au moins 18 ans. Toute
               inscription implique l&apos;acceptation des présentes CGU. Les
               informations fournies doivent être exactes.
             </p>
             <p>
               <strong className="text-white">3. Utilisation du service</strong>{" "}
-              — L&apos;utilisateur s&apos;engage à respecter les autres membres,
-              à ne pas publier de contenu illicite, offensant, discriminatoire
-              ou portant atteinte aux droits d&apos;autrui.
+              L&apos;utilisateur s&apos;engage à respecter les autres membres, à
+              ne pas publier de contenu illicite, offensant, discriminatoire ou
+              portant atteinte aux droits d&apos;autrui.
             </p>
             <p>
-              <strong className="text-white">4. Données personnelles</strong> —
+              <strong className="text-white">4. Données personnelles :</strong>{" "}
               Conformément au RGPD, vos données sont traitées de manière
               sécurisée. Vous disposez d&apos;un droit d&apos;accès, de
               rectification et de suppression. Contactez support@lomilomi.fr.
             </p>
             <p>
-              <strong className="text-white">5. Modération</strong> — Tout
+              <strong className="text-white">5. Modération :</strong> Tout
               comportement contraire aux CGU peut entraîner la suspension ou la
               suppression du compte sans préavis.
             </p>
             <p>
-              <strong className="text-white">6. Responsabilité</strong> — Lomi
+              <strong className="text-white">6. Responsabilité :</strong> Lomi
               Lomi ne garantit pas la véracité des profils et décline toute
               responsabilité en cas de litige entre utilisateurs.
             </p>
@@ -141,11 +141,11 @@ export default function FaqPage() {
               <strong className="text-white">
                 7. Propriété intellectuelle
               </strong>{" "}
-              — L&apos;ensemble du contenu de la plateforme (logo, design, code)
+              L&apos;ensemble du contenu de la plateforme (logo, design, code)
               est la propriété exclusive de Lomi Lomi.
             </p>
             <p>
-              <strong className="text-white">8. Modification</strong> — Lomi
+              <strong className="text-white">8. Modification :</strong> Lomi
               Lomi se réserve le droit de modifier les présentes CGU à tout
               moment. Les utilisateurs seront informés de toute modification
               substantielle.

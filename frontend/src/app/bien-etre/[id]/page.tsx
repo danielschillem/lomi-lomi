@@ -374,7 +374,7 @@ export default function ProviderPage() {
                           {dayNames[a.day_of_week]}
                         </span>
                         <br />
-                        {a.start_time} — {a.end_time}
+                        {a.start_time} - {a.end_time}
                       </div>
                     ))}
                 </div>

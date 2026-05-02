@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "https://lomilomi.app",
   ),
   title: {
-    default: "Lomi Lomi — Rencontres discrètes & affinités authentiques",
+    default: "Lomi Lomi - Rencontres discrètes & affinités authentiques",
     template: "%s | Lomi Lomi",
   },
   description:
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fr_FR",
     siteName: "Lomi Lomi",
-    title: "Lomi Lomi — Rencontres discrètes & affinités authentiques",
+    title: "Lomi Lomi - Rencontres discrètes & affinités authentiques",
     description:
       "Plateforme de rencontres anonymes et sécurisées. Matching par affinités, messagerie chiffrée, profils vérifiés.",
     images: [
@@ -51,13 +51,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Lomi Lomi — Rencontres discrètes",
+        alt: "Lomi Lomi - Rencontres discrètes",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lomi Lomi — Rencontres discrètes",
+    title: "Lomi Lomi - Rencontres discrètes",
     description:
       "Matching par affinités, messagerie chiffrée, profils vérifiés.",
   },

@@ -183,6 +183,13 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		})
 	}
 
+	// Send push notification to receiver
+	SendPushToUser(req.ReceiverID, msg.Sender.Username, msg.Content, map[string]interface{}{
+		"type":            "message",
+		"conversation_id": msg.ConversationID,
+		"sender_id":       msg.SenderID,
+	})
+
 	return c.Status(fiber.StatusCreated).JSON(msg)
 }
 

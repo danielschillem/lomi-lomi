@@ -205,7 +205,7 @@ export default function CartePage() {
                       {place.name}
                     </h3>
                     <p className="text-muted text-xs truncate">
-                      {place.city} — {place.category}
+                      {place.city} - {place.category}
                     </p>
                   </div>
                   {place.rating > 0 && (

@@ -1,5 +1,5 @@
-# Mode IP (pas de HTTPS automatique sans domaine)
-# Quand tu auras un domaine, remplace :80 par ton domaine
+# ===== DEVELOPMENT MODE (IP, no HTTPS) =====
+# When you have a domain, comment out this block and uncomment the production block below.
 
 :80 {
 	# API backend — routes /api/*
@@ -22,3 +22,28 @@
 		reverse_proxy frontend:3000
 	}
 }
+
+# ===== PRODUCTION MODE (uncomment and set your domain) =====
+# lomilomi.app {
+# 	# Automatic HTTPS via Let's Encrypt
+#
+# 	# API backend
+# 	handle /api/* {
+# 		reverse_proxy backend:8888
+# 	}
+#
+# 	# WebSocket (with proper upgrade headers)
+# 	handle /ws {
+# 		reverse_proxy backend:8888
+# 	}
+#
+# 	# Static uploads
+# 	handle /uploads/* {
+# 		reverse_proxy backend:8888
+# 	}
+#
+# 	# Frontend
+# 	handle {
+# 		reverse_proxy frontend:3000
+# 	}
+# }

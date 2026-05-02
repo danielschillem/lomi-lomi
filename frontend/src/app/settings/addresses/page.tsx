@@ -260,7 +260,7 @@ export default function AddressesPage() {
                       {addr.postal_code} {addr.city}, {addr.country}
                     </p>
                     {addr.phone && (
-                      <p className="text-sm text-gray-500">📞 {addr.phone}</p>
+                      <p className="text-sm text-gray-500">{addr.phone}</p>
                     )}
                   </div>
                   <div className="flex gap-1">

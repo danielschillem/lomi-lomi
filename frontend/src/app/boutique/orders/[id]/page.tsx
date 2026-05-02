@@ -160,7 +160,7 @@ export default function OrderTrackingPage() {
           <p className="text-sm text-gray-500">{order.delivery_address.city}</p>
           {order.delivery_address.phone && (
             <p className="text-sm text-gray-500">
-              📞 {order.delivery_address.phone}
+              {order.delivery_address.phone}
             </p>
           )}
         </div>

@@ -17,7 +17,7 @@ export default function GlobalError({
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center">
         <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-6">
-          <span className="text-3xl">⚠️</span>
+          <span className="text-3xl">!</span>
         </div>
         <h2 className="text-xl font-semibold mb-2 text-foreground">
           Une erreur est survenue

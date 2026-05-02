@@ -138,7 +138,7 @@ export default function ProfilePage() {
     setError("");
     try {
       await sendVerification();
-      setSuccess("Email de vérification envoyé — vérifiez votre boîte");
+      setSuccess("Email de vérification envoyé, vérifiez votre boîte");
       setTimeout(() => setSuccess(""), 5000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erreur vérification");

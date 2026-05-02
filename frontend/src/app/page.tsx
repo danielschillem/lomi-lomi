@@ -64,7 +64,7 @@ const steps = [
   {
     num: "04",
     title: "Rencontrez-vous",
-    desc: "Consultez notre carte interactive pour trouver le lieu parfait. Hôtels, restaurants, espaces de loisirs — tout est à portée de main.",
+    desc: "Consultez notre carte interactive pour trouver le lieu parfait. Hôtels, restaurants, espaces de loisirs, tout est à portée de main.",
   },
 ];
 

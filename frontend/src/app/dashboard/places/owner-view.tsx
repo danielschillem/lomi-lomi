@@ -69,7 +69,10 @@ export default function OwnerPlacesView() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {places.map((place) => (
-            <div key={place.id} className="rounded-xl bg-white/90 border border-border p-5 ">
+            <div
+              key={place.id}
+              className="rounded-xl bg-white/90 border border-border p-5 "
+            >
               {editId === place.id ? (
                 <div className="space-y-3">
                   <input
@@ -116,9 +119,7 @@ export default function OwnerPlacesView() {
                 <>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-white">
-                        {place.name}
-                      </h3>
+                      <h3 className="font-semibold text-white">{place.name}</h3>
                       <p className="text-sm text-muted">
                         {place.category} • {place.city}
                       </p>
@@ -140,9 +141,9 @@ export default function OwnerPlacesView() {
                     </p>
                   )}
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
-                    {place.address && <span>📍 {place.address}</span>}
-                    {place.phone && <span>📞 {place.phone}</span>}
-                    <span>⭐ {place.rating.toFixed(1)}</span>
+                    {place.address && <span>{place.address}</span>}
+                    {place.phone && <span>{place.phone}</span>}
+                    <span>{place.rating.toFixed(1)}</span>
                   </div>
                 </>
               )}

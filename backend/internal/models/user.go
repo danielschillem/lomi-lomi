@@ -28,6 +28,7 @@ type User struct {
 	IsOnline   bool       `gorm:"default:false" json:"is_online"`
 	LastSeenAt *time.Time `json:"last_seen_at"`
 	Role       string     `gorm:"size:20;default:user" json:"role"` // user, owner, admin
+	PushToken  string     `gorm:"size:255" json:"-"`
 	Photos     []Photo    `gorm:"foreignKey:UserID" json:"photos,omitempty"`
 }
 

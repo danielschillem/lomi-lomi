@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"bytes"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -155,7 +158,8 @@ func (h *OrangeMoneyHandler) callOrangeMoneyAPI(txnID string, amount int64, phon
 	return "", fmt.Errorf("no payment URL in response: %s", string(respBody))
 }
 
-// HandleWebhook handles Orange Money payment notifications
+// HandleWebhook handles Orange Money payment notifications.
+// Validates signature, handles all statuses, ensures idempotency.
 func (h *OrangeMoneyHandler) HandleWebhook(c *fiber.Ctx) error {
 	type Notification struct {
 		Status     string `json:"status"`
@@ -165,22 +169,71 @@ func (h *OrangeMoneyHandler) HandleWebhook(c *fiber.Ctx) error {
 		NotifToken string `json:"notif_token"`
 	}
 
+	body := c.Body()
+
+	// Validate webhook signature if API key is configured
+	if h.Config.OrangeMoneyAPIKey != "" {
+		signature := c.Get("X-OM-Signature")
+		if signature == "" {
+			signature = c.Get("X-Signature")
+		}
+		if signature != "" {
+			mac := hmac.New(sha256.New, []byte(h.Config.OrangeMoneyAPIKey))
+			mac.Write(body)
+			expected := hex.EncodeToString(mac.Sum(nil))
+			if !hmac.Equal([]byte(signature), []byte(expected)) {
+				log.Printf("[OM Webhook] Invalid signature: got %s", signature)
+				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Signature invalide"})
+			}
+		}
+	}
+
 	var notif Notification
-	if err := c.BodyParser(&notif); err != nil {
+	if err := json.Unmarshal(body, &notif); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
 	}
 
-	if notif.Status == "SUCCESS" || notif.Status == "SUCCESSFULL" {
-		// Find order by payment_id (txnID)
-		ref := notif.OrderID
-		if ref == "" {
-			ref = notif.TxnID
-		}
-		database.DB.Model(&models.Order{}).
-			Where("payment_id = ?", ref).
-			Updates(map[string]interface{}{
-				"status": "paid",
-			})
+	ref := notif.OrderID
+	if ref == "" {
+		ref = notif.TxnID
+	}
+	if ref == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Référence manquante"})
+	}
+
+	// Find the order
+	var order models.Order
+	if err := database.DB.Where("payment_id = ?", ref).First(&order).Error; err != nil {
+		log.Printf("[OM Webhook] Order not found for ref: %s", ref)
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Commande non trouvée"})
+	}
+
+	// Idempotency: skip if order is already in a final state
+	if order.Status == "paid" || order.Status == "delivered" || order.Status == "canceled" {
+		log.Printf("[OM Webhook] Order %d already in final state: %s (idempotent skip)", order.ID, order.Status)
+		return c.SendStatus(fiber.StatusOK)
+	}
+
+	// Process based on status
+	switch notif.Status {
+	case "SUCCESS", "SUCCESSFULL":
+		database.DB.Model(&order).Update("status", "paid")
+		log.Printf("[OM Webhook] Order %d marked as paid (ref: %s)", order.ID, ref)
+
+	case "FAILED", "FAILURE":
+		database.DB.Model(&order).Update("status", "payment_failed")
+		log.Printf("[OM Webhook] Order %d payment failed (ref: %s)", order.ID, ref)
+
+	case "CANCELLED", "CANCELED":
+		database.DB.Model(&order).Update("status", "canceled")
+		log.Printf("[OM Webhook] Order %d payment cancelled (ref: %s)", order.ID, ref)
+
+	case "EXPIRED", "TIMEOUT":
+		database.DB.Model(&order).Update("status", "payment_expired")
+		log.Printf("[OM Webhook] Order %d payment expired (ref: %s)", order.ID, ref)
+
+	default:
+		log.Printf("[OM Webhook] Unknown status '%s' for order %d (ref: %s)", notif.Status, order.ID, ref)
 	}
 
 	return c.SendStatus(fiber.StatusOK)

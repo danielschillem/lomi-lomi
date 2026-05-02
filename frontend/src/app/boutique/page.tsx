@@ -265,7 +265,7 @@ function BoutiqueContent() {
                     >
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-muted">
-                          #{o.id} —{" "}
+                          #{o.id} -{" "}
                           {new Date(o.created_at).toLocaleDateString("fr-FR")}
                         </span>
                         <span

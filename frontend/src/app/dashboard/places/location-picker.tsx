@@ -77,7 +77,7 @@ export default function LocationPicker({
       },
       (err) => {
         const messages: Record<number, string> = {
-          1: "Permission refusée — autorisez la localisation",
+          1: "Permission refusée, autorisez la localisation",
           2: "Position indisponible",
           3: "Délai dépassé",
         };

@@ -581,3 +581,17 @@ export function deleteAddress(id: number) {
     method: "DELETE",
   });
 }
+
+/* ===== Push Notifications ===== */
+export function registerPushToken(token: string) {
+  return request<{ message: string }>("/push/register", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export function unregisterPushToken() {
+  return request<{ message: string }>("/push/register", {
+    method: "DELETE",
+  });
+}
