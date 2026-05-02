@@ -100,7 +100,7 @@ export default function Navbar() {
               <Icon className="w-5 h-5" />
               <span className="text-[10px]">{link.label}</span>
               {link.badge && link.badge > 0 ? (
-                <span className="absolute -top-1 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold bg-pink-500 text-white rounded-full px-1">
+                <span className="absolute -top-1 -right-0.5 min-w-4.5 h-4.5 flex items-center justify-center text-[10px] font-bold bg-pink-500 text-white rounded-full px-1">
                   {link.badge > 99 ? "99+" : link.badge}
                 </span>
               ) : null}

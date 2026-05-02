@@ -239,6 +239,7 @@ export default function ProfilePage() {
                     className="hidden"
                     onChange={handleAvatarUpload}
                     disabled={uploading}
+                    title="Changer la photo de profil"
                   />
                 </label>
               </div>
@@ -418,6 +419,7 @@ export default function ProfilePage() {
                     />
                     <button
                       onClick={() => handleDeletePhoto(photo.id)}
+                      title="Supprimer cette photo"
                       className="absolute top-1 right-1 w-6 h-6 bg-red-600/80 hover:bg-red-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
                     >
                       <Trash2 className="w-3 h-3 text-white" />

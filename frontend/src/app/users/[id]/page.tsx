@@ -132,7 +132,7 @@ export default function UserProfilePage() {
 
         <div className="bg-white/90 border border-border rounded-2xl overflow-hidden">
           {/* Avatar */}
-          <div className="relative h-48 bg-gradient-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center">
+          <div className="relative h-48 bg-linear-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
