@@ -76,13 +76,13 @@ export default function NotificationsPage() {
   function iconFor(type: string) {
     switch (type) {
       case "match":
-        return <Heart className="w-5 h-5 text-pink-500" />;
+        return <Heart className="w-5 h-5 text-pink-600" />;
       case "message":
-        return <MessageCircle className="w-5 h-5 text-violet-400" />;
+        return <MessageCircle className="w-5 h-5 text-violet-600" />;
       case "order":
-        return <ShoppingBag className="w-5 h-5 text-green-400" />;
+        return <ShoppingBag className="w-5 h-5 text-green-600" />;
       default:
-        return <Bell className="w-5 h-5 text-zinc-400" />;
+        return <Bell className="w-5 h-5 text-muted" />;
     }
   }
 
@@ -106,7 +106,7 @@ export default function NotificationsPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -119,13 +119,13 @@ export default function NotificationsPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Bell className="w-5 h-5 text-violet-400" />
+            <Bell className="w-5 h-5 text-violet-600" />
             Notifications
             {unread > 0 && (
               <span className="text-xs bg-pink-600 text-white px-2 py-0.5 rounded-full">
@@ -136,7 +136,7 @@ export default function NotificationsPage() {
           {unread > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs text-violet-400 hover:text-violet-300 transition flex items-center gap-1"
+              className="text-xs text-violet-600 hover:text-violet-600 transition flex items-center gap-1"
             >
               <Check className="w-3.5 h-3.5" />
               Tout lire
@@ -145,9 +145,9 @@ export default function NotificationsPage() {
         </div>
 
         {notifs.length === 0 ? (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-12 text-center">
-            <Bell className="w-12 h-12 text-zinc-600 mx-auto mb-4" />
-            <p className="text-zinc-400">Aucune notification</p>
+          <div className="bg-white/90 border border-border rounded-2xl p-12 text-center">
+            <Bell className="w-12 h-12 text-muted/60 mx-auto mb-4" />
+            <p className="text-muted">Aucune notification</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -157,15 +157,15 @@ export default function NotificationsPage() {
                 <div
                   className={`flex items-start gap-4 p-4 rounded-xl border transition ${
                     n.is_read
-                      ? "bg-zinc-900/40 border-zinc-800"
-                      : "bg-zinc-900/80 border-violet-500/30"
-                  } ${href ? "hover:border-violet-500/50 cursor-pointer" : ""}`}
+                      ? "bg-surface/40 border-border"
+                      : "bg-surface/80 border-violet-200"
+                  } ${href ? "hover:border-violet-300 cursor-pointer" : ""}`}
                 >
                   <div className="mt-0.5">{iconFor(n.type)}</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm">{n.title}</p>
-                    <p className="text-zinc-400 text-sm mt-0.5">{n.body}</p>
-                    <p className="text-zinc-600 text-xs mt-1">
+                    <p className="text-muted text-sm mt-0.5">{n.body}</p>
+                    <p className="text-muted/60 text-xs mt-1">
                       {new Date(n.created_at).toLocaleString("fr-FR")}
                     </p>
                   </div>
@@ -175,7 +175,7 @@ export default function NotificationsPage() {
                       e.stopPropagation();
                       handleDelete(n.id);
                     }}
-                    className="text-zinc-600 hover:text-red-400 transition"
+                    className="text-muted/60 hover:text-red-400 transition"
                     title="Supprimer"
                   >
                     <Trash2 className="w-4 h-4" />

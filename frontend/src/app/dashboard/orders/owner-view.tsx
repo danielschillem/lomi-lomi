@@ -30,12 +30,12 @@ const STATUS_LABELS: Record<
 > = {
   pending: {
     label: "En attente",
-    color: "bg-yellow-500/10 text-yellow-400",
+    color: "bg-yellow-50 text-yellow-600",
     icon: Clock,
   },
   confirmed: {
     label: "Confirmée",
-    color: "bg-blue-500/10 text-blue-400",
+    color: "bg-blue-50 text-blue-600",
     icon: CheckCircle,
   },
   preparing: {
@@ -45,17 +45,17 @@ const STATUS_LABELS: Record<
   },
   shipped: {
     label: "Expédiée",
-    color: "bg-violet-500/10 text-violet-400",
+    color: "bg-violet-50 text-violet-600",
     icon: Truck,
   },
   delivered: {
     label: "Livrée",
-    color: "bg-green-500/10 text-green-400",
+    color: "bg-green-50 text-green-600",
     icon: CheckCircle,
   },
   canceled: {
     label: "Annulée",
-    color: "bg-red-500/100/10 text-red-400",
+    color: "bg-red-50 text-red-400",
     icon: XCircle,
   },
 };
@@ -104,7 +104,7 @@ export default function OwnerOrdersView() {
       </h1>
 
       {orders.length === 0 ? (
-        <p className="text-zinc-400">Aucune commande pour le moment.</p>
+        <p className="text-muted">Aucune commande pour le moment.</p>
       ) : (
         <div className="space-y-4">
           {orders.map((order) => {
@@ -112,13 +112,13 @@ export default function OwnerOrdersView() {
               STATUS_LABELS[order.status] || STATUS_LABELS.pending;
             const nextStatus = NEXT_STATUS[order.status];
             return (
-              <div key={order.id} className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 ">
+              <div key={order.id} className="rounded-xl bg-white/90 border border-border p-5 ">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <p className="font-semibold text-white">
                       Commande #{order.id}
                     </p>
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-muted">
                       {new Date(order.created_at).toLocaleDateString("fr-FR")} •{" "}
                       {order.user?.username || "Client"}
                     </p>
@@ -142,7 +142,7 @@ export default function OwnerOrdersView() {
                     {order.items.map((item, i) => (
                       <div
                         key={i}
-                        className="flex justify-between text-sm text-zinc-400"
+                        className="flex justify-between text-sm text-muted"
                       >
                         <span>
                           {item.product?.name || `Produit #${item.product_id}`}{" "}
@@ -156,7 +156,7 @@ export default function OwnerOrdersView() {
 
                 {/* Delivery address */}
                 {order.delivery_address && (
-                  <div className="mt-3 rounded-lg bg-zinc-800/50 p-3 text-sm">
+                  <div className="mt-3 rounded-lg bg-surface p-3 text-sm">
                     <p className="font-medium">📦 Livraison</p>
                     <p>{order.delivery_address.full_name}</p>
                     <p>
@@ -183,7 +183,7 @@ export default function OwnerOrdersView() {
                     order.status !== "delivered" && (
                       <button
                         onClick={() => handleStatusUpdate(order.id, "canceled")}
-                        className="rounded-lg bg-red-500/10 px-4 py-2 text-sm text-red-400 transition hover:bg-red-100"
+                        className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-400 transition hover:bg-red-100"
                       >
                         Annuler
                       </button>

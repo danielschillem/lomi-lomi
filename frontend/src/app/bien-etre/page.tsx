@@ -83,18 +83,18 @@ export default function WellnessPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-emerald-400" />
+            <Sparkles className="w-5 h-5 text-emerald-600" />
             Bien-être
           </h1>
           <Link
             href="/bien-etre/reservations"
-            className="inline-flex items-center gap-1.5 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition"
           >
             <Clock className="w-4 h-4" />
             Mes RDV
@@ -105,19 +105,19 @@ export default function WellnessPage() {
         <div className="mb-6 space-y-4">
           {/* City search */}
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="text"
               placeholder="Rechercher par ville..."
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500/50 transition"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 transition"
             />
           </div>
 
           {/* Category filters */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            <Filter className="w-4 h-4 text-zinc-500 shrink-0" />
+            <Filter className="w-4 h-4 text-muted shrink-0" />
             {categories.map((cat) => {
               const Icon = cat.icon;
               return (
@@ -126,8 +126,8 @@ export default function WellnessPage() {
                   onClick={() => setCategory(cat.value)}
                   className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                     category === cat.value
-                      ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                      : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+                      ? "bg-emerald-500/20 text-emerald-600 border border-emerald-500/30"
+                      : "bg-surface text-muted border border-border hover:border-border"
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -138,12 +138,12 @@ export default function WellnessPage() {
           </div>
 
           {/* Mobile filter */}
-          <label className="inline-flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+          <label className="inline-flex items-center gap-2 text-sm text-muted cursor-pointer">
             <input
               type="checkbox"
               checked={mobileOnly}
               onChange={(e) => setMobileOnly(e.target.checked)}
-              className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500/20"
+              className="rounded border-border bg-surface text-emerald-500 focus:ring-emerald-500/20"
             />
             <MapPin className="w-3.5 h-3.5" />À domicile uniquement
           </label>
@@ -151,14 +151,14 @@ export default function WellnessPage() {
 
         {/* Providers Grid */}
         {loading ? (
-          <div className="text-center py-12 text-zinc-400 animate-pulse">
+          <div className="text-center py-12 text-muted animate-pulse">
             Chargement des prestataires...
           </div>
         ) : providers.length === 0 ? (
           <div className="text-center py-12">
-            <Sparkles className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+            <Sparkles className="w-16 h-16 text-muted/60 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Aucun prestataire</h2>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-muted text-sm">
               Les prestataires bien-être seront bientôt disponibles.
             </p>
           </div>
@@ -168,10 +168,10 @@ export default function WellnessPage() {
               <Link
                 key={provider.id}
                 href={`/bien-etre/${provider.id}`}
-                className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden hover:border-emerald-500/30 transition group"
+                className="bg-white/90 border border-border rounded-2xl overflow-hidden hover:border-emerald-500/30 transition group"
               >
                 {/* Image */}
-                <div className="h-48 bg-zinc-800 flex items-center justify-center relative">
+                <div className="h-48 bg-surface-2 flex items-center justify-center relative">
                   {provider.image_url ? (
                     <img
                       src={provider.image_url}
@@ -179,7 +179,7 @@ export default function WellnessPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Sparkles className="w-12 h-12 text-zinc-600" />
+                    <Sparkles className="w-12 h-12 text-muted/60" />
                   )}
                   {provider.is_verified && (
                     <span className="absolute top-3 right-3 bg-emerald-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -197,44 +197,44 @@ export default function WellnessPage() {
                 {/* Info */}
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-sm group-hover:text-emerald-400 transition truncate">
+                    <h3 className="font-semibold text-sm group-hover:text-emerald-600 transition truncate">
                       {provider.name}
                     </h3>
                     {provider.rating > 0 && (
-                      <span className="shrink-0 flex items-center gap-1 text-xs text-yellow-400">
+                      <span className="shrink-0 flex items-center gap-1 text-xs text-yellow-600">
                         <Star className="w-3.5 h-3.5 fill-yellow-400" />
                         {provider.rating.toFixed(1)}
-                        <span className="text-zinc-500">
+                        <span className="text-muted">
                           ({provider.review_count})
                         </span>
                       </span>
                     )}
                   </div>
 
-                  <span className="text-xs text-zinc-500 capitalize">
+                  <span className="text-xs text-muted capitalize">
                     {categories.find((c) => c.value === provider.category)
                       ?.label || provider.category}
                   </span>
 
-                  <p className="text-zinc-400 text-xs mt-2 line-clamp-2 leading-relaxed">
+                  <p className="text-muted text-xs mt-2 line-clamp-2 leading-relaxed">
                     {provider.description}
                   </p>
 
                   {provider.city && (
-                    <p className="text-zinc-500 text-xs mt-2 flex items-center gap-1">
+                    <p className="text-muted text-xs mt-2 flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {provider.city}
                     </p>
                   )}
 
                   {/* Services preview */}
-                  <div className="mt-3 pt-3 border-t border-zinc-800 flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
+                    <span className="text-xs text-muted">
                       {provider.services?.length || 0} service
                       {(provider.services?.length || 0) > 1 ? "s" : ""}
                     </span>
                     {minPrice(provider.services) !== null && (
-                      <span className="text-sm font-bold text-emerald-400">
+                      <span className="text-sm font-bold text-emerald-600">
                         À partir de{" "}
                         {Math.round(minPrice(provider.services) || 0)} FCFA
                       </span>

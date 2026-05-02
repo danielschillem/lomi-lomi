@@ -92,42 +92,42 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Users className="w-6 h-6 text-violet-400" />
+          <Users className="w-6 h-6 text-violet-600" />
           Utilisateurs
         </h1>
-        <span className="text-sm text-zinc-500">{total} au total</span>
+        <span className="text-sm text-muted">{total} au total</span>
       </div>
 
       {/* Search */}
       <form onSubmit={handleSearch} className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
         <input
           type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Rechercher par pseudo ou email..."
-          className="w-full bg-zinc-900/60 border border-zinc-800 rounded-lg pl-10 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+          className="w-full bg-white/90 border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
         />
       </form>
 
       {/* Table */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white/90 border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+            <tr className="border-b border-border">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Utilisateur
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden md:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden md:table-cell">
                 Email
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden sm:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden sm:table-cell">
                 Ville
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Statut
               </th>
-              <th className="text-right px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-right px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Actions
               </th>
             </tr>
@@ -137,7 +137,7 @@ export default function AdminUsersPage() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-12 text-center text-zinc-500 animate-pulse"
+                  className="px-6 py-12 text-center text-muted animate-pulse"
                 >
                   Chargement...
                 </td>
@@ -146,9 +146,9 @@ export default function AdminUsersPage() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-12 text-center text-zinc-500"
+                  className="px-6 py-12 text-center text-muted"
                 >
-                  <Users className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+                  <Users className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucun utilisateur trouvé.
                 </td>
               </tr>
@@ -156,11 +156,11 @@ export default function AdminUsersPage() {
               users.map((u) => (
                 <tr
                   key={u.id}
-                  className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition"
+                  className="border-b border-border/50 hover:bg-gray-100/30 transition"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-zinc-800 overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-full bg-surface-2 overflow-hidden shrink-0 flex items-center justify-center">
                         {u.avatar_url ? (
                           <img
                             src={u.avatar_url}
@@ -168,7 +168,7 @@ export default function AdminUsersPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-xs text-zinc-500">
+                          <span className="text-xs text-muted">
                             {u.username?.[0]?.toUpperCase()}
                           </span>
                         )}
@@ -180,28 +180,28 @@ export default function AdminUsersPage() {
                             <span className="w-2 h-2 rounded-full bg-green-400" />
                           )}
                         </span>
-                        <span className="text-xs text-zinc-500 block">
+                        <span className="text-xs text-muted block">
                           #{u.id} —{" "}
                           {new Date(u.created_at).toLocaleDateString("fr-FR")}
                         </span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-zinc-400 hidden md:table-cell">
+                  <td className="px-6 py-4 text-muted hidden md:table-cell">
                     {u.email}
                   </td>
-                  <td className="px-6 py-4 text-zinc-400 hidden sm:table-cell">
+                  <td className="px-6 py-4 text-muted hidden sm:table-cell">
                     {u.city || "—"}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5">
                       {u.role === "admin" && (
-                        <span className="text-[10px] bg-violet-500/10 text-violet-400 border border-violet-500/20 px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="text-[10px] bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full font-medium">
                           Admin
                         </span>
                       )}
                       {u.is_verified && (
-                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1.5 py-0.5 rounded-full font-medium">
                           Vérifié
                         </span>
                       )}
@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
                             ? "Rétrograder"
                             : "Promouvoir admin"
                         }
-                        className="p-1.5 rounded-md hover:bg-zinc-700 transition text-zinc-500 hover:text-violet-400"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-violet-600"
                       >
                         <Crown className="w-4 h-4" />
                       </button>
@@ -225,7 +225,7 @@ export default function AdminUsersPage() {
                         title={
                           u.is_verified ? "Retirer vérification" : "Vérifier"
                         }
-                        className="p-1.5 rounded-md hover:bg-zinc-700 transition text-zinc-500 hover:text-emerald-400"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-emerald-600"
                       >
                         {u.is_verified ? (
                           <UserX className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => handleDelete(u)}
                         title="Supprimer"
-                        className="p-1.5 rounded-md hover:bg-zinc-700 transition text-zinc-500 hover:text-red-400"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -255,18 +255,18 @@ export default function AdminUsersPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white disabled:opacity-30 transition"
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground disabled:opacity-30 transition"
           >
             <ChevronLeft className="w-4 h-4" />
             Précédent
           </button>
-          <span className="text-sm text-zinc-500">
+          <span className="text-sm text-muted">
             Page {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white disabled:opacity-30 transition"
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground disabled:opacity-30 transition"
           >
             Suivant
             <ChevronRight className="w-4 h-4" />

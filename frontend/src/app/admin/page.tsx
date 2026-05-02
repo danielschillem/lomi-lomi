@@ -38,37 +38,37 @@ export default function AdminDashboard() {
       label: "Utilisateurs",
       value: stats?.users ?? "—",
       icon: Users,
-      color: "text-violet-400",
+      color: "text-violet-600",
     },
     {
       label: "Produits",
       value: stats?.products ?? "—",
       icon: ShoppingBag,
-      color: "text-pink-400",
+      color: "text-pink-500",
     },
     {
       label: "Lieux",
       value: stats?.places ?? "—",
       icon: MapPin,
-      color: "text-blue-400",
+      color: "text-blue-600",
     },
     {
       label: "Messages",
       value: stats?.messages ?? "—",
       icon: MessageCircle,
-      color: "text-green-400",
+      color: "text-green-600",
     },
     {
       label: "Commandes",
       value: stats?.orders ?? "—",
       icon: ShoppingCart,
-      color: "text-yellow-400",
+      color: "text-yellow-600",
     },
     {
       label: "Revenus",
       value: stats?.revenue != null ? `${Math.round(stats.revenue)} FCFA` : "—",
       icon: TrendingUp,
-      color: "text-emerald-400",
+      color: "text-emerald-600",
     },
     {
       label: "Prestataires bien-être",
@@ -94,10 +94,10 @@ export default function AdminDashboard() {
           return (
             <div
               key={s.label}
-              className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6"
+              className="bg-white/90 border border-border rounded-xl p-6"
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-zinc-500 uppercase tracking-wider">
+                <span className="text-xs text-muted uppercase tracking-wider">
                   {s.label}
                 </span>
                 <Icon className={`w-5 h-5 ${s.color}`} />

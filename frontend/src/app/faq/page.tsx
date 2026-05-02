@@ -55,13 +55,13 @@ export default function FaqPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-violet-400" />
+            <HelpCircle className="w-5 h-5 text-violet-600" />
             Aide & Légal
           </h1>
           <div className="w-16" />
@@ -74,7 +74,7 @@ export default function FaqPage() {
             {faqs.map((faq, i) => (
               <div
                 key={i}
-                className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden"
+                className="bg-white/90 border border-border rounded-xl overflow-hidden"
               >
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
@@ -82,13 +82,13 @@ export default function FaqPage() {
                 >
                   <span className="text-sm font-medium pr-4">{faq.q}</span>
                   {open === i ? (
-                    <ChevronUp className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-muted shrink-0" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-muted shrink-0" />
                   )}
                 </button>
                 {open === i && (
-                  <div className="px-5 pb-4 text-sm text-zinc-400 leading-relaxed border-t border-zinc-800 pt-3">
+                  <div className="px-5 pb-4 text-sm text-muted leading-relaxed border-t border-border pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -100,10 +100,10 @@ export default function FaqPage() {
         {/* CGU */}
         <section className="mb-10">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Scale className="w-5 h-5 text-violet-400" />
+            <Scale className="w-5 h-5 text-violet-600" />
             Conditions générales d&apos;utilisation
           </h2>
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 text-sm text-zinc-400 space-y-4 leading-relaxed">
+          <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
             <p>
               <strong className="text-white">1. Objet</strong> — Les présentes
               CGU régissent l&apos;utilisation de la plateforme Lomi Lomi,
@@ -156,10 +156,10 @@ export default function FaqPage() {
         {/* Privacy */}
         <section>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-violet-400" />
+            <Shield className="w-5 h-5 text-violet-600" />
             Politique de confidentialité
           </h2>
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-6 text-sm text-zinc-400 space-y-4 leading-relaxed">
+          <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
             <p>
               Lomi Lomi collecte uniquement les données nécessaires au
               fonctionnement du service : pseudo, email, localisation
@@ -174,7 +174,7 @@ export default function FaqPage() {
               l&apos;ensemble de vos données depuis les paramètres de votre
               profil.
             </p>
-            <p className="text-zinc-500 text-xs">
+            <p className="text-muted text-xs">
               Dernière mise à jour : 20 avril 2026
             </p>
           </div>

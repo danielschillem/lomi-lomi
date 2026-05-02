@@ -100,7 +100,7 @@ export default function MapView({
             eventHandlers={{ click: () => onSelect(place) }}
           >
             <Popup>
-              <div className="text-zinc-900">
+              <div className="text-foreground">
                 <strong>{place.name}</strong>
                 <br />
                 <span className="text-xs">
@@ -113,7 +113,7 @@ export default function MapView({
       {userLocation && (
         <Marker position={userLocation} icon={userIcon}>
           <Popup>
-            <div className="text-zinc-900 text-sm font-medium">
+            <div className="text-foreground text-sm font-medium">
               Votre position
             </div>
           </Popup>

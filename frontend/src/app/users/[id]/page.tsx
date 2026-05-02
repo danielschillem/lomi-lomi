@@ -92,7 +92,7 @@ export default function UserProfilePage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -101,11 +101,11 @@ export default function UserProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <User className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
-          <p className="text-zinc-400">{error || "Profil introuvable"}</p>
+          <User className="w-16 h-16 text-muted/60 mx-auto mb-4" />
+          <p className="text-muted">{error || "Profil introuvable"}</p>
           <Link
             href="/discover"
-            className="inline-block mt-4 text-violet-400 hover:text-violet-300 text-sm"
+            className="inline-block mt-4 text-violet-600 hover:text-violet-600 text-sm"
           >
             Retour à la découverte
           </Link>
@@ -123,29 +123,29 @@ export default function UserProfilePage() {
         <div className="flex items-center justify-between mb-8">
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Retour
           </button>
         </div>
 
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
+        <div className="bg-white/90 border border-border rounded-2xl overflow-hidden">
           {/* Avatar */}
           <div className="relative h-48 bg-gradient-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center">
             {profile.avatar_url ? (
               <img
                 src={profile.avatar_url}
                 alt={profile.username}
-                className="w-28 h-28 rounded-full object-cover border-4 border-zinc-900"
+                className="w-28 h-28 rounded-full object-cover border-4 border-white"
               />
             ) : (
-              <div className="w-28 h-28 rounded-full bg-zinc-800 flex items-center justify-center border-4 border-zinc-900">
-                <User className="w-14 h-14 text-zinc-500" />
+              <div className="w-28 h-28 rounded-full bg-surface-2 flex items-center justify-center border-4 border-white">
+                <User className="w-14 h-14 text-muted" />
               </div>
             )}
             {profile.is_online && (
-              <span className="absolute bottom-4 left-1/2 translate-x-8 w-5 h-5 bg-green-500 rounded-full border-3 border-zinc-900" />
+              <span className="absolute bottom-4 left-1/2 translate-x-8 w-5 h-5 bg-green-500 rounded-full border-3 border-white" />
             )}
           </div>
 
@@ -154,24 +154,24 @@ export default function UserProfilePage() {
             <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
               {profile.username}
               {profile.is_verified && (
-                <BadgeCheck className="w-5 h-5 text-violet-400" />
+                <BadgeCheck className="w-5 h-5 text-violet-600" />
               )}
             </h1>
 
             {profile.city && (
-              <p className="text-sm text-zinc-400 flex items-center justify-center gap-1 mt-1">
+              <p className="text-sm text-muted flex items-center justify-center gap-1 mt-1">
                 <MapPin className="w-3.5 h-3.5" />
                 {profile.city}
               </p>
             )}
 
             {profile.gender && (
-              <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs bg-zinc-800 text-zinc-300">
+              <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs bg-surface-2 text-foreground">
                 {profile.gender}
               </span>
             )}
 
-            <p className="text-sm text-zinc-500 flex items-center justify-center gap-1 mt-3">
+            <p className="text-sm text-muted flex items-center justify-center gap-1 mt-3">
               <Calendar className="w-3.5 h-3.5" />
               Membre depuis{" "}
               {new Date(profile.created_at).toLocaleDateString("fr-FR", {
@@ -181,7 +181,7 @@ export default function UserProfilePage() {
             </p>
 
             {profile.bio && (
-              <div className="mt-4 bg-zinc-800/50 rounded-xl p-4 text-sm text-zinc-300 text-left">
+              <div className="mt-4 bg-surface rounded-xl p-4 text-sm text-foreground text-left">
                 {profile.bio}
               </div>
             )}
@@ -189,7 +189,7 @@ export default function UserProfilePage() {
             {/* Photo gallery */}
             {photos.length > 0 && (
               <div className="mt-4">
-                <h3 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1 justify-center">
+                <h3 className="text-xs font-medium text-muted uppercase tracking-wider mb-2 flex items-center gap-1 justify-center">
                   <ImageIcon className="w-3 h-3" />
                   Photos ({photos.length})
                 </h3>
@@ -225,7 +225,7 @@ export default function UserProfilePage() {
                   <button
                     onClick={() => setShowReport(!showReport)}
                     disabled={reported}
-                    className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
+                    className="flex-1 border border-border text-muted hover:text-foreground py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
                   >
                     <Flag className="w-4 h-4" />
                     {reported ? "Signalé" : "Signaler"}
@@ -233,13 +233,13 @@ export default function UserProfilePage() {
                 </div>
 
                 {showReport && (
-                  <div className="bg-zinc-800/50 rounded-lg p-3 space-y-1">
+                  <div className="bg-surface rounded-lg p-3 space-y-1">
                     {["spam", "fake", "harassment", "inappropriate"].map(
                       (r) => (
                         <button
                           key={r}
                           onClick={() => handleReport(r)}
-                          className="w-full text-left px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-700 rounded transition capitalize"
+                          className="w-full text-left px-3 py-1.5 text-sm text-foreground hover:bg-gray-100 rounded transition capitalize"
                         >
                           {r === "harassment"
                             ? "Harcèlement"
@@ -260,7 +260,7 @@ export default function UserProfilePage() {
               <div className="mt-6">
                 <Link
                   href="/settings"
-                  className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300"
+                  className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-600"
                 >
                   Modifier mes paramètres
                 </Link>

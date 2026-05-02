@@ -91,21 +91,21 @@ export default function LocationPicker({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs text-zinc-500 block">
+        <label className="text-xs text-muted block">
           Cliquez sur la carte ou utilisez le GPS
         </label>
         <button
           type="button"
           onClick={handleGeolocate}
           disabled={gpsLoading}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 text-white text-xs font-medium rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
         >
           <LocateFixed size={14} className={gpsLoading ? "animate-spin" : ""} />
           {gpsLoading ? "Localisation…" : "Ma position GPS"}
         </button>
       </div>
       {gpsError && <p className="text-xs text-red-400">{gpsError}</p>}
-      <div className="rounded-lg overflow-hidden border border-zinc-700 h-56">
+      <div className="rounded-lg overflow-hidden border border-border h-56">
         <MapContainer
           center={center}
           zoom={hasPosition ? 15 : 12}
@@ -127,7 +127,7 @@ export default function LocationPicker({
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Latitude</label>
+          <label className="text-xs text-muted mb-1 block">Latitude</label>
           <input
             type="number"
             step="any"
@@ -136,11 +136,11 @@ export default function LocationPicker({
             onChange={(e) =>
               onChange(parseFloat(e.target.value) || 0, longitude)
             }
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
+            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
           />
         </div>
         <div>
-          <label className="text-xs text-zinc-500 mb-1 block">Longitude</label>
+          <label className="text-xs text-muted mb-1 block">Longitude</label>
           <input
             type="number"
             step="any"
@@ -149,7 +149,7 @@ export default function LocationPicker({
             onChange={(e) =>
               onChange(latitude, parseFloat(e.target.value) || 0)
             }
-            className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
+            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
           />
         </div>
       </div>

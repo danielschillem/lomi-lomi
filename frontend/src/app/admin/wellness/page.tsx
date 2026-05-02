@@ -396,7 +396,7 @@ export default function AdminWellnessPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Sparkles className="w-6 h-6 text-emerald-400" />
+          <Sparkles className="w-6 h-6 text-emerald-600" />
           Bien-être
         </h1>
         <div className="flex gap-2">
@@ -404,8 +404,8 @@ export default function AdminWellnessPage() {
             onClick={() => setTab("providers")}
             className={`px-4 py-2 rounded-lg text-sm transition ${
               tab === "providers"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-zinc-800 text-zinc-400 hover:text-white"
+                ? "bg-emerald-500/20 text-emerald-600"
+                : "bg-surface-2 text-muted hover:text-foreground"
             }`}
           >
             Prestataires
@@ -414,8 +414,8 @@ export default function AdminWellnessPage() {
             onClick={() => setTab("bookings")}
             className={`px-4 py-2 rounded-lg text-sm transition ${
               tab === "bookings"
-                ? "bg-emerald-500/20 text-emerald-400"
-                : "bg-zinc-800 text-zinc-400 hover:text-white"
+                ? "bg-emerald-500/20 text-emerald-600"
+                : "bg-surface-2 text-muted hover:text-foreground"
             }`}
           >
             Réservations
@@ -429,7 +429,7 @@ export default function AdminWellnessPage() {
           <button
             onClick={() => setError(null)}
             title="Fermer"
-            className="ml-2 text-red-400 hover:text-white"
+            className="ml-2 text-red-400 hover:text-foreground"
           >
             <X className="w-4 h-4" />
           </button>
@@ -440,7 +440,7 @@ export default function AdminWellnessPage() {
       {tab === "providers" && (
         <>
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-muted">
               {providers.length} prestataire{providers.length > 1 ? "s" : ""}
             </p>
             <button
@@ -453,7 +453,7 @@ export default function AdminWellnessPage() {
           </div>
 
           {loadingProviders ? (
-            <div className="text-zinc-400 text-sm animate-pulse py-8 text-center">
+            <div className="text-muted text-sm animate-pulse py-8 text-center">
               Chargement...
             </div>
           ) : (
@@ -461,7 +461,7 @@ export default function AdminWellnessPage() {
               {providers.map((p) => (
                 <div
                   key={p.id}
-                  className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5"
+                  className="bg-white/90 border border-border rounded-xl p-5"
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
@@ -473,40 +473,40 @@ export default function AdminWellnessPage() {
                           </span>
                         )}
                         {p.is_verified && (
-                          <span className="text-xs text-emerald-400">
+                          <span className="text-xs text-emerald-600">
                             ✓ Vérifié
                           </span>
                         )}
                       </h3>
-                      <span className="text-xs text-zinc-500 capitalize">
+                      <span className="text-xs text-muted capitalize">
                         {p.category.replace("_", " ")} — {p.city || "Ville N/A"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openAvailability(p)}
-                        className="text-zinc-500 hover:text-emerald-400 transition"
+                        className="text-muted hover:text-emerald-600 transition"
                         title="Horaires"
                       >
                         <Clock className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openNewService(p.id)}
-                        className="text-zinc-500 hover:text-emerald-400 transition"
+                        className="text-muted hover:text-emerald-600 transition"
                         title="Ajouter service"
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => openEditProvider(p)}
-                        className="text-zinc-500 hover:text-blue-400 transition"
+                        className="text-muted hover:text-blue-600 transition"
                         title="Modifier"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => deleteProvider(p.id)}
-                        className="text-zinc-500 hover:text-red-400 transition"
+                        className="text-muted hover:text-red-400 transition"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -520,11 +520,11 @@ export default function AdminWellnessPage() {
                       {p.services.map((s) => (
                         <div
                           key={s.id}
-                          className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-3 py-2"
+                          className="flex items-center justify-between bg-surface rounded-lg px-3 py-2"
                         >
                           <div>
                             <span className="text-sm">{s.name}</span>
-                            <span className="text-xs text-zinc-500 ml-2">
+                            <span className="text-xs text-muted ml-2">
                               {s.duration}min — {Math.round(s.price)} FCFA
                               {s.is_duo ? " (duo)" : ""}
                             </span>
@@ -532,14 +532,14 @@ export default function AdminWellnessPage() {
                           <div className="flex gap-1.5">
                             <button
                               onClick={() => openEditService(s)}
-                              className="text-zinc-500 hover:text-blue-400 transition"
+                              className="text-muted hover:text-blue-600 transition"
                               title="Modifier service"
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => deleteService(s.id)}
-                              className="text-zinc-500 hover:text-red-400 transition"
+                              className="text-muted hover:text-red-400 transition"
                               title="Supprimer service"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -558,7 +558,7 @@ export default function AdminWellnessPage() {
                         .map((a, i) => (
                           <span
                             key={i}
-                            className="text-[10px] bg-zinc-800 text-zinc-500 px-2 py-0.5 rounded"
+                            className="text-[10px] bg-surface-2 text-muted px-2 py-0.5 rounded"
                           >
                             {dayNames[a.day_of_week]} {a.start_time}-
                             {a.end_time}
@@ -586,8 +586,8 @@ export default function AdminWellnessPage() {
                 }}
                 className={`px-3 py-1.5 rounded-full text-xs transition whitespace-nowrap ${
                   bookingsStatus === s
-                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                    : "bg-zinc-900 text-zinc-400 border border-zinc-800"
+                    ? "bg-emerald-500/20 text-emerald-600 border border-emerald-500/30"
+                    : "bg-surface text-muted border border-border"
                 }`}
               >
                 {s === ""
@@ -604,11 +604,11 @@ export default function AdminWellnessPage() {
           </div>
 
           {loadingBookings ? (
-            <div className="text-zinc-400 text-sm animate-pulse py-8 text-center">
+            <div className="text-muted text-sm animate-pulse py-8 text-center">
               Chargement...
             </div>
           ) : bookings.length === 0 ? (
-            <p className="text-zinc-500 text-sm py-8 text-center">
+            <p className="text-muted text-sm py-8 text-center">
               Aucune réservation.
             </p>
           ) : (
@@ -616,36 +616,36 @@ export default function AdminWellnessPage() {
               {bookings.map((b) => (
                 <div
                   key={b.id}
-                  className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4"
+                  className="bg-white/90 border border-border rounded-xl p-4"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
                       <span className="text-sm font-semibold">
                         {b.service?.name}
                       </span>
-                      <span className="text-xs text-zinc-500 ml-2">
+                      <span className="text-xs text-muted ml-2">
                         #{b.id}
                       </span>
                       <br />
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted">
                         par {b.user?.username} — {b.provider?.name}
                       </span>
                     </div>
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         b.status === "confirmed"
-                          ? "bg-emerald-500/10 text-emerald-400"
+                          ? "bg-emerald-50 text-emerald-600"
                           : b.status === "completed"
-                            ? "bg-blue-500/10 text-blue-400"
+                            ? "bg-blue-50 text-blue-600"
                             : b.status === "canceled"
-                              ? "bg-red-500/10 text-red-400"
+                              ? "bg-red-50 text-red-400"
                               : "bg-amber-500/10 text-amber-400"
                       }`}
                     >
                       {b.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-xs text-zinc-400 mb-3">
+                  <div className="flex items-center gap-4 text-xs text-muted mb-3">
                     <span>{new Date(b.date).toLocaleDateString("fr-FR")}</span>
                     <span>
                       {b.start_time} — {b.end_time}
@@ -688,17 +688,17 @@ export default function AdminWellnessPage() {
                 <button
                   onClick={() => setBookingsPage((p) => Math.max(1, p - 1))}
                   disabled={bookingsPage === 1}
-                  className="text-xs text-zinc-500 hover:text-white disabled:opacity-30 transition"
+                  className="text-xs text-muted hover:text-foreground disabled:opacity-30 transition"
                 >
                   ← Précédent
                 </button>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-muted">
                   Page {bookingsPage}
                 </span>
                 <button
                   onClick={() => setBookingsPage((p) => p + 1)}
                   disabled={bookings.length < 20}
-                  className="text-xs text-zinc-500 hover:text-white disabled:opacity-30 transition"
+                  className="text-xs text-muted hover:text-foreground disabled:opacity-30 transition"
                 >
                   Suivant →
                 </button>
@@ -712,13 +712,13 @@ export default function AdminWellnessPage() {
       {showProviderModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-zinc-950/80"
+            className="absolute inset-0 bg-white/80"
             onClick={() => setShowProviderModal(false)}
           />
-          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setShowProviderModal(false)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+              className="absolute top-4 right-4 text-muted hover:text-foreground"
               title="Fermer"
             >
               <X className="w-5 h-5" />
@@ -730,7 +730,7 @@ export default function AdminWellnessPage() {
               <div className="col-span-2">
                 <label
                   htmlFor="provider-name"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Nom
                 </label>
@@ -740,13 +740,13 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div className="col-span-2">
                 <label
                   htmlFor="provider-desc"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Description
                 </label>
@@ -760,13 +760,13 @@ export default function AdminWellnessPage() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white resize-none"
                 />
               </div>
               <div>
                 <label
                   htmlFor="provider-category"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Catégorie
                 </label>
@@ -779,7 +779,7 @@ export default function AdminWellnessPage() {
                       category: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 >
                   {providerCategories.map((c) => (
                     <option key={c} value={c}>
@@ -791,7 +791,7 @@ export default function AdminWellnessPage() {
               <div>
                 <label
                   htmlFor="provider-city"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Ville
                 </label>
@@ -801,13 +801,13 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, city: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div className="col-span-2">
                 <label
                   htmlFor="provider-address"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Adresse
                 </label>
@@ -820,13 +820,13 @@ export default function AdminWellnessPage() {
                       address: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div>
                 <label
                   htmlFor="provider-phone"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Téléphone
                 </label>
@@ -836,13 +836,13 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, phone: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div>
                 <label
                   htmlFor="provider-email"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Email
                 </label>
@@ -853,13 +853,13 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, email: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div>
                 <label
                   htmlFor="provider-website"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Site web
                 </label>
@@ -872,13 +872,13 @@ export default function AdminWellnessPage() {
                       website: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div>
                 <label
                   htmlFor="provider-image"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Image URL
                 </label>
@@ -891,19 +891,19 @@ export default function AdminWellnessPage() {
                       image_url: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div className="col-span-2">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-xs text-zinc-500">
+                  <label className="block text-xs text-muted">
                     Localisation GPS
                   </label>
                   <button
                     type="button"
                     onClick={handleGeolocateProvider}
                     disabled={gpsLoading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-700 text-white text-xs font-medium rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
                   >
                     <LocateFixed
                       size={14}
@@ -919,7 +919,7 @@ export default function AdminWellnessPage() {
                   <div>
                     <label
                       htmlFor="provider-lat"
-                      className="block text-xs text-zinc-500 mb-1"
+                      className="block text-xs text-muted mb-1"
                     >
                       Latitude
                     </label>
@@ -934,13 +934,13 @@ export default function AdminWellnessPage() {
                           latitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                     />
                   </div>
                   <div>
                     <label
                       htmlFor="provider-lng"
-                      className="block text-xs text-zinc-500 mb-1"
+                      className="block text-xs text-muted mb-1"
                     >
                       Longitude
                     </label>
@@ -955,13 +955,13 @@ export default function AdminWellnessPage() {
                           longitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                     />
                   </div>
                 </div>
               </div>
               <div className="col-span-2">
-                <label className="block text-xs text-zinc-500 mb-1">
+                <label className="block text-xs text-muted mb-1">
                   Certifications (séparées par des virgules)
                 </label>
                 <input
@@ -973,10 +973,10 @@ export default function AdminWellnessPage() {
                     })
                   }
                   placeholder="RNCP, FFMBE, ..."
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={providerForm.mobile_service}
@@ -986,11 +986,11 @@ export default function AdminWellnessPage() {
                       mobile_service: e.target.checked,
                     })
                   }
-                  className="rounded border-zinc-700 bg-zinc-900 text-emerald-500"
+                  className="rounded border-border bg-surface text-emerald-500"
                 />
                 À domicile
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={providerForm.is_verified}
@@ -1000,11 +1000,11 @@ export default function AdminWellnessPage() {
                       is_verified: e.target.checked,
                     })
                   }
-                  className="rounded border-zinc-700 bg-zinc-900 text-emerald-500"
+                  className="rounded border-border bg-surface text-emerald-500"
                 />
                 Vérifié
               </label>
-              <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
                 <input
                   type="checkbox"
                   checked={providerForm.is_active}
@@ -1014,7 +1014,7 @@ export default function AdminWellnessPage() {
                       is_active: e.target.checked,
                     })
                   }
-                  className="rounded border-zinc-700 bg-zinc-900 text-emerald-500"
+                  className="rounded border-border bg-surface text-emerald-500"
                 />
                 Actif
               </label>
@@ -1033,13 +1033,13 @@ export default function AdminWellnessPage() {
       {showServiceModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-zinc-950/80"
+            className="absolute inset-0 bg-white/80"
             onClick={() => setShowServiceModal(false)}
           />
-          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
+          <div className="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-md">
             <button
               onClick={() => setShowServiceModal(false)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+              className="absolute top-4 right-4 text-muted hover:text-foreground"
               title="Fermer"
             >
               <X className="w-5 h-5" />
@@ -1051,7 +1051,7 @@ export default function AdminWellnessPage() {
               <div>
                 <label
                   htmlFor="service-name"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Nom
                 </label>
@@ -1061,13 +1061,13 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setServiceForm({ ...serviceForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div>
                 <label
                   htmlFor="service-desc"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Description
                 </label>
@@ -1081,14 +1081,14 @@ export default function AdminWellnessPage() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label
                     htmlFor="service-duration"
-                    className="block text-xs text-zinc-500 mb-1"
+                    className="block text-xs text-muted mb-1"
                   >
                     Durée (min)
                   </label>
@@ -1102,13 +1102,13 @@ export default function AdminWellnessPage() {
                         duration: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                   />
                 </div>
                 <div>
                   <label
                     htmlFor="service-price"
-                    className="block text-xs text-zinc-500 mb-1"
+                    className="block text-xs text-muted mb-1"
                   >
                     Prix (FCFA)
                   </label>
@@ -1123,14 +1123,14 @@ export default function AdminWellnessPage() {
                         price: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                   />
                 </div>
               </div>
               <div>
                 <label
                   htmlFor="service-category"
-                  className="block text-xs text-zinc-500 mb-1"
+                  className="block text-xs text-muted mb-1"
                 >
                   Catégorie
                 </label>
@@ -1144,11 +1144,11 @@ export default function AdminWellnessPage() {
                     })
                   }
                   placeholder="relaxation, hot_stones, thai..."
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
                 />
               </div>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={serviceForm.is_duo}
@@ -1158,11 +1158,11 @@ export default function AdminWellnessPage() {
                         is_duo: e.target.checked,
                       })
                     }
-                    className="rounded border-zinc-700 bg-zinc-900 text-pink-500"
+                    className="rounded border-border bg-surface text-pink-600"
                   />
                   Duo possible
                 </label>
-                <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
                   <input
                     type="checkbox"
                     checked={serviceForm.is_active}
@@ -1172,7 +1172,7 @@ export default function AdminWellnessPage() {
                         is_active: e.target.checked,
                       })
                     }
-                    className="rounded border-zinc-700 bg-zinc-900 text-emerald-500"
+                    className="rounded border-border bg-surface text-emerald-500"
                   />
                   Actif
                 </label>
@@ -1192,13 +1192,13 @@ export default function AdminWellnessPage() {
       {showAvailModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-zinc-950/80"
+            className="absolute inset-0 bg-white/80"
             onClick={() => setShowAvailModal(false)}
           />
-          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
+          <div className="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-md">
             <button
               onClick={() => setShowAvailModal(false)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+              className="absolute top-4 right-4 text-muted hover:text-foreground"
               title="Fermer"
             >
               <X className="w-5 h-5" />
@@ -1218,7 +1218,7 @@ export default function AdminWellnessPage() {
                       updated[i].day_of_week = parseInt(e.target.value);
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
                   >
                     {dayNames.map((d, di) => (
                       <option key={di} value={di}>
@@ -1235,9 +1235,9 @@ export default function AdminWellnessPage() {
                       updated[i].start_time = e.target.value;
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
                   />
-                  <span className="text-zinc-500 text-xs">—</span>
+                  <span className="text-muted text-xs">—</span>
                   <input
                     title="Heure de fin"
                     type="time"
@@ -1247,7 +1247,7 @@ export default function AdminWellnessPage() {
                       updated[i].end_time = e.target.value;
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
                   />
                   <button
                     onClick={() =>
@@ -1269,7 +1269,7 @@ export default function AdminWellnessPage() {
                   { day_of_week: 1, start_time: "09:00", end_time: "18:00" },
                 ])
               }
-              className="inline-flex items-center gap-1 text-xs text-emerald-400 hover:text-emerald-300 transition mb-4"
+              className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-300 transition mb-4"
             >
               <Plus className="w-3 h-3" />
               Ajouter un créneau

@@ -62,17 +62,17 @@ const statusConfig: Record<
   },
   confirmed: {
     label: "Confirmé",
-    color: "bg-emerald-500/10 text-emerald-400",
+    color: "bg-emerald-50 text-emerald-600",
     icon: Check,
   },
   completed: {
     label: "Terminé",
-    color: "bg-blue-500/10 text-blue-400",
+    color: "bg-blue-50 text-blue-600",
     icon: Check,
   },
   canceled: {
     label: "Annulé",
-    color: "bg-red-500/10 text-red-400",
+    color: "bg-red-50 text-red-400",
     icon: X,
   },
 };
@@ -142,7 +142,7 @@ export default function ReservationsPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function ReservationsPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
-        <p className="text-zinc-400">
+        <p className="text-muted">
           Connectez-vous pour voir vos réservations.
         </p>
         <Link
@@ -170,13 +170,13 @@ export default function ReservationsPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/bien-etre"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Bien-être
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-emerald-400" />
+            <Calendar className="w-5 h-5 text-emerald-600" />
             Mes réservations
           </h1>
           <div className="w-16" />
@@ -184,7 +184,7 @@ export default function ReservationsPage() {
 
         {/* Review success */}
         {reviewSuccess && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
             <Check className="w-4 h-4" />
             Avis publié avec succès !
           </div>
@@ -204,8 +204,8 @@ export default function ReservationsPage() {
               onClick={() => setFilter(f.value)}
               className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                 filter === f.value
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                  : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+                  ? "bg-emerald-500/20 text-emerald-600 border border-emerald-500/30"
+                  : "bg-surface text-muted border border-border hover:border-border"
               }`}
             >
               {f.label}
@@ -215,14 +215,14 @@ export default function ReservationsPage() {
 
         {/* Bookings */}
         {loading ? (
-          <div className="text-center py-12 text-zinc-400 animate-pulse">
+          <div className="text-center py-12 text-muted animate-pulse">
             Chargement...
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+            <Calendar className="w-16 h-16 text-muted/60 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Aucune réservation</h2>
-            <p className="text-zinc-400 text-sm mb-4">
+            <p className="text-muted text-sm mb-4">
               Explorez nos prestataires pour réserver un soin.
             </p>
             <Link
@@ -249,7 +249,7 @@ export default function ReservationsPage() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-5"
+                  className="bg-white/90 border border-border rounded-xl p-5"
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div>
@@ -258,7 +258,7 @@ export default function ReservationsPage() {
                       </h3>
                       <Link
                         href={`/bien-etre/${booking.provider?.id}`}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 transition"
+                        className="text-xs text-emerald-600 hover:text-emerald-300 transition"
                       >
                         {booking.provider?.name}
                       </Link>
@@ -271,7 +271,7 @@ export default function ReservationsPage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-zinc-400 mb-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-muted mb-3">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       {new Date(booking.date).toLocaleDateString("fr-FR")}
@@ -292,12 +292,12 @@ export default function ReservationsPage() {
                   </div>
 
                   {booking.notes && (
-                    <p className="text-zinc-500 text-xs mb-3 italic">
+                    <p className="text-muted text-xs mb-3 italic">
                       {booking.notes}
                     </p>
                   )}
 
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+                  <div className="flex items-center justify-between pt-3 border-t border-border">
                     <span className="text-sm font-bold text-white">
                       {Math.round(booking.total_price)} FCFA
                     </span>
@@ -305,7 +305,7 @@ export default function ReservationsPage() {
                       {canReview && (
                         <button
                           onClick={() => setReviewBooking(booking)}
-                          className="inline-flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300 transition"
+                          className="inline-flex items-center gap-1 text-xs text-yellow-600 hover:text-yellow-300 transition"
                         >
                           <Star className="w-3 h-3" />
                           Laisser un avis
@@ -336,26 +336,26 @@ export default function ReservationsPage() {
       {reviewBooking && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-zinc-950/80"
+            className="absolute inset-0 bg-white/80"
             onClick={() => setReviewBooking(null)}
           />
-          <div className="relative bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md">
+          <div className="relative bg-surface border border-border rounded-2xl p-6 w-full max-w-md">
             <button
               onClick={() => setReviewBooking(null)}
-              className="absolute top-4 right-4 text-zinc-500 hover:text-white transition"
+              className="absolute top-4 right-4 text-muted hover:text-foreground transition"
               title="Fermer"
             >
               <X className="w-5 h-5" />
             </button>
 
             <h3 className="text-lg font-bold mb-1">Laisser un avis</h3>
-            <p className="text-sm text-zinc-500 mb-4">
+            <p className="text-sm text-muted mb-4">
               {reviewBooking.service?.name} — {reviewBooking.provider?.name}
             </p>
 
             {/* Rating */}
             <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-2">Note</label>
+              <label className="block text-xs text-muted mb-2">Note</label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button
@@ -367,8 +367,8 @@ export default function ReservationsPage() {
                     <Star
                       className={`w-7 h-7 ${
                         n <= reviewRating
-                          ? "text-yellow-400 fill-yellow-400"
-                          : "text-zinc-700"
+                          ? "text-yellow-600 fill-yellow-400"
+                          : "text-foreground"
                       }`}
                     />
                   </button>
@@ -378,7 +378,7 @@ export default function ReservationsPage() {
 
             {/* Comment */}
             <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-1.5">
+              <label className="block text-xs text-muted mb-1.5">
                 Commentaire
               </label>
               <textarea
@@ -386,7 +386,7 @@ export default function ReservationsPage() {
                 onChange={(e) => setReviewComment(e.target.value)}
                 placeholder="Partagez votre expérience..."
                 rows={3}
-                className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50 transition resize-none"
+                className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder-gray-400 focus:outline-none focus:border-yellow-500/50 transition resize-none"
               />
             </div>
 

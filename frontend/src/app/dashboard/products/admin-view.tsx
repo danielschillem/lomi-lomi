@@ -109,7 +109,7 @@ export default function AdminProductsView() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ShoppingBag className="w-6 h-6 text-pink-400" />
+          <ShoppingBag className="w-6 h-6 text-pink-500" />
           Produits
         </h1>
         <button
@@ -126,7 +126,7 @@ export default function AdminProductsView() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <form
             onSubmit={handleSubmit}
-            className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-lg mx-4 space-y-4"
+            className="bg-surface border border-border rounded-xl p-6 w-full max-w-lg mx-4 space-y-4"
           >
             <div className="flex items-center justify-between mb-2">
               <h2 className="font-semibold text-lg">
@@ -136,7 +136,7 @@ export default function AdminProductsView() {
                 type="button"
                 onClick={() => setShowForm(false)}
                 title="Fermer"
-                className="p-1 rounded hover:bg-zinc-800"
+                className="p-1 rounded hover:bg-gray-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -146,7 +146,7 @@ export default function AdminProductsView() {
               placeholder="Nom du produit"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <textarea
               placeholder="Description"
@@ -155,11 +155,11 @@ export default function AdminProductsView() {
                 setForm({ ...form, description: e.target.value })
               }
               rows={3}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-xs text-zinc-500 mb-1 block">
+                <label className="text-xs text-muted mb-1 block">
                   Prix (FCFA)
                 </label>
                 <input
@@ -172,11 +172,11 @@ export default function AdminProductsView() {
                   onChange={(e) =>
                     setForm({ ...form, price: parseFloat(e.target.value) || 0 })
                   }
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
-                <label className="text-xs text-zinc-500 mb-1 block">
+                <label className="text-xs text-muted mb-1 block">
                   Stock
                 </label>
                 <input
@@ -187,7 +187,7 @@ export default function AdminProductsView() {
                   onChange={(e) =>
                     setForm({ ...form, stock: parseInt(e.target.value) || 0 })
                   }
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
@@ -195,13 +195,13 @@ export default function AdminProductsView() {
               placeholder="Catégorie"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <input
               placeholder="URL de l'image"
               value={form.image_url}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -210,7 +210,7 @@ export default function AdminProductsView() {
                 onChange={(e) =>
                   setForm({ ...form, is_active: e.target.checked })
                 }
-                className="rounded border-zinc-600"
+                className="rounded border-border"
               />
               Actif
             </label>
@@ -226,23 +226,23 @@ export default function AdminProductsView() {
       )}
 
       {/* Table */}
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white/90 border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+            <tr className="border-b border-border">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Produit
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden sm:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden sm:table-cell">
                 Catégorie
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Prix
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden md:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden md:table-cell">
                 Stock
               </th>
-              <th className="text-right px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-right px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Actions
               </th>
             </tr>
@@ -252,7 +252,7 @@ export default function AdminProductsView() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-12 text-center text-zinc-500 animate-pulse"
+                  className="px-6 py-12 text-center text-muted animate-pulse"
                 >
                   Chargement...
                 </td>
@@ -261,9 +261,9 @@ export default function AdminProductsView() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-6 py-12 text-center text-zinc-500"
+                  className="px-6 py-12 text-center text-muted"
                 >
-                  <Package className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+                  <Package className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucun produit dans la boutique.
                   <br />
                   <span className="text-xs">
@@ -275,7 +275,7 @@ export default function AdminProductsView() {
               products.map((p) => (
                 <tr
                   key={p.id}
-                  className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition"
+                  className="border-b border-border/50 hover:bg-gray-100/30 transition"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -286,29 +286,29 @@ export default function AdminProductsView() {
                           className="w-10 h-10 rounded-lg object-cover shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center shrink-0">
-                          <Package className="w-5 h-5 text-zinc-600" />
+                        <div className="w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center shrink-0">
+                          <Package className="w-5 h-5 text-muted/60" />
                         </div>
                       )}
                       <div>
                         <span className="font-medium flex items-center gap-2">
                           {p.name}
                           {!p.is_active && (
-                            <span className="text-[10px] bg-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded-full">
+                            <span className="text-[10px] bg-gray-200 text-muted px-1.5 py-0.5 rounded-full">
                               Inactif
                             </span>
                           )}
                         </span>
-                        <span className="text-xs text-zinc-500 block truncate max-w-50">
+                        <span className="text-xs text-muted block truncate max-w-50">
                           {p.description}
                         </span>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-zinc-400 hidden sm:table-cell">
+                  <td className="px-6 py-4 text-muted hidden sm:table-cell">
                     {p.category || "—"}
                   </td>
-                  <td className="px-6 py-4 font-medium text-pink-400">
+                  <td className="px-6 py-4 font-medium text-pink-500">
                     {Math.round(p.price)} FCFA
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
@@ -317,8 +317,8 @@ export default function AdminProductsView() {
                         p.stock === 0
                           ? "text-red-400 font-medium"
                           : p.stock < 10
-                            ? "text-yellow-400"
-                            : "text-zinc-400"
+                            ? "text-yellow-600"
+                            : "text-muted"
                       }
                     >
                       {p.stock}
@@ -329,14 +329,14 @@ export default function AdminProductsView() {
                       <button
                         onClick={() => openEdit(p)}
                         title="Modifier"
-                        className="p-1.5 rounded-md hover:bg-zinc-700 transition text-zinc-500 hover:text-violet-400"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-violet-600"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(p)}
                         title="Supprimer"
-                        className="p-1.5 rounded-md hover:bg-zinc-700 transition text-zinc-500 hover:text-red-400"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-red-400"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

@@ -538,7 +538,7 @@ export default function ChatPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -546,11 +546,11 @@ export default function ChatPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="shrink-0 bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800 px-4 py-3">
+      <header className="shrink-0 bg-surface/80 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <Link
             href="/messages"
-            className="text-zinc-400 hover:text-white transition"
+            className="text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -559,7 +559,7 @@ export default function ChatPage() {
               href={`/users/${otherUser.id}`}
               className="flex items-center gap-3 flex-1 min-w-0"
             >
-              <div className="relative w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="relative w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden shrink-0">
                 {otherUser.avatar_url ? (
                   <img
                     src={otherUser.avatar_url}
@@ -567,17 +567,17 @@ export default function ChatPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <User className="w-5 h-5 text-zinc-500" />
+                  <User className="w-5 h-5 text-muted" />
                 )}
                 {otherUser.is_online && (
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-zinc-900" />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="font-semibold text-sm truncate">
                   {otherUser.username}
                 </h1>
-                <p className="text-xs text-zinc-500 flex items-center gap-1">
+                <p className="text-xs text-muted flex items-center gap-1">
                   <Shield className="w-3 h-3" />
                   Messagerie sécurisée
                 </p>
@@ -585,12 +585,12 @@ export default function ChatPage() {
             </Link>
           ) : (
             <>
-              <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0">
-                <User className="w-5 h-5 text-zinc-500" />
+              <div className="w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-muted" />
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="font-semibold text-sm">Conversation</h1>
-                <p className="text-xs text-zinc-500 flex items-center gap-1">
+                <p className="text-xs text-muted flex items-center gap-1">
                   <Shield className="w-3 h-3" />
                   Messagerie sécurisée
                 </p>
@@ -607,7 +607,7 @@ export default function ChatPage() {
               className={`p-2 rounded-lg transition ${
                 sharingLocation
                   ? "bg-green-600 text-white"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-muted hover:text-foreground hover:bg-gray-100"
               }`}
               title={
                 sharingLocation ? "Arrêter le partage" : "Partager ma position"
@@ -623,7 +623,7 @@ export default function ChatPage() {
               className={`p-2 rounded-lg transition ${
                 showVTCForm
                   ? "bg-violet-600 text-white"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-muted hover:text-foreground hover:bg-gray-100"
               }`}
               title="Commander un VTC"
             >
@@ -644,7 +644,7 @@ export default function ChatPage() {
             </div>
             <button
               onClick={stopSharingLocation}
-              className="text-xs text-green-400 hover:text-green-300 transition flex items-center gap-1"
+              className="text-xs text-green-600 hover:text-green-300 transition flex items-center gap-1"
             >
               <X className="w-3 h-3" />
               Arrêter
@@ -682,7 +682,7 @@ export default function ChatPage() {
                   stopLocationShare(incomingShare.id).catch(() => {});
                   setIncomingShare(null);
                 }}
-                className="text-xs text-blue-400 hover:text-blue-300 transition"
+                className="text-xs text-blue-600 hover:text-blue-300 transition"
                 title="Fermer"
               >
                 <X className="w-3 h-3" />
@@ -694,22 +694,22 @@ export default function ChatPage() {
 
       {/* VTC Form */}
       {showVTCForm && (
-        <div className="shrink-0 bg-zinc-900/90 border-b border-zinc-800 px-4 py-4">
+        <div className="shrink-0 bg-surface/90 border-b border-border px-4 py-4">
           <div className="max-w-2xl mx-auto space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Car className="w-4 h-4 text-violet-400" />
+                <Car className="w-4 h-4 text-violet-600" />
                 Commander un VTC
               </h3>
               <button
                 onClick={() => setShowVTCForm(false)}
-                className="text-zinc-400 hover:text-white transition"
+                className="text-muted hover:text-foreground transition"
                 title="Fermer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-muted">
               Envoyez un VTC chercher {otherUser?.username || "votre contact"}{" "}
               pour un rendez-vous
             </p>
@@ -719,7 +719,7 @@ export default function ChatPage() {
               onChange={(e) => setVtcPickupAddress(e.target.value)}
               placeholder="Adresse de prise en charge (ou position actuelle)"
               title="Adresse de prise en charge"
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
             />
             <input
               type="text"
@@ -727,7 +727,7 @@ export default function ChatPage() {
               onChange={(e) => setVtcDropoffAddress(e.target.value)}
               placeholder="Adresse de destination"
               title="Adresse de destination"
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
             />
             <input
               type="text"
@@ -735,7 +735,7 @@ export default function ChatPage() {
               onChange={(e) => setVtcNote(e.target.value)}
               placeholder="Note pour le chauffeur (optionnel)"
               title="Note"
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
             />
             <button
               onClick={handleRequestVTC}
@@ -758,7 +758,7 @@ export default function ChatPage() {
         <div className="shrink-0 bg-violet-900/30 border-b border-violet-800/50 px-4 py-3">
           <div className="max-w-2xl mx-auto space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-violet-300">
+              <div className="flex items-center gap-2 text-sm text-violet-600">
                 <Car className="w-4 h-4" />
                 <span className="font-medium">
                   Course VTC —{" "}
@@ -779,7 +779,7 @@ export default function ChatPage() {
                       ? "bg-green-500/20 text-green-300"
                       : activeRide.status === "in_progress"
                         ? "bg-blue-500/20 text-blue-300"
-                        : "bg-zinc-500/20 text-zinc-300"
+                        : "bg-gray-100 text-foreground"
                 }`}
               >
                 {activeRide.status === "pending"
@@ -792,10 +792,10 @@ export default function ChatPage() {
                 {activeRide.status}
               </span>
             </div>
-            <div className="text-xs text-zinc-400 space-y-1">
+            <div className="text-xs text-muted space-y-1">
               {activeRide.pickup_address && (
                 <p className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-green-400" />
+                  <MapPin className="w-3 h-3 text-green-600" />
                   Départ : {activeRide.pickup_address}
                 </p>
               )}
@@ -806,7 +806,7 @@ export default function ChatPage() {
                 </p>
               )}
               {activeRide.note && (
-                <p className="text-zinc-500 italic">Note : {activeRide.note}</p>
+                <p className="text-muted italic">Note : {activeRide.note}</p>
               )}
             </div>
             {activeRide.driver_lat !== 0 && activeRide.driver_lng !== 0 && (
@@ -856,8 +856,8 @@ export default function ChatPage() {
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-2xl mx-auto space-y-3">
           {messages.length === 0 ? (
-            <div className="text-center text-zinc-500 text-sm py-12">
-              <Shield className="w-8 h-8 mx-auto mb-3 text-zinc-600" />
+            <div className="text-center text-muted text-sm py-12">
+              <Shield className="w-8 h-8 mx-auto mb-3 text-muted/60" />
               Envoyez le premier message !
             </div>
           ) : (
@@ -872,7 +872,7 @@ export default function ChatPage() {
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                       isMine
                         ? "bg-violet-600 text-white rounded-br-md"
-                        : "bg-zinc-800 text-zinc-200 rounded-bl-md"
+                        : "bg-surface-2 text-foreground rounded-bl-md"
                     }`}
                   >
                     <p>{msg.content}</p>
@@ -883,7 +883,7 @@ export default function ChatPage() {
                     >
                       <span
                         className={`text-[10px] ${
-                          isMine ? "text-violet-200" : "text-zinc-500"
+                          isMine ? "text-violet-200" : "text-muted"
                         }`}
                       >
                         {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
@@ -893,9 +893,9 @@ export default function ChatPage() {
                       </span>
                       {isMine &&
                         (msg.is_read ? (
-                          <CheckCheck className="w-3.5 h-3.5 text-violet-300" />
+                          <CheckCheck className="w-3.5 h-3.5 text-violet-600" />
                         ) : (
-                          <Check className="w-3 h-3 text-violet-300/60" />
+                          <Check className="w-3 h-3 text-violet-600/60" />
                         ))}
                     </div>
                   </div>
@@ -905,7 +905,7 @@ export default function ChatPage() {
           )}
           {typingUser && (
             <div className="flex justify-start">
-              <div className="bg-zinc-800 text-zinc-400 text-sm rounded-2xl rounded-bl-md px-4 py-2.5 animate-pulse">
+              <div className="bg-surface-2 text-muted text-sm rounded-2xl rounded-bl-md px-4 py-2.5 animate-pulse">
                 écrit…
               </div>
             </div>
@@ -915,7 +915,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input */}
-      <div className="shrink-0 border-t border-zinc-800 bg-zinc-900/80 backdrop-blur-md px-4 py-3">
+      <div className="shrink-0 border-t border-border bg-surface/80 backdrop-blur-md px-4 py-3">
         <form
           onSubmit={handleSend}
           className="max-w-2xl mx-auto flex items-center gap-3"
@@ -925,7 +925,7 @@ export default function ChatPage() {
             value={content}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Votre message..."
-            className="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-full px-5 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+            className="flex-1 bg-surface border border-border rounded-full px-5 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
           />
           <button
             type="submit"

@@ -90,7 +90,7 @@ export default function ConversationsPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -101,23 +101,23 @@ export default function ConversationsPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-violet-400" />
+            <MessageCircle className="w-5 h-5 text-violet-600" />
             Messages
           </h1>
           <div className="w-16" />
         </div>
 
         {conversations.length === 0 ? (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-12 text-center">
-            <MessageCircle className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+          <div className="bg-white/90 border border-border rounded-2xl p-12 text-center">
+            <MessageCircle className="w-16 h-16 text-muted/60 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Aucune conversation</h2>
-            <p className="text-zinc-400 text-sm mb-6">
+            <p className="text-muted text-sm mb-6">
               Commencez par découvrir des profils et matcher !
             </p>
             <Link
@@ -137,10 +137,10 @@ export default function ConversationsPage() {
                 <Link
                   key={conv.id}
                   href={`/messages/${conv.id}`}
-                  className="flex items-center gap-4 bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/30 rounded-xl p-4 transition"
+                  className="flex items-center gap-4 bg-white/90 border border-border hover:border-violet-400/30 rounded-xl p-4 transition"
                 >
                   <div className="relative shrink-0">
-                    <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+                    <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {other?.avatar_url ? (
                         <img
                           src={other.avatar_url}
@@ -148,7 +148,7 @@ export default function ConversationsPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User className="w-6 h-6 text-zinc-500" />
+                        <User className="w-6 h-6 text-muted" />
                       )}
                     </div>
                     {other?.is_online && (
@@ -162,13 +162,13 @@ export default function ConversationsPage() {
                       >
                         {other?.username || `Utilisateur #${conv.user2_id}`}
                       </span>
-                      <span className="text-xs text-zinc-500 shrink-0 ml-2">
+                      <span className="text-xs text-muted shrink-0 ml-2">
                         {new Date(conv.updated_at).toLocaleDateString("fr-FR")}
                       </span>
                     </div>
                     <div className="flex items-center justify-between mt-0.5">
                       <p
-                        className={`text-xs truncate ${hasUnread ? "text-zinc-200 font-medium" : "text-zinc-400"}`}
+                        className={`text-xs truncate ${hasUnread ? "text-foreground font-medium" : "text-muted"}`}
                       >
                         {conv.last_message || "Commencez la conversation..."}
                       </p>

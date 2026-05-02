@@ -136,7 +136,7 @@ export default function SettingsPage() {
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -147,28 +147,28 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/profile"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Profil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Settings className="w-5 h-5 text-violet-400" />
+            <Settings className="w-5 h-5 text-violet-600" />
             Paramètres
           </h1>
           <div className="w-16" />
         </div>
 
         {/* Preferences */}
-        <section className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 mb-6">
+        <section className="bg-white/90 border border-border rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Sliders className="w-5 h-5 text-violet-400" />
+            <Sliders className="w-5 h-5 text-violet-600" />
             Préférences de découverte
           </h2>
           <form onSubmit={handleSavePreferences} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">
+                <label className="block text-xs text-muted mb-1">
                   Âge minimum
                 </label>
                 <input
@@ -178,11 +178,11 @@ export default function SettingsPage() {
                   value={minAge}
                   onChange={(e) => setMinAge(Number(e.target.value))}
                   title="Âge minimum"
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
-                <label className="block text-xs text-zinc-400 mb-1">
+                <label className="block text-xs text-muted mb-1">
                   Âge maximum
                 </label>
                 <input
@@ -192,12 +192,12 @@ export default function SettingsPage() {
                   value={maxAge}
                   onChange={(e) => setMaxAge(Number(e.target.value))}
                   title="Âge maximum"
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
+                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">
+              <label className="block text-xs text-muted mb-1">
                 Distance max ({maxDistance} km)
               </label>
               <input
@@ -211,14 +211,14 @@ export default function SettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs text-zinc-400 mb-1">
+              <label className="block text-xs text-muted mb-1">
                 Genre recherché
               </label>
               <select
                 value={prefGender}
                 onChange={(e) => setPrefGender(e.target.value)}
                 title="Genre recherché"
-                className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
               >
                 <option value="">Tous</option>
                 <option value="homme">Homme</option>
@@ -235,15 +235,15 @@ export default function SettingsPage() {
               {prefLoading ? "Sauvegarde..." : "Sauvegarder"}
             </button>
             {prefMsg && (
-              <p className="text-sm text-green-400 text-center">{prefMsg}</p>
+              <p className="text-sm text-green-600 text-center">{prefMsg}</p>
             )}
           </form>
         </section>
 
         {/* Change Password */}
-        <section className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 mb-6">
+        <section className="bg-white/90 border border-border rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-violet-400" />
+            <Lock className="w-5 h-5 text-violet-600" />
             Changer le mot de passe
           </h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
@@ -252,21 +252,21 @@ export default function SettingsPage() {
               placeholder="Mot de passe actuel"
               value={currentPwd}
               onChange={(e) => setCurrentPwd(e.target.value)}
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <input
               type="password"
               placeholder="Nouveau mot de passe"
               value={newPwd}
               onChange={(e) => setNewPwd(e.target.value)}
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <input
               type="password"
               placeholder="Confirmer le nouveau mot de passe"
               value={confirmPwd}
               onChange={(e) => setConfirmPwd(e.target.value)}
-              className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <button
               type="submit"
@@ -276,7 +276,7 @@ export default function SettingsPage() {
               {pwdLoading ? "Modification..." : "Modifier le mot de passe"}
             </button>
             {pwdMsg && (
-              <p className="text-sm text-green-400 text-center">{pwdMsg}</p>
+              <p className="text-sm text-green-600 text-center">{pwdMsg}</p>
             )}
             {pwdError && (
               <p className="text-sm text-red-400 text-center">{pwdError}</p>
@@ -285,12 +285,12 @@ export default function SettingsPage() {
         </section>
 
         {/* Delete Account */}
-        <section className="bg-zinc-900/60 border border-red-900/30 rounded-2xl p-6">
+        <section className="bg-white/90 border border-red-900/30 rounded-2xl p-6">
           <h2 className="text-lg font-semibold mb-2 flex items-center gap-2 text-red-400">
             <Trash2 className="w-5 h-5" />
             Zone dangereuse
           </h2>
-          <p className="text-sm text-zinc-400 mb-4">
+          <p className="text-sm text-muted mb-4">
             La suppression de votre compte est irréversible. Toutes vos données
             seront effacées.
           </p>
@@ -312,7 +312,7 @@ export default function SettingsPage() {
                 placeholder="Mot de passe"
                 value={deletePwd}
                 onChange={(e) => setDeletePwd(e.target.value)}
-                className="w-full bg-zinc-800/50 border border-red-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-red-500"
+                className="w-full bg-surface border border-red-700 rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-red-500"
               />
               <div className="flex gap-3">
                 <button
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                     setDeletePwd("");
                     setDeleteError("");
                   }}
-                  className="flex-1 border border-zinc-700 text-zinc-400 hover:text-white py-2.5 rounded-lg transition text-sm"
+                  className="flex-1 border border-border text-muted hover:text-foreground py-2.5 rounded-lg transition text-sm"
                 >
                   Annuler
                 </button>

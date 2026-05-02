@@ -105,13 +105,13 @@ export default function OwnerProductsView() {
   const FormFields = ({ defaults }: { defaults?: Partial<Product> }) => (
     <div className="space-y-3">
       <input
-        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
         placeholder="Nom du produit"
         defaultValue={defaults?.name}
         onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
       />
       <textarea
-        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
         placeholder="Description"
         rows={2}
         defaultValue={defaults?.description}
@@ -121,7 +121,7 @@ export default function OwnerProductsView() {
       />
       <div className="grid grid-cols-3 gap-2">
         <input
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
           placeholder="Prix (FCFA)"
           type="number"
           step="0.01"
@@ -129,13 +129,13 @@ export default function OwnerProductsView() {
           onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
         />
         <input
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
           placeholder="Catégorie"
           defaultValue={defaults?.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
         />
         <input
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
           placeholder="Stock"
           type="number"
           defaultValue={defaults?.stock}
@@ -158,7 +158,7 @@ export default function OwnerProductsView() {
       </div>
 
       {showCreate && (
-        <div className="mb-6 rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 ">
+        <div className="mb-6 rounded-xl bg-white/90 border border-border p-5 ">
           <h3 className="mb-3 font-semibold">Nouveau produit</h3>
           <FormFields />
           <div className="mt-3 flex gap-2">
@@ -170,7 +170,7 @@ export default function OwnerProductsView() {
             </button>
             <button
               onClick={() => setShowCreate(false)}
-              className="flex items-center gap-1 rounded-lg bg-zinc-700 px-4 py-2 text-sm"
+              className="flex items-center gap-1 rounded-lg bg-gray-200 px-4 py-2 text-sm"
             >
               <X size={14} /> Annuler
             </button>
@@ -179,7 +179,7 @@ export default function OwnerProductsView() {
       )}
 
       {products.length === 0 && !showCreate ? (
-        <p className="text-zinc-400">
+        <p className="text-muted">
           Aucun produit. Cliquez sur &quot;Ajouter&quot; pour en créer.
         </p>
       ) : (
@@ -187,7 +187,7 @@ export default function OwnerProductsView() {
           {products.map((product) => (
             <div
               key={product.id}
-              className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 "
+              className="rounded-xl bg-white/90 border border-border p-5 "
             >
               {editId === product.id ? (
                 <>
@@ -201,7 +201,7 @@ export default function OwnerProductsView() {
                     </button>
                     <button
                       onClick={() => setEditId(null)}
-                      className="flex items-center gap-1 rounded-lg bg-zinc-700 px-3 py-2 text-sm"
+                      className="flex items-center gap-1 rounded-lg bg-gray-200 px-3 py-2 text-sm"
                     >
                       <X size={14} /> Annuler
                     </button>
@@ -214,7 +214,7 @@ export default function OwnerProductsView() {
                       <h3 className="font-semibold text-white">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-violet-400 font-bold">
+                      <p className="text-sm text-violet-600 font-bold">
                         {Math.round(product.price)} FCFA
                       </p>
                     </div>
@@ -231,27 +231,27 @@ export default function OwnerProductsView() {
                             stock: String(product.stock),
                           });
                         }}
-                        className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
+                        className="rounded-lg p-2 text-muted hover:bg-gray-100 hover:text-foreground"
                       >
                         <Edit2 size={14} />
                       </button>
                       <button
                         title="Supprimer"
                         onClick={() => handleDelete(product.id)}
-                        className="rounded-lg p-2 text-zinc-500 hover:bg-red-500/10 hover:text-red-400"
+                        className="rounded-lg p-2 text-muted hover:bg-red-50 hover:text-red-400"
                       >
                         <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
                   {product.description && (
-                    <p className="mt-2 text-sm text-zinc-400 line-clamp-2">
+                    <p className="mt-2 text-sm text-muted line-clamp-2">
                       {product.description}
                     </p>
                   )}
-                  <div className="mt-2 flex gap-2 text-xs text-zinc-400">
+                  <div className="mt-2 flex gap-2 text-xs text-muted">
                     {product.category && (
-                      <span className="rounded bg-zinc-800 px-2 py-0.5">
+                      <span className="rounded bg-surface-2 px-2 py-0.5">
                         {product.category}
                       </span>
                     )}

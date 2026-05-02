@@ -24,11 +24,11 @@ interface Order {
 }
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  paid: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  shipped: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  delivered: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
+  pending: "bg-yellow-50 text-yellow-600 border-yellow-200",
+  paid: "bg-blue-50 text-blue-600 border-blue-200",
+  shipped: "bg-violet-50 text-violet-600 border-violet-200",
+  delivered: "bg-emerald-50 text-emerald-600 border-emerald-200",
+  cancelled: "bg-red-50 text-red-400 border-red-200",
 };
 
 const statuses = ["pending", "paid", "shipped", "delivered", "cancelled"];
@@ -70,32 +70,32 @@ export default function AdminOrdersPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ShoppingCart className="w-6 h-6 text-green-400" />
+          <ShoppingCart className="w-6 h-6 text-green-600" />
           Commandes
         </h1>
-        <span className="text-sm text-zinc-500">{total} au total</span>
+        <span className="text-sm text-muted">{total} au total</span>
       </div>
 
-      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden">
+      <div className="bg-white/90 border border-border rounded-xl overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-800">
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+            <tr className="border-b border-border">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 #
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Client
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden md:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden md:table-cell">
                 Articles
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Total
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium">
                 Statut
               </th>
-              <th className="text-left px-6 py-4 text-xs text-zinc-500 uppercase tracking-wider font-medium hidden sm:table-cell">
+              <th className="text-left px-6 py-4 text-xs text-muted uppercase tracking-wider font-medium hidden sm:table-cell">
                 Date
               </th>
             </tr>
@@ -105,7 +105,7 @@ export default function AdminOrdersPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-6 py-12 text-center text-zinc-500 animate-pulse"
+                  className="px-6 py-12 text-center text-muted animate-pulse"
                 >
                   Chargement...
                 </td>
@@ -114,9 +114,9 @@ export default function AdminOrdersPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-6 py-12 text-center text-zinc-500"
+                  className="px-6 py-12 text-center text-muted"
                 >
-                  <Package className="w-10 h-10 mx-auto mb-3 text-zinc-600" />
+                  <Package className="w-10 h-10 mx-auto mb-3 text-muted/60" />
                   Aucune commande pour le moment.
                 </td>
               </tr>
@@ -124,9 +124,9 @@ export default function AdminOrdersPage() {
               orders.map((o) => (
                 <tr
                   key={o.id}
-                  className="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition"
+                  className="border-b border-border/50 hover:bg-gray-100/30 transition"
                 >
-                  <td className="px-6 py-4 text-zinc-400 font-mono text-xs">
+                  <td className="px-6 py-4 text-muted font-mono text-xs">
                     #{o.id}
                   </td>
                   <td className="px-6 py-4">
@@ -135,16 +135,16 @@ export default function AdminOrdersPage() {
                         {o.user?.username || `User #${o.user_id}`}
                       </span>
                       {o.user?.email && (
-                        <span className="text-xs text-zinc-500 block">
+                        <span className="text-xs text-muted block">
                           {o.user.email}
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-zinc-400 hidden md:table-cell">
+                  <td className="px-6 py-4 text-muted hidden md:table-cell">
                     {o.items?.length ?? 0} article(s)
                   </td>
-                  <td className="px-6 py-4 font-medium text-green-400">
+                  <td className="px-6 py-4 font-medium text-green-600">
                     {Math.round(o.total_amount)} FCFA
                   </td>
                   <td className="px-6 py-4">
@@ -152,20 +152,20 @@ export default function AdminOrdersPage() {
                       value={o.status}
                       onChange={(e) => handleStatusChange(o, e.target.value)}
                       title="Statut de la commande"
-                      className={`text-[11px] border px-2 py-1 rounded-full font-medium bg-transparent cursor-pointer focus:outline-none ${statusColors[o.status] || "text-zinc-400 border-zinc-600"}`}
+                      className={`text-[11px] border px-2 py-1 rounded-full font-medium bg-transparent cursor-pointer focus:outline-none ${statusColors[o.status] || "text-muted border-border"}`}
                     >
                       {statuses.map((s) => (
                         <option
                           key={s}
                           value={s}
-                          className="bg-zinc-900 text-white"
+                          className="bg-surface text-foreground"
                         >
                           {s.charAt(0).toUpperCase() + s.slice(1)}
                         </option>
                       ))}
                     </select>
                   </td>
-                  <td className="px-6 py-4 text-zinc-500 text-xs hidden sm:table-cell">
+                  <td className="px-6 py-4 text-muted text-xs hidden sm:table-cell">
                     {new Date(o.created_at).toLocaleDateString("fr-FR")}
                   </td>
                 </tr>
@@ -180,18 +180,18 @@ export default function AdminOrdersPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white disabled:opacity-30 transition"
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground disabled:opacity-30 transition"
           >
             <ChevronLeft className="w-4 h-4" />
             Précédent
           </button>
-          <span className="text-sm text-zinc-500">
+          <span className="text-sm text-muted">
             Page {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-white disabled:opacity-30 transition"
+            className="inline-flex items-center gap-1 text-sm text-muted hover:text-foreground disabled:opacity-30 transition"
           >
             Suivant
             <ChevronRight className="w-4 h-4" />

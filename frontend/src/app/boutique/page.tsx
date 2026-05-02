@@ -61,7 +61,7 @@ export default function BoutiquePage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center text-zinc-400 animate-pulse">
+        <div className="min-h-screen flex items-center justify-center text-muted animate-pulse">
           Chargement...
         </div>
       }
@@ -190,18 +190,18 @@ function BoutiqueContent() {
         <div className="flex items-center justify-between mb-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-violet-400" />
+            <ShoppingBag className="w-5 h-5 text-violet-600" />
             Boutique
           </h1>
           <button
             onClick={() => setCartOpen(true)}
-            className="relative text-zinc-400 hover:text-white transition"
+            className="relative text-muted hover:text-foreground transition"
             title="Panier"
           >
             <ShoppingCart className="w-6 h-6" />
@@ -215,7 +215,7 @@ function BoutiqueContent() {
 
         {/* Order success */}
         {orderSuccess && (
-          <div className="bg-green-500/10 border border-green-500/20 text-green-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+          <div className="bg-green-50 border border-green-500/20 text-green-600 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
             <Check className="w-4 h-4" />
             Paiement confirmé ! Votre commande sera livrée sous 48h.
           </div>
@@ -237,7 +237,7 @@ function BoutiqueContent() {
                 setOrdersOpen(!ordersOpen);
                 if (!ordersOpen && orders.length === 0) loadOrders();
               }}
-              className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+              className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
             >
               <Clock className="w-4 h-4" />
               Mes commandes
@@ -250,31 +250,31 @@ function BoutiqueContent() {
             {ordersOpen && (
               <div className="mt-4 space-y-3">
                 {ordersLoading ? (
-                  <p className="text-zinc-500 text-sm animate-pulse">
+                  <p className="text-muted text-sm animate-pulse">
                     Chargement...
                   </p>
                 ) : orders.length === 0 ? (
-                  <p className="text-zinc-500 text-sm">
+                  <p className="text-muted text-sm">
                     Aucune commande pour le moment.
                   </p>
                 ) : (
                   orders.map((o) => (
                     <div
                       key={o.id}
-                      className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4"
+                      className="bg-white/90 border border-border rounded-xl p-4"
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-zinc-500">
+                        <span className="text-xs text-muted">
                           #{o.id} —{" "}
                           {new Date(o.created_at).toLocaleDateString("fr-FR")}
                         </span>
                         <span
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             o.status === "paid"
-                              ? "bg-green-500/10 text-green-400"
+                              ? "bg-green-50 text-green-600"
                               : o.status === "pending"
                                 ? "bg-amber-500/10 text-amber-400"
-                                : "bg-zinc-800 text-zinc-400"
+                                : "bg-surface-2 text-muted"
                           }`}
                         >
                           {o.status === "paid"
@@ -290,17 +290,17 @@ function BoutiqueContent() {
                             key={item.id}
                             className="flex justify-between text-sm"
                           >
-                            <span className="text-zinc-300">
+                            <span className="text-foreground">
                               {item.product?.name || "Produit"} ×{" "}
                               {item.quantity}
                             </span>
-                            <span className="text-zinc-400">
+                            <span className="text-muted">
                               {Math.round(item.price * item.quantity)} FCFA
                             </span>
                           </div>
                         ))}
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
                         <span className="text-sm font-semibold text-white">
                           {Math.round(o.total_amount)} FCFA
                         </span>
@@ -318,7 +318,7 @@ function BoutiqueContent() {
                                 /* ignore */
                               }
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition"
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-600 transition"
                           >
                             <ExternalLink className="w-3 h-3" />
                             Payer via Orange Money
@@ -340,8 +340,8 @@ function BoutiqueContent() {
               onClick={() => setCategory("")}
               className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                 category === ""
-                  ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
-                  : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+                  ? "bg-violet-500/20 text-violet-600 border border-violet-200"
+                  : "bg-surface text-muted border border-border hover:border-border"
               }`}
             >
               Tous
@@ -352,8 +352,8 @@ function BoutiqueContent() {
                 onClick={() => setCategory(cat)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap capitalize ${
                   category === cat
-                    ? "bg-violet-500/20 text-violet-400 border border-violet-500/30"
-                    : "bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700"
+                    ? "bg-violet-500/20 text-violet-600 border border-violet-200"
+                    : "bg-surface text-muted border border-border hover:border-border"
                 }`}
               >
                 {cat}
@@ -364,14 +364,14 @@ function BoutiqueContent() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="text-center py-12 text-zinc-400 animate-pulse">
+          <div className="text-center py-12 text-muted animate-pulse">
             Chargement des produits...
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+            <Package className="w-16 h-16 text-muted/60 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Aucun produit</h2>
-            <p className="text-zinc-400 text-sm">
+            <p className="text-muted text-sm">
               La boutique sera bientôt approvisionnée.
             </p>
           </div>
@@ -380,9 +380,9 @@ function BoutiqueContent() {
             {filtered.map((product) => (
               <div
                 key={product.id}
-                className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden hover:border-violet-500/30 transition group"
+                className="bg-white/90 border border-border rounded-2xl overflow-hidden hover:border-violet-400/30 transition group"
               >
-                <div className="h-48 bg-zinc-800 flex items-center justify-center">
+                <div className="h-48 bg-surface-2 flex items-center justify-center">
                   {product.image_url ? (
                     <img
                       src={product.image_url}
@@ -390,23 +390,23 @@ function BoutiqueContent() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Package className="w-12 h-12 text-zinc-600" />
+                    <Package className="w-12 h-12 text-muted/60" />
                   )}
                 </div>
                 <div className="p-5">
-                  <h3 className="font-semibold text-sm mb-1 group-hover:text-violet-400 transition truncate">
+                  <h3 className="font-semibold text-sm mb-1 group-hover:text-violet-600 transition truncate">
                     {product.name}
                   </h3>
                   {product.category && (
-                    <span className="text-xs text-zinc-500 capitalize">
+                    <span className="text-xs text-muted capitalize">
                       {product.category}
                     </span>
                   )}
-                  <p className="text-zinc-400 text-xs mt-2 line-clamp-2 leading-relaxed">
+                  <p className="text-muted text-xs mt-2 line-clamp-2 leading-relaxed">
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-bold text-violet-400">
+                    <span className="text-lg font-bold text-violet-600">
                       {Math.round(product.price)} FCFA
                     </span>
                     <button
@@ -434,18 +434,18 @@ function BoutiqueContent() {
       {cartOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div
-            className="absolute inset-0 bg-zinc-950/70"
+            className="absolute inset-0 bg-white/70"
             onClick={() => setCartOpen(false)}
           />
-          <div className="relative w-full max-w-md bg-zinc-900 border-l border-zinc-800 flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+          <div className="relative w-full max-w-md bg-surface border-l border-border flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-border">
               <h2 className="text-lg font-bold flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-violet-400" />
+                <ShoppingCart className="w-5 h-5 text-violet-600" />
                 Panier ({itemCount})
               </h2>
               <button
                 onClick={() => setCartOpen(false)}
-                className="text-zinc-400 hover:text-white transition"
+                className="text-muted hover:text-foreground transition"
                 title="Fermer"
               >
                 <X className="w-5 h-5" />
@@ -455,16 +455,16 @@ function BoutiqueContent() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {cart.length === 0 ? (
                 <div className="text-center py-8">
-                  <ShoppingCart className="w-12 h-12 text-zinc-600 mx-auto mb-3" />
-                  <p className="text-zinc-400 text-sm">Votre panier est vide</p>
+                  <ShoppingCart className="w-12 h-12 text-muted/60 mx-auto mb-3" />
+                  <p className="text-muted text-sm">Votre panier est vide</p>
                 </div>
               ) : (
                 cart.map((item) => (
                   <div
                     key={item.product.id}
-                    className="flex items-center gap-4 bg-zinc-800/50 rounded-xl p-4"
+                    className="flex items-center gap-4 bg-surface rounded-xl p-4"
                   >
-                    <div className="w-14 h-14 rounded-lg bg-zinc-800 shrink-0 flex items-center justify-center overflow-hidden">
+                    <div className="w-14 h-14 rounded-lg bg-surface-2 shrink-0 flex items-center justify-center overflow-hidden">
                       {item.product.image_url ? (
                         <img
                           src={item.product.image_url}
@@ -472,21 +472,21 @@ function BoutiqueContent() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Package className="w-6 h-6 text-zinc-600" />
+                        <Package className="w-6 h-6 text-muted/60" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-semibold truncate">
                         {item.product.name}
                       </h4>
-                      <p className="text-violet-400 text-sm font-medium">
+                      <p className="text-violet-600 text-sm font-medium">
                         {Math.round(item.product.price)} FCFA
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => updateQuantity(item.product.id, -1)}
-                        className="w-7 h-7 rounded-md bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center transition"
+                        className="w-7 h-7 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
                         title="Retirer"
                       >
                         <Minus className="w-3.5 h-3.5" />
@@ -496,7 +496,7 @@ function BoutiqueContent() {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.product.id, 1)}
-                        className="w-7 h-7 rounded-md bg-zinc-700 hover:bg-zinc-600 flex items-center justify-center transition"
+                        className="w-7 h-7 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
                         title="Ajouter"
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -508,9 +508,9 @@ function BoutiqueContent() {
             </div>
 
             {cart.length > 0 && (
-              <div className="shrink-0 border-t border-zinc-800 p-6">
+              <div className="shrink-0 border-t border-border p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-zinc-400">Total</span>
+                  <span className="text-muted">Total</span>
                   <span className="text-xl font-bold text-white">
                     {Math.round(total)} FCFA
                   </span>
@@ -534,7 +534,7 @@ function BoutiqueContent() {
                       : "Payer par carte"}
                   </button>
                 )}
-                <p className="text-zinc-500 text-xs text-center mt-3 flex items-center justify-center gap-1">
+                <p className="text-muted text-xs text-center mt-3 flex items-center justify-center gap-1">
                   <Star className="w-3 h-3" />
                   Livraison discrète garantie
                 </p>

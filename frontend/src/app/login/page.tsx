@@ -126,7 +126,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="absolute inset-0 bg-linear-to-br from-violet-950/30 via-zinc-950 to-pink-950/20" />
+      <div className="absolute inset-0 bg-linear-to-br from-violet-50 via-white to-pink-50" />
 
       <div className="relative w-full max-w-md">
         <button
@@ -136,16 +136,16 @@ export default function LoginPage() {
             else setStep("choose");
             setError("");
           }}
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition mb-8"
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour
         </button>
 
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-8">
+        <div className="bg-white/90 border border-border rounded-2xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-500/10 border border-violet-500/20 mb-4">
-              <LogIn className="w-7 h-7 text-violet-400" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-50 border border-violet-200 mb-4">
+              <LogIn className="w-7 h-7 text-violet-600" />
             </div>
             <h1 className="text-2xl font-bold">
               {step === "choose" && "Connexion"}
@@ -153,12 +153,12 @@ export default function LoginPage() {
               {step === "otp" && "Vérification"}
               {step === "email" && "Connexion par email"}
             </h1>
-            <p className="text-zinc-400 text-sm mt-1">
+            <p className="text-muted text-sm mt-1">
               {step === "choose" && "Retrouvez votre espace privé"}
               {step === "phone" && "Recevez un code de connexion par SMS"}
               {step === "otp" && `Code envoyé au ${phone}`}
               {step === "otp" && devCode && (
-                <span className="block mt-1 text-emerald-400 font-mono text-base">
+                <span className="block mt-1 text-emerald-600 font-mono text-base">
                   Code dev : {devCode}
                 </span>
               )}
@@ -167,7 +167,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3 mb-6">
+            <div className="bg-red-50 border border-red-200 text-red-400 text-sm rounded-lg px-4 py-3 mb-6">
               {error}
             </div>
           )}
@@ -182,7 +182,7 @@ export default function LoginPage() {
                 <Phone className="w-5 h-5" />
                 <div className="text-left flex-1">
                   <p className="text-sm font-semibold">Numéro de téléphone</p>
-                  <p className="text-xs text-violet-200/70">
+                  <p className="text-xs text-violet-600">
                     Connexion rapide par code SMS
                   </p>
                 </div>
@@ -190,14 +190,14 @@ export default function LoginPage() {
               </button>
               <button
                 onClick={() => setStep("email")}
-                className="w-full flex items-center gap-4 bg-zinc-800 hover:bg-zinc-700 text-white font-semibold py-4 px-5 rounded-xl transition border border-zinc-700"
+                className="w-full flex items-center gap-4 bg-surface-2 hover:bg-gray-100 text-white font-semibold py-4 px-5 rounded-xl transition border border-border"
               >
-                <Mail className="w-5 h-5 text-zinc-400" />
+                <Mail className="w-5 h-5 text-muted" />
                 <div className="text-left flex-1">
                   <p className="text-sm font-semibold">Email</p>
-                  <p className="text-xs text-zinc-400">Avec mot de passe</p>
+                  <p className="text-xs text-muted">Avec mot de passe</p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-500" />
+                <ArrowRight className="w-4 h-4 text-muted" />
               </button>
             </div>
           )}
@@ -206,7 +206,7 @@ export default function LoginPage() {
           {step === "phone" && (
             <form onSubmit={handleSendOTP} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   Numéro de téléphone
                 </label>
                 <div className="flex gap-2">
@@ -214,12 +214,12 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowCountries(!showCountries)}
-                      className="flex items-center gap-1.5 bg-zinc-800/50 border border-zinc-700 rounded-lg px-3 py-3 text-sm text-white hover:border-violet-500 transition whitespace-nowrap"
+                      className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-3 py-3 text-sm text-white hover:border-violet-400 transition whitespace-nowrap"
                     >
                       <span>{country.flag}</span>
-                      <span className="text-zinc-400">{country.dial}</span>
+                      <span className="text-muted">{country.dial}</span>
                       <svg
-                        className="w-3 h-3 text-zinc-500"
+                        className="w-3 h-3 text-muted"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -233,7 +233,7 @@ export default function LoginPage() {
                       </svg>
                     </button>
                     {showCountries && (
-                      <div className="absolute top-full left-0 mt-1 w-64 max-h-60 overflow-y-auto bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl z-50">
+                      <div className="absolute top-full left-0 mt-1 w-64 max-h-60 overflow-y-auto bg-surface-2 border border-border rounded-lg shadow-xl z-50">
                         {COUNTRIES.map((c) => (
                           <button
                             key={c.code}
@@ -242,15 +242,15 @@ export default function LoginPage() {
                               setCountry(c);
                               setShowCountries(false);
                             }}
-                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-zinc-700 transition text-left ${
+                            className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 transition text-left ${
                               c.code === country.code
-                                ? "bg-violet-500/10 text-violet-300"
+                                ? "bg-violet-50 text-violet-600"
                                 : "text-white"
                             }`}
                           >
                             <span>{c.flag}</span>
                             <span className="flex-1 truncate">{c.name}</span>
-                            <span className="text-zinc-400 text-xs">
+                            <span className="text-muted text-xs">
                               {c.dial}
                             </span>
                           </button>
@@ -266,7 +266,7 @@ export default function LoginPage() {
                     }
                     required
                     placeholder="6 12 34 56 78"
-                    className="flex-1 bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+                    className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
                   />
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function LoginPage() {
           {step === "otp" && (
             <form onSubmit={handleVerifyOTP} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   Code de vérification
                 </label>
                 <input
@@ -297,7 +297,7 @@ export default function LoginPage() {
                   required
                   maxLength={6}
                   placeholder="000000"
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-zinc-600 focus:outline-none focus:border-violet-500 transition font-mono"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition font-mono"
                   autoFocus
                 />
               </div>
@@ -319,7 +319,7 @@ export default function LoginPage() {
                     /* ignore */
                   }
                 }}
-                className="w-full text-sm text-zinc-400 hover:text-white disabled:text-zinc-600 transition"
+                className="w-full text-sm text-muted hover:text-foreground disabled:text-gray-300 transition"
               >
                 {cooldown > 0
                   ? `Renvoyer dans ${cooldown}s`
@@ -332,7 +332,7 @@ export default function LoginPage() {
           {step === "email" && (
             <form onSubmit={handleEmailLogin} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   Email
                 </label>
                 <input
@@ -341,11 +341,11 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="votre@email.com"
-                  className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-300 mb-1.5">
+                <label className="block text-sm font-medium text-foreground mb-1.5">
                   Mot de passe
                 </label>
                 <div className="relative">
@@ -355,12 +355,12 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Votre mot de passe"
-                    className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 pr-12 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 pr-12 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPwd(!showPwd)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition"
                   >
                     {showPwd ? (
                       <EyeOff className="w-5 h-5" />
@@ -381,11 +381,11 @@ export default function LoginPage() {
           )}
 
           {step === "choose" && (
-            <p className="text-zinc-500 text-sm text-center mt-6">
+            <p className="text-muted text-sm text-center mt-6">
               Pas encore de compte ?{" "}
               <Link
                 href="/register"
-                className="text-violet-400 hover:text-violet-300 transition"
+                className="text-violet-600 hover:text-violet-600 transition"
               >
                 S&apos;inscrire gratuitement
               </Link>

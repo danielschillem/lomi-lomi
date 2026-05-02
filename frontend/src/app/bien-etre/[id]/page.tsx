@@ -221,7 +221,7 @@ export default function ProviderPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-zinc-400">Chargement...</div>
+        <div className="animate-pulse text-muted">Chargement...</div>
       </div>
     );
   }
@@ -229,10 +229,10 @@ export default function ProviderPage() {
   if (!provider) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-zinc-400">Prestataire non trouvé</p>
+        <p className="text-muted">Prestataire non trouvé</p>
         <Link
           href="/bien-etre"
-          className="text-emerald-400 text-sm hover:underline"
+          className="text-emerald-600 text-sm hover:underline"
         >
           Retour au catalogue
         </Link>
@@ -249,7 +249,7 @@ export default function ProviderPage() {
         {/* Header */}
         <Link
           href="/bien-etre"
-          className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition mb-6"
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour au catalogue
@@ -257,7 +257,7 @@ export default function ProviderPage() {
 
         {/* Booking success */}
         {bookingSuccess && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
             <Check className="w-4 h-4" />
             Réservation créée avec succès ! Consultez vos rendez-vous pour le
             suivi.
@@ -265,9 +265,9 @@ export default function ProviderPage() {
         )}
 
         {/* Provider card */}
-        <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden mb-8">
+        <div className="bg-white/90 border border-border rounded-2xl overflow-hidden mb-8">
           {/* Image */}
-          <div className="h-64 bg-zinc-800 flex items-center justify-center relative">
+          <div className="h-64 bg-surface-2 flex items-center justify-center relative">
             {provider.image_url ? (
               <img
                 src={provider.image_url}
@@ -275,7 +275,7 @@ export default function ProviderPage() {
                 className="w-full h-full object-cover"
               />
             ) : (
-              <Sparkles className="w-16 h-16 text-zinc-600" />
+              <Sparkles className="w-16 h-16 text-muted/60" />
             )}
             {provider.is_verified && (
               <span className="absolute top-4 right-4 bg-emerald-500/90 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
@@ -289,31 +289,31 @@ export default function ProviderPage() {
             <div className="flex items-start justify-between gap-4 mb-3">
               <div>
                 <h1 className="text-2xl font-bold">{provider.name}</h1>
-                <span className="text-sm text-zinc-500 capitalize">
+                <span className="text-sm text-muted capitalize">
                   {provider.category.replace("_", " ")}
                 </span>
               </div>
               {provider.rating > 0 && (
-                <div className="flex items-center gap-1.5 text-yellow-400">
+                <div className="flex items-center gap-1.5 text-yellow-600">
                   <Star className="w-5 h-5 fill-yellow-400" />
                   <span className="text-lg font-bold">
                     {provider.rating.toFixed(1)}
                   </span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-muted">
                     ({provider.review_count} avis)
                   </span>
                 </div>
               )}
             </div>
 
-            <p className="text-zinc-300 text-sm leading-relaxed mb-4">
+            <p className="text-foreground text-sm leading-relaxed mb-4">
               {provider.description}
             </p>
 
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
               {provider.mobile_service && (
-                <span className="inline-flex items-center gap-1 text-xs bg-violet-500/10 text-violet-400 border border-violet-500/20 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs bg-violet-50 text-violet-600 border border-violet-200 px-2.5 py-1 rounded-full">
                   <MapPin className="w-3 h-3" />
                   Se déplace à domicile
                 </span>
@@ -321,7 +321,7 @@ export default function ProviderPage() {
               {certs.map((cert, i) => (
                 <span
                   key={i}
-                  className="text-xs bg-zinc-800 text-zinc-400 px-2.5 py-1 rounded-full"
+                  className="text-xs bg-surface-2 text-muted px-2.5 py-1 rounded-full"
                 >
                   {cert}
                 </span>
@@ -329,7 +329,7 @@ export default function ProviderPage() {
             </div>
 
             {/* Contact info */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-500">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
               {provider.address && (
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" />
@@ -347,7 +347,7 @@ export default function ProviderPage() {
                   href={provider.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition"
+                  className="flex items-center gap-1 text-emerald-600 hover:text-emerald-300 transition"
                 >
                   <Globe className="w-3.5 h-3.5" />
                   Site web
@@ -357,9 +357,9 @@ export default function ProviderPage() {
 
             {/* Availability schedule */}
             {provider.availabilities && provider.availabilities.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-zinc-800">
-                <h3 className="text-sm font-semibold text-zinc-300 mb-2 flex items-center gap-1.5">
-                  <Clock className="w-4 h-4 text-emerald-400" />
+              <div className="mt-4 pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                  <Clock className="w-4 h-4 text-emerald-600" />
                   Horaires
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -368,9 +368,9 @@ export default function ProviderPage() {
                     .map((a) => (
                       <div
                         key={a.id}
-                        className="text-xs text-zinc-400 bg-zinc-800/50 rounded-lg px-3 py-2"
+                        className="text-xs text-muted bg-surface rounded-lg px-3 py-2"
                       >
-                        <span className="font-medium text-zinc-300">
+                        <span className="font-medium text-foreground">
                           {dayNames[a.day_of_week]}
                         </span>
                         <br />
@@ -385,7 +385,7 @@ export default function ProviderPage() {
 
         {/* Services */}
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-emerald-400" />
+          <Sparkles className="w-5 h-5 text-emerald-600" />
           Prestations
         </h2>
 
@@ -393,10 +393,10 @@ export default function ProviderPage() {
           {provider.services?.map((service) => (
             <div
               key={service.id}
-              className={`bg-zinc-900/60 border rounded-xl p-5 transition cursor-pointer ${
+              className={`bg-white/90 border rounded-xl p-5 transition cursor-pointer ${
                 selectedService?.id === service.id
                   ? "border-emerald-500/50 bg-emerald-500/5"
-                  : "border-zinc-800 hover:border-emerald-500/30"
+                  : "border-border hover:border-emerald-500/30"
               }`}
               onClick={() =>
                 setSelectedService(
@@ -406,20 +406,20 @@ export default function ProviderPage() {
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <h3 className="font-semibold text-sm">{service.name}</h3>
-                <span className="text-lg font-bold text-emerald-400 shrink-0">
+                <span className="text-lg font-bold text-emerald-600 shrink-0">
                   {Math.round(service.price)} FCFA
                 </span>
               </div>
-              <p className="text-zinc-400 text-xs leading-relaxed mb-3">
+              <p className="text-muted text-xs leading-relaxed mb-3">
                 {service.description}
               </p>
-              <div className="flex items-center gap-3 text-xs text-zinc-500">
+              <div className="flex items-center gap-3 text-xs text-muted">
                 <span className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
                   {service.duration} min
                 </span>
                 {service.is_duo && (
-                  <span className="flex items-center gap-1 text-pink-400">
+                  <span className="flex items-center gap-1 text-pink-600">
                     <Users className="w-3 h-3" />
                     Duo possible
                   </span>
@@ -431,14 +431,14 @@ export default function ProviderPage() {
 
         {/* Booking form */}
         {selectedService && user && (
-          <div className="bg-zinc-900/60 border border-emerald-500/20 rounded-2xl p-6 mb-8">
+          <div className="bg-white/90 border border-emerald-200 rounded-2xl p-6 mb-8">
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-emerald-400" />
+              <Calendar className="w-5 h-5 text-emerald-600" />
               Réserver : {selectedService.name}
             </h3>
 
             {bookingError && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
+              <div className="bg-red-50 border border-red-200 text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
                 {bookingError}
               </div>
             )}
@@ -448,7 +448,7 @@ export default function ProviderPage() {
               <div>
                 <label
                   htmlFor="booking-date"
-                  className="block text-xs text-zinc-500 mb-1.5"
+                  className="block text-xs text-muted mb-1.5"
                 >
                   Date
                 </label>
@@ -461,7 +461,7 @@ export default function ProviderPage() {
                     setBookingDate(e.target.value);
                     setBookingTime("");
                   }}
-                  className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500/50 transition"
+                  className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition"
                 />
               </div>
 
@@ -469,7 +469,7 @@ export default function ProviderPage() {
               <div>
                 <label
                   htmlFor="booking-time"
-                  className="block text-xs text-zinc-500 mb-1.5"
+                  className="block text-xs text-muted mb-1.5"
                 >
                   Heure
                 </label>
@@ -478,7 +478,7 @@ export default function ProviderPage() {
                     id="booking-time"
                     value={bookingTime}
                     onChange={(e) => setBookingTime(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-emerald-500/50 transition"
+                    className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-emerald-500/50 transition"
                   >
                     <option value="">Choisir un créneau</option>
                     {timeSlots.map((slot) => (
@@ -488,7 +488,7 @@ export default function ProviderPage() {
                     ))}
                   </select>
                 ) : (
-                  <p className="text-zinc-500 text-xs px-3 py-2.5">
+                  <p className="text-muted text-xs px-3 py-2.5">
                     {bookingDate
                       ? "Aucun créneau disponible ce jour"
                       : "Sélectionnez une date"}
@@ -500,7 +500,7 @@ export default function ProviderPage() {
             {/* Persons (duo) */}
             {selectedService.is_duo && (
               <div className="mb-4">
-                <label className="block text-xs text-zinc-500 mb-1.5">
+                <label className="block text-xs text-muted mb-1.5">
                   Nombre de personnes
                 </label>
                 <div className="flex gap-2">
@@ -511,8 +511,8 @@ export default function ProviderPage() {
                     }}
                     className={`px-4 py-2 rounded-lg text-sm transition ${
                       persons === 1
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                        : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                        ? "bg-emerald-500/20 text-emerald-600 border border-emerald-500/30"
+                        : "bg-surface-2 text-muted border border-border"
                     }`}
                   >
                     Solo
@@ -521,8 +521,8 @@ export default function ProviderPage() {
                     onClick={() => setPersons(2)}
                     className={`px-4 py-2 rounded-lg text-sm transition flex items-center gap-1.5 ${
                       persons === 2
-                        ? "bg-pink-500/20 text-pink-400 border border-pink-500/30"
-                        : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                        ? "bg-pink-500/20 text-pink-600 border border-pink-500/30"
+                        : "bg-surface-2 text-muted border border-border"
                     }`}
                   >
                     <Users className="w-3.5 h-3.5" />
@@ -535,7 +535,7 @@ export default function ProviderPage() {
                   <div className="mt-3">
                     <label
                       htmlFor="guest-select"
-                      className="block text-xs text-zinc-500 mb-1.5"
+                      className="block text-xs text-muted mb-1.5"
                     >
                       Inviter un match (optionnel)
                     </label>
@@ -547,7 +547,7 @@ export default function ProviderPage() {
                           e.target.value ? Number(e.target.value) : undefined,
                         )
                       }
-                      className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white focus:outline-none focus:border-pink-500/50 transition"
+                      className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-pink-300 transition"
                     >
                       <option value="">Aucun invité</option>
                       {matches.map((m) => (
@@ -563,7 +563,7 @@ export default function ProviderPage() {
 
             {/* Notes */}
             <div className="mb-4">
-              <label className="block text-xs text-zinc-500 mb-1.5">
+              <label className="block text-xs text-muted mb-1.5">
                 Notes (optionnel)
               </label>
               <textarea
@@ -571,14 +571,14 @@ export default function ProviderPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Allergies, préférences particulières..."
                 rows={2}
-                className="w-full px-3 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50 transition resize-none"
+                className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder-gray-400 focus:outline-none focus:border-emerald-500/50 transition resize-none"
               />
             </div>
 
             {/* Summary & submit */}
-            <div className="flex items-center justify-between pt-4 border-t border-zinc-800">
+            <div className="flex items-center justify-between pt-4 border-t border-border">
               <div>
-                <span className="text-zinc-500 text-sm">Total :</span>
+                <span className="text-muted text-sm">Total :</span>
                 <span className="text-xl font-bold text-white ml-2">
                   {Math.round(selectedService.price * persons)} FCFA
                 </span>
@@ -597,8 +597,8 @@ export default function ProviderPage() {
 
         {/* Not logged in */}
         {selectedService && !user && (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 mb-8 text-center">
-            <p className="text-zinc-400 text-sm mb-3">
+          <div className="bg-white/90 border border-border rounded-2xl p-6 mb-8 text-center">
+            <p className="text-muted text-sm mb-3">
               Connectez-vous pour réserver une prestation.
             </p>
             <Link
@@ -612,22 +612,22 @@ export default function ProviderPage() {
 
         {/* Reviews */}
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-          <Star className="w-5 h-5 text-yellow-400" />
+          <Star className="w-5 h-5 text-yellow-600" />
           Avis ({reviews.length})
         </h2>
 
         {reviews.length === 0 ? (
-          <p className="text-zinc-500 text-sm">Aucun avis pour le moment.</p>
+          <p className="text-muted text-sm">Aucun avis pour le moment.</p>
         ) : (
           <div className="space-y-4">
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4"
+                className="bg-white/90 border border-border rounded-xl p-4"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+                    <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {review.user?.avatar_url ? (
                         <img
                           src={review.user.avatar_url}
@@ -635,7 +635,7 @@ export default function ProviderPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <span className="text-xs text-zinc-500">
+                        <span className="text-xs text-muted">
                           {review.user?.username?.[0]?.toUpperCase() || "?"}
                         </span>
                       )}
@@ -650,15 +650,15 @@ export default function ProviderPage() {
                         key={i}
                         className={`w-3.5 h-3.5 ${
                           i < review.rating
-                            ? "text-yellow-400 fill-yellow-400"
-                            : "text-zinc-700"
+                            ? "text-yellow-600 fill-yellow-400"
+                            : "text-foreground"
                         }`}
                       />
                     ))}
                   </div>
                 </div>
-                <p className="text-zinc-400 text-sm">{review.comment}</p>
-                <p className="text-zinc-600 text-xs mt-2">
+                <p className="text-muted text-sm">{review.comment}</p>
+                <p className="text-muted/60 text-xs mt-2">
                   {new Date(review.created_at).toLocaleDateString("fr-FR")}
                 </p>
               </div>

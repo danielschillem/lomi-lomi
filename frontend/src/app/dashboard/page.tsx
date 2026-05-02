@@ -68,37 +68,37 @@ export default function DashboardPage() {
           label: "Utilisateurs",
           value: adminStats.users,
           icon: Users,
-          color: "bg-violet-500/10 text-violet-400",
+          color: "bg-violet-50 text-violet-600",
         },
         {
           label: "Produits (tous)",
           value: adminStats.products,
           icon: ShoppingBag,
-          color: "bg-pink-500/10 text-pink-400",
+          color: "bg-pink-50 text-pink-500",
         },
         {
           label: "Lieux (tous)",
           value: adminStats.places,
           icon: MapPin,
-          color: "bg-blue-500/10 text-blue-400",
+          color: "bg-blue-50 text-blue-600",
         },
         {
           label: "Messages",
           value: adminStats.messages,
           icon: MessageCircle,
-          color: "bg-green-500/10 text-green-400",
+          color: "bg-green-50 text-green-600",
         },
         {
           label: "Commandes (toutes)",
           value: adminStats.orders,
           icon: ClipboardList,
-          color: "bg-yellow-500/10 text-yellow-400",
+          color: "bg-yellow-50 text-yellow-600",
         },
         {
           label: "Revenus globaux",
           value: `${Math.round(adminStats.revenue)} FCFA`,
           icon: DollarSign,
-          color: "bg-emerald-500/10 text-emerald-400",
+          color: "bg-emerald-50 text-emerald-600",
         },
         {
           label: "Prestataires bien-être",
@@ -121,19 +121,19 @@ export default function DashboardPage() {
           label: "Mes lieux",
           value: ownerStats.places,
           icon: MapPin,
-          color: "bg-blue-500/10 text-blue-400",
+          color: "bg-blue-50 text-blue-600",
         },
         {
           label: "Mes produits",
           value: ownerStats.products,
           icon: ShoppingBag,
-          color: "bg-green-500/10 text-green-400",
+          color: "bg-green-50 text-green-600",
         },
         {
           label: "Bien-être",
           value: ownerStats.wellness,
           icon: Heart,
-          color: "bg-pink-500/10 text-pink-400",
+          color: "bg-pink-50 text-pink-500",
         },
         {
           label: "Commandes",
@@ -145,13 +145,13 @@ export default function DashboardPage() {
           label: "Revenus",
           value: `${Math.round(ownerStats.revenue)} FCFA`,
           icon: DollarSign,
-          color: "bg-yellow-500/10 text-yellow-400",
+          color: "bg-yellow-50 text-yellow-600",
         },
         {
           label: "Réservations bien-être",
           value: ownerStats.bookings,
           icon: BarChart3,
-          color: "bg-violet-500/10 text-violet-400",
+          color: "bg-violet-50 text-violet-600",
         },
         {
           label: "Réservations lieux",
@@ -170,21 +170,21 @@ export default function DashboardPage() {
 
       {isAdmin && adminCards.length > 0 && (
         <>
-          <h2 className="mb-4 text-sm uppercase tracking-widest text-zinc-500">
+          <h2 className="mb-4 text-sm uppercase tracking-widest text-muted">
             Plateforme
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-8">
             {adminCards.map((card) => (
               <div
                 key={card.label}
-                className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 transition hover:border-violet-500/30"
+                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-violet-400/30"
               >
                 <div className="flex items-center gap-3">
                   <div className={`rounded-lg p-2 ${card.color}`}>
                     <card.icon size={20} />
                   </div>
                   <div>
-                    <p className="text-sm text-zinc-400">{card.label}</p>
+                    <p className="text-sm text-muted">{card.label}</p>
                     <p className="text-xl font-bold text-white">{card.value}</p>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function DashboardPage() {
       {ownerCards.length > 0 && (
         <>
           {isAdmin && (
-            <h2 className="mb-4 text-sm uppercase tracking-widest text-zinc-500">
+            <h2 className="mb-4 text-sm uppercase tracking-widest text-muted">
               Mes contenus
             </h2>
           )}
@@ -205,14 +205,14 @@ export default function DashboardPage() {
             {ownerCards.map((card) => (
               <div
                 key={card.label}
-                className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 transition hover:border-violet-500/30"
+                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-violet-400/30"
               >
                 <div className="flex items-center gap-3">
                   <div className={`rounded-lg p-2 ${card.color}`}>
                     <card.icon size={20} />
                   </div>
                   <div>
-                    <p className="text-sm text-zinc-400">{card.label}</p>
+                    <p className="text-sm text-muted">{card.label}</p>
                     <p className="text-xl font-bold text-white">{card.value}</p>
                   </div>
                 </div>

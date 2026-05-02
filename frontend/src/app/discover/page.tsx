@@ -330,29 +330,29 @@ export default function DiscoverPage() {
       <div className="min-h-screen px-4 py-12">
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <div className="h-5 w-16 bg-zinc-800 rounded animate-pulse" />
-            <div className="h-6 w-28 bg-zinc-800 rounded animate-pulse" />
-            <div className="h-5 w-5 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-5 w-16 bg-surface-2 rounded animate-pulse" />
+            <div className="h-6 w-28 bg-surface-2 rounded animate-pulse" />
+            <div className="h-5 w-5 bg-surface-2 rounded animate-pulse" />
           </div>
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden">
-            <div className="h-80 bg-zinc-800 animate-pulse" />
+          <div className="bg-white/90 border border-border rounded-2xl overflow-hidden">
+            <div className="h-80 bg-surface-2 animate-pulse" />
             <div className="p-6 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="h-6 w-32 bg-zinc-800 rounded animate-pulse" />
-                <div className="h-5 w-12 bg-zinc-800 rounded-full animate-pulse" />
+                <div className="h-6 w-32 bg-surface-2 rounded animate-pulse" />
+                <div className="h-5 w-12 bg-surface-2 rounded-full animate-pulse" />
               </div>
-              <div className="h-4 w-24 bg-zinc-800 rounded animate-pulse" />
-              <div className="h-4 w-full bg-zinc-800 rounded animate-pulse" />
-              <div className="h-4 w-3/4 bg-zinc-800 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-surface-2 rounded animate-pulse" />
+              <div className="h-4 w-full bg-surface-2 rounded animate-pulse" />
+              <div className="h-4 w-3/4 bg-surface-2 rounded animate-pulse" />
               <div className="flex gap-2 pt-2">
-                <div className="h-6 w-16 bg-zinc-800 rounded-full animate-pulse" />
-                <div className="h-6 w-20 bg-zinc-800 rounded-full animate-pulse" />
-                <div className="h-6 w-14 bg-zinc-800 rounded-full animate-pulse" />
+                <div className="h-6 w-16 bg-surface-2 rounded-full animate-pulse" />
+                <div className="h-6 w-20 bg-surface-2 rounded-full animate-pulse" />
+                <div className="h-6 w-14 bg-surface-2 rounded-full animate-pulse" />
               </div>
             </div>
             <div className="flex items-center justify-center gap-6 p-6 pt-0">
-              <div className="w-16 h-16 rounded-full bg-zinc-800 animate-pulse" />
-              <div className="w-20 h-20 rounded-full bg-zinc-800 animate-pulse" />
+              <div className="w-16 h-16 rounded-full bg-surface-2 animate-pulse" />
+              <div className="w-20 h-20 rounded-full bg-surface-2 animate-pulse" />
             </div>
           </div>
         </div>
@@ -372,33 +372,33 @@ export default function DiscoverPage() {
         <div className="flex items-center justify-between mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition"
           >
             <ArrowLeft className="w-4 h-4" />
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-500" />
+            <Heart className="w-5 h-5 text-pink-600" />
             Découverte
           </h1>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowRadar(!showRadar)}
-              className={`p-1.5 rounded-lg transition ${showRadar ? "bg-green-600 text-white" : "text-zinc-400 hover:text-white"}`}
+              className={`p-1.5 rounded-lg transition ${showRadar ? "bg-green-600 text-white" : "text-muted hover:text-foreground"}`}
               title="Radar"
             >
               <RadarIcon className="w-5 h-5" />
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-1.5 rounded-lg transition ${showFilters ? "bg-violet-600 text-white" : "text-zinc-400 hover:text-white"}`}
+              className={`p-1.5 rounded-lg transition ${showFilters ? "bg-violet-600 text-white" : "text-muted hover:text-foreground"}`}
               title="Filtres"
             >
               <SlidersHorizontal className="w-5 h-5" />
             </button>
             <button
               onClick={loadProfiles}
-              className="text-zinc-400 hover:text-white transition"
+              className="text-muted hover:text-foreground transition"
               title="Rafraîchir"
             >
               <RefreshCw className="w-5 h-5" />
@@ -408,15 +408,15 @@ export default function DiscoverPage() {
 
         {/* Filters panel */}
         {showFilters && (
-          <div className="mb-6 bg-zinc-900/80 border border-zinc-800 rounded-2xl p-5 space-y-5 animate-in slide-in-from-top-2">
-            <h3 className="text-sm font-semibold text-zinc-300 flex items-center gap-2">
+          <div className="mb-6 bg-surface/80 border border-border rounded-2xl p-5 space-y-5 animate-in slide-in-from-top-2">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
               <SlidersHorizontal className="w-4 h-4" />
               Préférences de découverte
             </h3>
 
             {/* Gender */}
             <div>
-              <label className="text-xs text-zinc-500 mb-2 block">Genre</label>
+              <label className="text-xs text-muted mb-2 block">Genre</label>
               <div className="flex gap-2">
                 {[
                   { value: "", label: "Tous" },
@@ -432,7 +432,7 @@ export default function DiscoverPage() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                       prefs.gender === opt.value
                         ? "bg-violet-600 text-white"
-                        : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                        : "bg-surface-2 text-muted hover:bg-gray-100"
                     }`}
                   >
                     {opt.label}
@@ -443,7 +443,7 @@ export default function DiscoverPage() {
 
             {/* Age range */}
             <div>
-              <label className="text-xs text-zinc-500 mb-2 block">
+              <label className="text-xs text-muted mb-2 block">
                 Âge : {prefs.min_age} – {prefs.max_age} ans
               </label>
               <div className="flex items-center gap-3">
@@ -484,7 +484,7 @@ export default function DiscoverPage() {
 
             {/* Distance */}
             <div>
-              <label className="text-xs text-zinc-500 mb-2 block">
+              <label className="text-xs text-muted mb-2 block">
                 Distance max : {prefs.max_distance} km
               </label>
               <input
@@ -522,14 +522,14 @@ export default function DiscoverPage() {
 
         {/* Search bar */}
         <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
             placeholder="Rechercher par pseudo ou ville..."
             title="Rechercher des profils"
-            className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-violet-500 transition"
+            className="w-full bg-white/90 border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
           />
         </div>
 
@@ -537,11 +537,11 @@ export default function DiscoverPage() {
         {searchQuery.trim().length >= 2 && (
           <div className="mb-6 space-y-2">
             {searching ? (
-              <p className="text-sm text-zinc-400 text-center animate-pulse">
+              <p className="text-sm text-muted text-center animate-pulse">
                 Recherche...
               </p>
             ) : searchResults.length === 0 ? (
-              <p className="text-sm text-zinc-500 text-center">
+              <p className="text-sm text-muted text-center">
                 Aucun résultat
               </p>
             ) : (
@@ -549,10 +549,10 @@ export default function DiscoverPage() {
                 <a
                   key={p.id}
                   href={`/users/${p.id}`}
-                  className="flex items-center gap-3 bg-zinc-900/60 border border-zinc-800 hover:border-violet-500/30 rounded-xl p-3 transition"
+                  className="flex items-center gap-3 bg-white/90 border border-border hover:border-violet-400/30 rounded-xl p-3 transition"
                 >
                   <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {p.avatar_url ? (
                         <img
                           src={p.avatar_url}
@@ -560,17 +560,17 @@ export default function DiscoverPage() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <User className="w-5 h-5 text-zinc-500" />
+                        <User className="w-5 h-5 text-muted" />
                       )}
                     </div>
                     {p.is_online && (
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900" />
+                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="font-semibold text-sm">{p.username}</span>
                     {p.city && (
-                      <p className="text-xs text-zinc-500 flex items-center gap-1">
+                      <p className="text-xs text-muted flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {p.city}
                       </p>
@@ -584,14 +584,14 @@ export default function DiscoverPage() {
 
         {/* Match overlay */}
         {matched && (
-          <div className="fixed inset-0 z-50 bg-zinc-950/90 flex items-center justify-center px-4">
-            <div className="bg-zinc-900 border border-violet-500/50 rounded-2xl p-8 text-center max-w-sm w-full animate-in zoom-in-95">
+          <div className="fixed inset-0 z-50 bg-white/90 flex items-center justify-center px-4">
+            <div className="bg-surface border border-violet-500/50 rounded-2xl p-8 text-center max-w-sm w-full animate-in zoom-in-95">
               <div className="flex items-center justify-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-violet-500 flex items-center justify-center overflow-hidden">
-                  <User className="w-8 h-8 text-violet-400" />
+                <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-violet-500 flex items-center justify-center overflow-hidden">
+                  <User className="w-8 h-8 text-violet-600" />
                 </div>
-                <Heart className="w-8 h-8 text-pink-500 animate-pulse" />
-                <div className="w-16 h-16 rounded-full bg-zinc-800 border-2 border-pink-500 flex items-center justify-center overflow-hidden">
+                <Heart className="w-8 h-8 text-pink-600 animate-pulse" />
+                <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-pink-500 flex items-center justify-center overflow-hidden">
                   {matched.avatar_url ? (
                     <img
                       src={matched.avatar_url}
@@ -599,14 +599,14 @@ export default function DiscoverPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="w-8 h-8 text-pink-400" />
+                    <User className="w-8 h-8 text-pink-500" />
                   )}
                 </div>
               </div>
               <h2 className="text-2xl font-bold bg-linear-to-r from-violet-400 to-pink-500 bg-clip-text text-transparent mb-2">
                 Match !
               </h2>
-              <p className="text-zinc-400 text-sm mb-6">
+              <p className="text-muted text-sm mb-6">
                 Vous et <span className="text-white">{matched.username}</span>{" "}
                 avez matché !
               </p>
@@ -620,7 +620,7 @@ export default function DiscoverPage() {
                 </button>
                 <button
                   onClick={closeMatch}
-                  className="px-4 text-zinc-400 hover:text-white transition text-sm"
+                  className="px-4 text-muted hover:text-foreground transition text-sm"
                 >
                   Plus tard
                 </button>
@@ -631,10 +631,10 @@ export default function DiscoverPage() {
 
         {/* Profile Card */}
         {done ? (
-          <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-12 text-center">
-            <User className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
+          <div className="bg-white/90 border border-border rounded-2xl p-12 text-center">
+            <User className="w-16 h-16 text-muted/60 mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Plus de profils</h2>
-            <p className="text-zinc-400 text-sm mb-6">
+            <p className="text-muted text-sm mb-6">
               Revenez plus tard pour découvrir de nouveaux profils.
             </p>
             <button
@@ -672,11 +672,11 @@ export default function DiscoverPage() {
 
               <div
                 ref={cardRef}
-                className={`bg-zinc-900/60 border border-zinc-800 rounded-2xl overflow-hidden transition-all select-none touch-none ${
+                className={`bg-white/90 border border-border rounded-2xl overflow-hidden transition-all select-none touch-none ${
                   action === "like"
-                    ? "border-pink-500/50 translate-x-[120%] rotate-12 opacity-0 duration-500"
+                    ? "border-pink-300 translate-x-[120%] rotate-12 opacity-0 duration-500"
                     : action === "pass"
-                      ? "border-zinc-600 -translate-x-[120%] -rotate-12 opacity-0 duration-500"
+                      ? "border-border -translate-x-[120%] -rotate-12 opacity-0 duration-500"
                       : dragging
                         ? "duration-0"
                         : "duration-300"
@@ -695,7 +695,7 @@ export default function DiscoverPage() {
                 onPointerCancel={onPointerUp}
               >
                 {/* Photo carousel */}
-                <div className="relative h-80 bg-zinc-800 flex items-center justify-center">
+                <div className="relative h-80 bg-surface-2 flex items-center justify-center">
                   {(() => {
                     const allImages = [
                       ...(current.avatar_url ? [current.avatar_url] : []),
@@ -712,7 +712,7 @@ export default function DiscoverPage() {
                             draggable={false}
                           />
                         ) : (
-                          <User className="w-24 h-24 text-zinc-600" />
+                          <User className="w-24 h-24 text-muted/60" />
                         )}
                         {allImages.length > 1 && (
                           <>
@@ -754,10 +754,10 @@ export default function DiscoverPage() {
                     );
                   })()}
                   {current.is_online && (
-                    <span className="absolute top-4 right-4 w-3 h-3 bg-green-500 rounded-full border-2 border-zinc-900" />
+                    <span className="absolute top-4 right-4 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   )}
                   {current.is_verified && (
-                    <span className="absolute top-4 left-4 text-xs bg-green-500/10 text-green-400 border border-green-500/20 px-2 py-0.5 rounded-full">
+                    <span className="absolute top-4 left-4 text-xs bg-green-50 text-green-600 border border-green-500/20 px-2 py-0.5 rounded-full">
                       Vérifié
                     </span>
                   )}
@@ -769,7 +769,7 @@ export default function DiscoverPage() {
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-bold">{current.username}</h2>
                       {current.age > 0 && (
-                        <span className="text-lg text-zinc-400">
+                        <span className="text-lg text-muted">
                           {current.age}
                         </span>
                       )}
@@ -777,21 +777,21 @@ export default function DiscoverPage() {
                     <div className="relative">
                       <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="text-zinc-500 hover:text-zinc-300 transition p-1"
+                        className="text-muted hover:text-foreground transition p-1"
                         title="Options"
                       >
                         <Flag className="w-4 h-4" />
                       </button>
                       {showMenu && (
-                        <div className="absolute right-0 top-8 z-20 bg-zinc-800 border border-zinc-700 rounded-lg shadow-xl w-52 py-1">
+                        <div className="absolute right-0 top-8 z-20 bg-surface-2 border border-border rounded-lg shadow-xl w-52 py-1">
                           <button
                             onClick={handleBlock}
-                            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-zinc-700 transition flex items-center gap-2"
+                            className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-100 transition flex items-center gap-2"
                           >
                             <Ban className="w-4 h-4" /> Bloquer
                           </button>
-                          <div className="border-t border-zinc-700 my-1" />
-                          <p className="px-4 py-1 text-xs text-zinc-500">
+                          <div className="border-t border-border my-1" />
+                          <p className="px-4 py-1 text-xs text-muted">
                             Signaler :
                           </p>
                           {["spam", "fake", "harassment", "inappropriate"].map(
@@ -799,7 +799,7 @@ export default function DiscoverPage() {
                               <button
                                 key={r}
                                 onClick={() => handleReport(r)}
-                                className="w-full text-left px-4 py-1.5 text-sm text-zinc-300 hover:bg-zinc-700 transition capitalize"
+                                className="w-full text-left px-4 py-1.5 text-sm text-foreground hover:bg-gray-100 transition capitalize"
                               >
                                 {r === "harassment"
                                   ? "Harcèlement"
@@ -819,13 +819,13 @@ export default function DiscoverPage() {
                   {/* City + Distance */}
                   <div className="flex items-center gap-3 mt-1">
                     {current.city && (
-                      <p className="text-zinc-400 text-sm flex items-center gap-1">
+                      <p className="text-muted text-sm flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
                         {current.city}
                       </p>
                     )}
                     {current.distance >= 0 && (
-                      <p className="text-zinc-500 text-sm flex items-center gap-1">
+                      <p className="text-muted text-sm flex items-center gap-1">
                         <Navigation className="w-3 h-3" />
                         {current.distance < 1
                           ? "< 1 km"
@@ -835,12 +835,12 @@ export default function DiscoverPage() {
                   </div>
 
                   {current.gender && (
-                    <p className="text-zinc-500 text-xs capitalize mt-1">
+                    <p className="text-muted text-xs capitalize mt-1">
                       {current.gender}
                     </p>
                   )}
                   {current.bio && (
-                    <p className="text-zinc-300 text-sm mt-3 leading-relaxed">
+                    <p className="text-foreground text-sm mt-3 leading-relaxed">
                       {current.bio}
                     </p>
                   )}
@@ -854,7 +854,7 @@ export default function DiscoverPage() {
                         {tags.map((tag) => (
                           <span
                             key={tag}
-                            className="inline-flex items-center gap-1 text-xs bg-violet-500/10 text-violet-300 border border-violet-500/20 px-2.5 py-1 rounded-full"
+                            className="inline-flex items-center gap-1 text-xs bg-violet-50 text-violet-600 border border-violet-200 px-2.5 py-1 rounded-full"
                           >
                             <Sparkles className="w-3 h-3" />
                             {tag}
@@ -878,14 +878,14 @@ export default function DiscoverPage() {
                   )}
                   <button
                     onClick={handlePass}
-                    className="w-16 h-16 rounded-full border-2 border-zinc-700 hover:border-zinc-500 flex items-center justify-center transition active:scale-90"
+                    className="w-16 h-16 rounded-full border-2 border-border hover:border-gray-300 flex items-center justify-center transition active:scale-90"
                     title="Passer (←)"
                   >
-                    <X className="w-7 h-7 text-zinc-400" />
+                    <X className="w-7 h-7 text-muted" />
                   </button>
                   <button
                     onClick={handleLike}
-                    className="w-20 h-20 rounded-full bg-linear-to-br from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 flex items-center justify-center transition shadow-lg shadow-violet-600/25 active:scale-90"
+                    className="w-20 h-20 rounded-full bg-linear-to-br from-violet-600 to-pink-600 hover:from-violet-700 hover:to-pink-700 flex items-center justify-center transition shadow-lg shadow-violet-200 active:scale-90"
                     title="J'aime (→)"
                   >
                     <Heart className="w-9 h-9 text-white" />
@@ -895,7 +895,7 @@ export default function DiscoverPage() {
             </div>
 
             {/* Keyboard hint */}
-            <p className="text-center text-zinc-600 text-xs mt-4">
+            <p className="text-center text-muted/60 text-xs mt-4">
               ← Passer · → J&apos;aime · Ctrl+Z Annuler · Glisser pour swiper
             </p>
           </>

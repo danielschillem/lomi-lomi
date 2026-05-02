@@ -18,8 +18,8 @@ export default function AdminLayout({
   }, [pathname, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-      <div className="animate-pulse text-zinc-400">Redirection...</div>
+    <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="animate-pulse text-muted">Redirection...</div>
     </div>
   );
 }

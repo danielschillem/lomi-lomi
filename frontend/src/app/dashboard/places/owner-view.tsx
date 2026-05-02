@@ -58,9 +58,9 @@ export default function OwnerPlacesView() {
       <h1 className="mb-6 text-2xl font-bold text-white">Mes lieux</h1>
 
       {places.length === 0 ? (
-        <div className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-8 text-center ">
-          <MapPin size={48} className="mx-auto text-zinc-600" />
-          <p className="mt-3 text-zinc-400">
+        <div className="rounded-xl bg-white/90 border border-border p-8 text-center ">
+          <MapPin size={48} className="mx-auto text-muted/60" />
+          <p className="mt-3 text-muted">
             Aucun lieu ne vous est attribué.
             <br />
             Contactez l&apos;administrateur pour en ajouter.
@@ -69,11 +69,11 @@ export default function OwnerPlacesView() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {places.map((place) => (
-            <div key={place.id} className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 ">
+            <div key={place.id} className="rounded-xl bg-white/90 border border-border p-5 ">
               {editId === place.id ? (
                 <div className="space-y-3">
                   <input
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
                     defaultValue={place.name}
                     placeholder="Nom"
                     onChange={(e) =>
@@ -81,7 +81,7 @@ export default function OwnerPlacesView() {
                     }
                   />
                   <textarea
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
                     defaultValue={place.description}
                     placeholder="Description"
                     rows={3}
@@ -90,7 +90,7 @@ export default function OwnerPlacesView() {
                     }
                   />
                   <input
-                    className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-white placeholder-zinc-500 focus:border-violet-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
                     defaultValue={place.phone}
                     placeholder="Téléphone"
                     onChange={(e) =>
@@ -106,7 +106,7 @@ export default function OwnerPlacesView() {
                     </button>
                     <button
                       onClick={() => setEditId(null)}
-                      className="flex items-center gap-1 rounded-lg bg-zinc-700 px-3 py-2 text-sm"
+                      className="flex items-center gap-1 rounded-lg bg-gray-200 px-3 py-2 text-sm"
                     >
                       <X size={14} /> Annuler
                     </button>
@@ -119,7 +119,7 @@ export default function OwnerPlacesView() {
                       <h3 className="font-semibold text-white">
                         {place.name}
                       </h3>
-                      <p className="text-sm text-zinc-400">
+                      <p className="text-sm text-muted">
                         {place.category} • {place.city}
                       </p>
                     </div>
@@ -129,17 +129,17 @@ export default function OwnerPlacesView() {
                         setEditData({});
                       }}
                       title="Modifier"
-                      className="rounded-lg p-2 text-zinc-500 transition hover:bg-zinc-800 hover:text-zinc-300"
+                      className="rounded-lg p-2 text-muted transition hover:bg-gray-100 hover:text-foreground"
                     >
                       <Edit2 size={16} />
                     </button>
                   </div>
                   {place.description && (
-                    <p className="mt-2 text-sm text-zinc-400 line-clamp-2">
+                    <p className="mt-2 text-sm text-muted line-clamp-2">
                       {place.description}
                     </p>
                   )}
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-zinc-400">
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
                     {place.address && <span>📍 {place.address}</span>}
                     {place.phone && <span>📞 {place.phone}</span>}
                     <span>⭐ {place.rating.toFixed(1)}</span>

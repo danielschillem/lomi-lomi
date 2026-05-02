@@ -20,10 +20,10 @@ interface Booking {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending: { label: "En attente", color: "bg-yellow-500/10 text-yellow-400" },
-  confirmed: { label: "Confirmée", color: "bg-blue-500/10 text-blue-400" },
-  completed: { label: "Terminée", color: "bg-green-500/10 text-green-400" },
-  canceled: { label: "Annulée", color: "bg-red-500/100/10 text-red-400" },
+  pending: { label: "En attente", color: "bg-yellow-50 text-yellow-600" },
+  confirmed: { label: "Confirmée", color: "bg-blue-50 text-blue-600" },
+  completed: { label: "Terminée", color: "bg-green-50 text-green-600" },
+  canceled: { label: "Annulée", color: "bg-red-50 text-red-400" },
 };
 
 export default function OwnerWellnessView() {
@@ -63,7 +63,7 @@ export default function OwnerWellnessView() {
       </h1>
 
       {bookings.length === 0 ? (
-        <p className="text-zinc-400">Aucune réservation bien-être.</p>
+        <p className="text-muted">Aucune réservation bien-être.</p>
       ) : (
         <div className="space-y-4">
           {bookings.map((booking) => {
@@ -71,7 +71,7 @@ export default function OwnerWellnessView() {
             return (
               <div
                 key={booking.id}
-                className="rounded-xl bg-zinc-900/60 border border-zinc-800 p-5 "
+                className="rounded-xl bg-white/90 border border-border p-5 "
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -79,16 +79,16 @@ export default function OwnerWellnessView() {
                       {booking.service?.name || "Service"} —{" "}
                       {booking.provider?.name}
                     </p>
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-muted">
                       {new Date(booking.date).toLocaleDateString("fr-FR")} •{" "}
                       {booking.start_time} – {booking.end_time}
                     </p>
-                    <p className="text-sm text-zinc-400">
+                    <p className="text-sm text-muted">
                       Client : {booking.user?.username} • {booking.persons}{" "}
                       pers. • {Math.round(booking.total_price)} FCFA
                     </p>
                     {booking.notes && (
-                      <p className="mt-1 text-sm text-zinc-500 italic">
+                      <p className="mt-1 text-sm text-muted italic">
                         {booking.notes}
                       </p>
                     )}
@@ -110,7 +110,7 @@ export default function OwnerWellnessView() {
                     </button>
                     <button
                       onClick={() => handleStatus(booking.id, "canceled")}
-                      className="flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400"
+                      className="flex items-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-400"
                     >
                       <XCircle size={14} /> Refuser
                     </button>
