@@ -26,6 +26,8 @@ type User struct {
 	Longitude  float64    `json:"longitude"`
 	IsVerified bool       `gorm:"default:false" json:"is_verified"`
 	IsOnline   bool       `gorm:"default:false" json:"is_online"`
+	IsBanned   bool       `gorm:"default:false" json:"is_banned"`
+	BanReason  string     `gorm:"size:255" json:"ban_reason,omitempty"`
 	LastSeenAt *time.Time `json:"last_seen_at"`
 	Role       string     `gorm:"size:20;default:user" json:"role"` // user, owner, admin
 	PushToken  string     `gorm:"size:255" json:"-"`

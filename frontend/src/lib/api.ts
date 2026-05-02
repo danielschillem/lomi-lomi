@@ -590,6 +590,19 @@ export function adminUpdateReport(id: number, status: string) {
   });
 }
 
+export function adminBanUser(id: number, banned: boolean, reason = "") {
+  return request<{ message: string }>(`/admin/users/${id}/ban`, {
+    method: "PUT",
+    body: JSON.stringify({ banned, reason }),
+  });
+}
+
+export function adminGetReportCount(userId: number) {
+  return request<{ user_id: number; pending_reports: number }>(
+    `/admin/users/${userId}/reports-count`,
+  );
+}
+
 /* ---- Wellness ---- */
 export function getWellnessProviders(params?: {
   category?: string;

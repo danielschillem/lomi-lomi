@@ -649,7 +649,7 @@ export default function AdminWellnessPage() {
                       {b.start_time} - {b.end_time}
                     </span>
                     <span>{b.persons === 2 ? "Duo" : "Solo"}</span>
-                    <span className="font-medium text-white">
+                    <span className="font-medium text-foreground">
                       {Math.round(b.total_price)} FCFA
                     </span>
                   </div>
@@ -736,7 +736,7 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div className="col-span-2">
@@ -756,7 +756,7 @@ export default function AdminWellnessPage() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
               <div>
@@ -775,7 +775,7 @@ export default function AdminWellnessPage() {
                       category: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 >
                   {providerCategories.map((c) => (
                     <option key={c} value={c}>
@@ -797,7 +797,7 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, city: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div className="col-span-2">
@@ -816,7 +816,7 @@ export default function AdminWellnessPage() {
                       address: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -832,7 +832,7 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, phone: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -849,7 +849,7 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, email: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -868,7 +868,7 @@ export default function AdminWellnessPage() {
                       website: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -887,7 +887,7 @@ export default function AdminWellnessPage() {
                       image_url: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div className="col-span-2">
@@ -930,7 +930,7 @@ export default function AdminWellnessPage() {
                           latitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                     />
                   </div>
                   <div>
@@ -951,7 +951,7 @@ export default function AdminWellnessPage() {
                           longitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                     />
                   </div>
                 </div>
@@ -969,7 +969,7 @@ export default function AdminWellnessPage() {
                     })
                   }
                   placeholder="RNCP, FFMBE, ..."
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
@@ -1057,7 +1057,7 @@ export default function AdminWellnessPage() {
                   onChange={(e) =>
                     setServiceForm({ ...serviceForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div>
@@ -1077,7 +1077,7 @@ export default function AdminWellnessPage() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -1098,7 +1098,7 @@ export default function AdminWellnessPage() {
                         duration: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                   />
                 </div>
                 <div>
@@ -1119,7 +1119,7 @@ export default function AdminWellnessPage() {
                         price: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                   />
                 </div>
               </div>
@@ -1140,7 +1140,7 @@ export default function AdminWellnessPage() {
                     })
                   }
                   placeholder="relaxation, hot_stones, thai..."
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-white"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
               </div>
               <div className="flex gap-4">
@@ -1214,7 +1214,7 @@ export default function AdminWellnessPage() {
                       updated[i].day_of_week = parseInt(e.target.value);
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-foreground"
                   >
                     {dayNames.map((d, di) => (
                       <option key={di} value={di}>
@@ -1231,7 +1231,7 @@ export default function AdminWellnessPage() {
                       updated[i].start_time = e.target.value;
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-foreground"
                   />
                   <span className="text-muted text-xs">-</span>
                   <input
@@ -1243,7 +1243,7 @@ export default function AdminWellnessPage() {
                       updated[i].end_time = e.target.value;
                       setAvailSlots(updated);
                     }}
-                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-white"
+                    className="px-2 py-1.5 bg-surface-2 border border-border rounded text-xs text-foreground"
                   />
                   <button
                     onClick={() =>

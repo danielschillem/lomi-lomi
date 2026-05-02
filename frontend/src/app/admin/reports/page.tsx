@@ -8,8 +8,9 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Ban,
 } from "lucide-react";
-import { adminListReports, adminUpdateReport } from "@/lib/api";
+import { adminListReports, adminUpdateReport, adminBanUser } from "@/lib/api";
 
 interface Report {
   id: number;
@@ -38,6 +39,9 @@ export default function AdminReportsPage() {
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("pending");
   const [loading, setLoading] = useState(true);
+  const [banTarget, setBanTarget] = useState<Report | null>(null);
+  const [banReason, setBanReason] = useState("");
+  const [banLoading, setBanLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -62,6 +66,21 @@ export default function AdminReportsPage() {
     } catch {
       /* ignore */
     }
+  }
+
+  async function handleBan() {
+    if (!banTarget) return;
+    setBanLoading(true);
+    try {
+      await adminBanUser(banTarget.reported_id, true, banReason);
+      await adminUpdateReport(banTarget.id, "reviewed");
+      setBanTarget(null);
+      setBanReason("");
+      load();
+    } catch {
+      /* ignore */
+    }
+    setBanLoading(false);
   }
 
   const totalPages = Math.ceil(total / 20) || 1;
@@ -156,6 +175,14 @@ export default function AdminReportsPage() {
                         Traiter
                       </button>
                       <button
+                        onClick={() => setBanTarget(r)}
+                        title="Bannir l'utilisateur signalé"
+                        className="inline-flex items-center gap-1.5 text-xs bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-100 transition"
+                      >
+                        <Ban className="w-3.5 h-3.5" />
+                        Bannir
+                      </button>
+                      <button
                         onClick={() => handleAction(r, "dismissed")}
                         title="Rejeter le signalement"
                         className="inline-flex items-center gap-1.5 text-xs bg-surface-2 text-muted border border-border px-3 py-1.5 rounded-lg hover:bg-gray-100 transition"
@@ -193,6 +220,47 @@ export default function AdminReportsPage() {
             Suivant
             <ChevronRight className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {banTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 m-4">
+            <h2 className="text-lg font-semibold text-gray-900 mb-1 flex items-center gap-2">
+              <Ban className="w-5 h-5 text-red-500" />
+              Bannir{" "}
+              {banTarget.reported?.username || `#${banTarget.reported_id}`}
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Raison du signalement : {banTarget.reason}
+              {banTarget.details ? ` - ${banTarget.details}` : ""}
+            </p>
+            <textarea
+              value={banReason}
+              onChange={(e) => setBanReason(e.target.value)}
+              placeholder="Raison du bannissement (optionnel)"
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm mb-4 focus:ring-2 focus:ring-red-300 focus:border-red-300 outline-none resize-none"
+              rows={3}
+            />
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => {
+                  setBanTarget(null);
+                  setBanReason("");
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleBan}
+                disabled={banLoading}
+                className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition disabled:opacity-50"
+              >
+                {banLoading ? "..." : "Confirmer le bannissement"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -7,6 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lomilomi/backend/internal/config"
+	"github.com/lomilomi/backend/internal/database"
+	"github.com/lomilomi/backend/internal/models"
 )
 
 func JWTAuth(cfg *config.Config) fiber.Handler {
@@ -51,6 +53,15 @@ func JWTAuth(cfg *config.Config) fiber.Handler {
 			c.Locals("role", role)
 		} else {
 			c.Locals("role", "user")
+		}
+
+		// Check if user is banned
+		userID := uint(claims["user_id"].(float64))
+		var user models.User
+		if err := database.DB.Select("is_banned").First(&user, userID).Error; err == nil && user.IsBanned {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Votre compte a été suspendu",
+			})
 		}
 
 		return c.Next()

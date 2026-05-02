@@ -121,46 +121,46 @@ export default function AddressesPage() {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <input
-          className="rounded-lg border px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
           placeholder="Label (ex: Maison)"
           value={form.label}
           onChange={(e) => setForm({ ...form, label: e.target.value })}
         />
         <input
-          className="rounded-lg border px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
           placeholder="Nom complet *"
           value={form.full_name}
           onChange={(e) => setForm({ ...form, full_name: e.target.value })}
         />
       </div>
       <input
-        className="w-full rounded-lg border px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
         placeholder="Adresse complète *"
         value={form.address}
         onChange={(e) => setForm({ ...form, address: e.target.value })}
       />
       <div className="grid grid-cols-3 gap-2">
         <input
-          className="rounded-lg border px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
           placeholder="Ville *"
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
         />
         <input
-          className="rounded-lg border px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
           placeholder="Code postal"
           value={form.postal_code}
           onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
         />
         <input
-          className="rounded-lg border px-3 py-2 text-sm"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
           placeholder="Pays"
           value={form.country}
           onChange={(e) => setForm({ ...form, country: e.target.value })}
         />
       </div>
       <input
-        className="w-full rounded-lg border px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
         placeholder="Téléphone"
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}

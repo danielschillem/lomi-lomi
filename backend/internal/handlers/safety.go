@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,6 +34,12 @@ func (h *SafetyHandler) CreateReport(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Impossible de se signaler soi-même"})
 	}
 
+	// Verify reported user exists
+	var reported models.User
+	if database.DB.First(&reported, req.ReportedID).Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur signalé introuvable"})
+	}
+
 	allowed := map[string]bool{
 		"spam": true, "harassment": true, "fake": true,
 		"inappropriate": true, "scam": true, "other": true,
@@ -57,6 +64,13 @@ func (h *SafetyHandler) CreateReport(c *fiber.Ctx) error {
 	}
 	database.DB.Create(&report)
 
+	// Auto-flag: if user has 3+ pending reports, log a warning
+	var pendingCount int64
+	database.DB.Model(&models.Report{}).Where("reported_id = ? AND status = ?", req.ReportedID, "pending").Count(&pendingCount)
+	if pendingCount >= 3 {
+		log.Printf("AUTO-FLAG: user %d (%s) has %d pending reports", req.ReportedID, reported.Username, pendingCount)
+	}
+
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "Signalement enregistré", "id": report.ID})
 }
 
@@ -75,6 +89,11 @@ func (h *SafetyHandler) BlockUser(c *fiber.Ctx) error {
 
 	if blockerID == req.BlockedID {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Impossible de se bloquer soi-même"})
+	}
+
+	// Verify blocked user exists
+	if database.DB.First(&models.User{}, req.BlockedID).Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur introuvable"})
 	}
 
 	// Check if already blocked
@@ -179,4 +198,60 @@ func (h *SafetyHandler) AdminUpdateReport(c *fiber.Ctx) error {
 	database.DB.Model(&report).Update("status", req.Status)
 
 	return c.JSON(fiber.Map{"message": "Signalement mis à jour"})
+}
+
+// AdminBanUser bans or unbans a user account.
+func (h *SafetyHandler) AdminBanUser(c *fiber.Ctx) error {
+	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	type Req struct {
+		Banned bool   `json:"banned"`
+		Reason string `json:"reason"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
+	}
+
+	var user models.User
+	if database.DB.First(&user, uint(id)).Error != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+	}
+
+	if user.Role == "admin" {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Impossible de bannir un administrateur"})
+	}
+
+	updates := map[string]interface{}{
+		"is_banned":  req.Banned,
+		"ban_reason": "",
+	}
+	if req.Banned {
+		updates["ban_reason"] = req.Reason
+	}
+	database.DB.Model(&user).Updates(updates)
+
+	action := "débanni"
+	if req.Banned {
+		action = "banni"
+		log.Printf("ADMIN-BAN: user %d (%s) banned, reason: %s", user.ID, user.Username, req.Reason)
+	}
+
+	return c.JSON(fiber.Map{"message": "Utilisateur " + action})
+}
+
+// AdminGetReportCount returns the number of pending reports for a specific user.
+func (h *SafetyHandler) AdminGetReportCount(c *fiber.Ctx) error {
+	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	var total int64
+	database.DB.Model(&models.Report{}).Where("reported_id = ? AND status = ?", uint(id), "pending").Count(&total)
+
+	return c.JSON(fiber.Map{"user_id": uint(id), "pending_reports": total})
 }

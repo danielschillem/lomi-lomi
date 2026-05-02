@@ -267,6 +267,8 @@ func main() {
 	admin.Put("/orders/:id/status", adminHandler.UpdateOrderStatus)
 	admin.Get("/reports", safetyHandler.AdminListReports)
 	admin.Put("/reports/:id", safetyHandler.AdminUpdateReport)
+	admin.Put("/users/:id/ban", safetyHandler.AdminBanUser)
+	admin.Get("/users/:id/reports-count", safetyHandler.AdminGetReportCount)
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

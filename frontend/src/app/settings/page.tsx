@@ -11,6 +11,9 @@ import {
   Sliders,
   Save,
   AlertTriangle,
+  ShieldOff,
+  MapPin,
+  ChevronRight,
 } from "lucide-react";
 import {
   changePassword,
@@ -238,6 +241,30 @@ export default function SettingsPage() {
               <p className="text-sm text-green-600 text-center">{prefMsg}</p>
             )}
           </form>
+        </section>
+
+        {/* Quick links */}
+        <section className="bg-white/90 border border-border rounded-2xl mb-6 divide-y divide-border">
+          <Link
+            href="/settings/blocked"
+            className="flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition"
+          >
+            <ShieldOff className="w-5 h-5 text-pink-500" />
+            <span className="flex-1 text-sm font-medium text-gray-900">
+              Utilisateurs bloques
+            </span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </Link>
+          <Link
+            href="/settings/addresses"
+            className="flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition"
+          >
+            <MapPin className="w-5 h-5 text-violet-500" />
+            <span className="flex-1 text-sm font-medium text-gray-900">
+              Adresses de livraison
+            </span>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+          </Link>
         </section>
 
         {/* Change Password */}
