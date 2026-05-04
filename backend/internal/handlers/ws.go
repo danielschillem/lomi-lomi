@@ -173,6 +173,13 @@ func (h *WSHub) HandleWebSocket(c *websocket.Conn) {
 				}
 			}
 		}
+
+		// Relay position GPS livreur → client (delivery tracking)
+		if incoming.Type == "delivery_location_update" {
+			if data, ok := incoming.Data.(map[string]interface{}); ok {
+				h.handleDeliveryLocationRelay(userID, data)
+			}
+		}
 	}
 }
 
@@ -205,4 +212,48 @@ func (h *WSHub) SendToUser(userID uint, msg WSMessage) {
 
 func (h *WSHub) BroadcastToUser(userID uint, msg WSMessage) {
 	h.SendToUser(userID, msg)
+}
+
+// BroadcastToRole envoie un message à tous les utilisateurs connectés ayant le rôle donné.
+// Le rôle est résolu en chargeant les IDs depuis la DB pour les connexions actives.
+func (h *WSHub) BroadcastToRole(role string, msg WSMessage) {
+	h.mu.RLock()
+	connectedIDs := make([]uint, 0, len(h.clients))
+	for uid := range h.clients {
+		connectedIDs = append(connectedIDs, uid)
+	}
+	h.mu.RUnlock()
+
+	if len(connectedIDs) == 0 {
+		return
+	}
+
+	// Filtrer les IDs par rôle en DB
+	var matched []uint
+	database.DB.Model(&models.User{}).
+		Select("id").
+		Where("id IN ? AND role = ?", connectedIDs, role).
+		Pluck("id", &matched)
+
+	for _, uid := range matched {
+		h.SendToUser(uid, msg)
+	}
+}
+
+// HandleDeliveryLocationRelay relaie la position GPS du livreur au client via WS pur (sans HTTP).
+// Le message WS attendu : { "type": "delivery_location_update", "data": { "delivery_id": X, "to_user_id": Y, "latitude": Z, "longitude": W } }
+func (h *WSHub) handleDeliveryLocationRelay(userID uint, data map[string]interface{}) {
+	toIDf, ok := data["to_user_id"].(float64)
+	if !ok {
+		return
+	}
+	h.SendToUser(uint(toIDf), WSMessage{
+		Type: "delivery_location_update",
+		Data: map[string]interface{}{
+			"delivery_id":        data["delivery_id"],
+			"delivery_person_id": userID,
+			"latitude":           data["latitude"],
+			"longitude":          data["longitude"],
+		},
+	})
 }

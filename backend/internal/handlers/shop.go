@@ -23,7 +23,7 @@ func (h *ShopHandler) GetProducts(c *fiber.Ctx) error {
 		query = query.Where("category = ?", category)
 	}
 
-	var products []models.Product
+	products := make([]models.Product, 0)
 	query.Order("created_at DESC").Find(&products)
 
 	return c.JSON(products)
@@ -139,7 +139,7 @@ func (h *ShopHandler) CreateOrder(c *fiber.Ctx) error {
 func (h *ShopHandler) GetOrders(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
-	var orders []models.Order
+	orders := make([]models.Order, 0)
 	database.DB.
 		Preload("Items.Product").
 		Where("user_id = ?", userID).

@@ -69,11 +69,13 @@ func Migrate() {
 		&models.WellnessBooking{},
 		&models.WellnessReview{},
 		&models.DeliveryAddress{},
+		&models.DeliveryTracking{},
 		&models.PasswordReset{},
 		&models.Subscription{},
 		&models.Prompt{},
 		&models.Event{},
 		&models.EventAttendee{},
+		&models.ServicePayment{},
 	)
 	if err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)

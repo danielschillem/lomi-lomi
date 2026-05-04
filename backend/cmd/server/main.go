@@ -16,6 +16,7 @@ import (
 	"github.com/lomilomi/backend/internal/database"
 	"github.com/lomilomi/backend/internal/handlers"
 	"github.com/lomilomi/backend/internal/middleware"
+	"github.com/lomilomi/backend/internal/models"
 )
 
 func main() {
@@ -28,7 +29,8 @@ func main() {
 
 	// Fiber app
 	app := fiber.New(fiber.Config{
-		AppName: "Lomi Lomi API v1.0",
+		AppName:   "Lomi Lomi API v1.0",
+		BodyLimit: 10 * 1024 * 1024, // 10 MB max body size
 	})
 
 	// Middleware
@@ -57,12 +59,20 @@ func main() {
 		})
 	})
 
-	// Bootstrap admin (secured by ADMIN_SECRET env var)
+	// Bootstrap admin (secured by ADMIN_SECRET env var, one-time use)
 	app.Post("/api/bootstrap-admin", func(c *fiber.Ctx) error {
 		secret := os.Getenv("ADMIN_SECRET")
 		if secret == "" || c.Get("X-Admin-Secret") != secret {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "forbidden"})
 		}
+
+		// Check if an admin already exists
+		var adminCount int64
+		database.DB.Model(&models.User{}).Where("role = 'admin'").Count(&adminCount)
+		if adminCount > 0 {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Un administrateur existe déjà"})
+		}
+
 		var req struct {
 			Email string `json:"email"`
 		}
@@ -70,7 +80,7 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "email required"})
 		}
 		if err := database.DB.Exec("UPDATE users SET role = 'admin' WHERE email = ?", req.Email).Error; err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+			return c.Status(500).JSON(fiber.Map{"error": "Erreur interne"})
 		}
 		return c.JSON(fiber.Map{"ok": true, "message": req.Email + " promoted to admin"})
 	})
@@ -84,6 +94,7 @@ func main() {
 	wellnessHandler := handlers.NewWellnessHandler()
 	matchHandler := handlers.NewMatchHandler()
 	paymentHandler := handlers.NewOrangeMoneyHandler(cfg)
+	servicePayHandler := handlers.NewServicePaymentHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
 	safetyHandler := handlers.NewSafetyHandler()
 	ownerHandler := handlers.NewOwnerHandler()
@@ -95,6 +106,7 @@ func main() {
 	wsHub := handlers.NewWSHub(cfg)
 	messageHandler := handlers.NewMessageHandler(wsHub, cfg)
 	locationHandler := handlers.NewLocationHandler(wsHub)
+	deliveryTrackingHandler := handlers.NewDeliveryTrackingHandler(wsHub)
 
 	// Public routes
 	api := app.Group("/api/v1")
@@ -180,10 +192,34 @@ func main() {
 	api.Post("/shop/orders", jwt, shopHandler.CreateOrder)
 	api.Get("/shop/orders", jwt, shopHandler.GetOrders)
 
-	// Orange Money
-	api.Post("/checkout", jwt, paymentHandler.InitiatePayment)
-	api.Post("/om/webhook", paymentHandler.HandleWebhook)
+	// Delivery tracking (boutique)
+	// Admin/Owner : créer une mission pour une commande
+	api.Post("/shop/orders/:orderID/delivery", jwt, middleware.RequireRole("admin", "owner"), deliveryTrackingHandler.CreateDeliveryRequest)
+	// Client : suivre la livraison de sa commande
+	api.Get("/shop/orders/:orderID/delivery", jwt, deliveryTrackingHandler.GetDeliveryByOrder)
+	// Livreur : missions disponibles & mes missions
+	api.Get("/delivery/available", jwt, middleware.RequireRole("livreur", "admin"), deliveryTrackingHandler.GetAvailableDeliveries)
+	api.Get("/delivery/mine", jwt, middleware.RequireRole("livreur", "admin"), deliveryTrackingHandler.GetMyDeliveries)
+	// Toutes parties : détail d'une mission
+	api.Get("/delivery/:id", jwt, deliveryTrackingHandler.GetDelivery)
+	// Livreur : actions sur une mission
+	api.Post("/delivery/:id/accept", jwt, middleware.RequireRole("livreur", "admin"), deliveryTrackingHandler.AcceptDelivery)
+	api.Put("/delivery/:id/status", jwt, middleware.RequireRole("livreur", "admin"), deliveryTrackingHandler.UpdateDeliveryStatus)
+	api.Put("/delivery/:id/location", jwt, middleware.RequireRole("livreur", "admin"), deliveryTrackingHandler.UpdateDeliveryLocation)
+
+	// Orange Money (XML-RPC API BF)
+	api.Post("/om/ussd-code", jwt, paymentHandler.GetUSSDCode)
+	api.Post("/om/confirm", jwt, paymentHandler.ConfirmPayment)
 	api.Get("/orders/:id/payment-status", jwt, paymentHandler.CheckPaymentStatus)
+
+	// Service payments (connection, reservation, booking)
+	api.Get("/pay/connection/:userId", jwt, servicePayHandler.CheckConnectionPaid)
+	api.Post("/pay/connection/initiate", jwt, servicePayHandler.InitiateConnectionPayment)
+	api.Post("/pay/connection/confirm", jwt, servicePayHandler.ConfirmConnectionPayment)
+	api.Post("/pay/reservation/initiate", jwt, servicePayHandler.InitiateReservationPayment)
+	api.Post("/pay/reservation/confirm", jwt, servicePayHandler.ConfirmReservationPayment)
+	api.Post("/pay/booking/initiate", jwt, servicePayHandler.InitiateBookingPayment)
+	api.Post("/pay/booking/confirm", jwt, servicePayHandler.ConfirmBookingPayment)
 
 	// Push notifications
 	api.Post("/push/register", jwt, pushHandler.RegisterPushToken)

@@ -24,7 +24,7 @@ func NewProfileExtHandler(cfg *config.Config) *ProfileExtHandler {
 // GetPrompts returns the profile prompts of a user.
 func (h *ProfileExtHandler) GetPrompts(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
-	var prompts []models.Prompt
+	prompts := make([]models.Prompt, 0)
 	database.DB.Where("user_id = ?", userID).Find(&prompts)
 	return c.JSON(prompts)
 }
@@ -54,7 +54,7 @@ func (h *ProfileExtHandler) SavePrompts(c *fiber.Ctx) error {
 		database.DB.Create(&models.Prompt{UserID: userID, Question: p.Question, Answer: p.Answer})
 	}
 
-	var prompts []models.Prompt
+	prompts := make([]models.Prompt, 0)
 	database.DB.Where("user_id = ?", userID).Find(&prompts)
 	return c.JSON(prompts)
 }
@@ -109,7 +109,7 @@ func (h *ProfileExtHandler) UploadSelfie(c *fiber.Ctx) error {
 
 // AdminListSelfies returns users with pending selfie verification.
 func (h *ProfileExtHandler) AdminListSelfies(c *fiber.Ctx) error {
-	var users []models.User
+	users := make([]models.User, 0)
 	database.DB.Where("selfie_status = 'pending'").
 		Select("id, username, avatar_url, selfie_url, selfie_status, created_at").
 		Find(&users)

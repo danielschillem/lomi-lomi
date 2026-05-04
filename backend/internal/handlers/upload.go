@@ -186,7 +186,7 @@ func (h *UploadHandler) GetPhotos(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
 	}
 
-	var photos []models.Photo
+	photos := make([]models.Photo, 0)
 	database.DB.Where("user_id = ?", uid).Order("position ASC").Find(&photos)
 
 	return c.JSON(photos)

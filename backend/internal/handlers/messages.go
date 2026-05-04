@@ -180,6 +180,20 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if connection fee is paid (250 FCFA one-time)
+	var connPaid int64
+	database.DB.Model(&models.ServicePayment{}).Where(
+		"((user_id = ? AND target_user_id = ?) OR (user_id = ? AND target_user_id = ?)) AND type = ? AND status = ?",
+		userID, req.ReceiverID, req.ReceiverID, userID, "connection", "paid",
+	).Count(&connPaid)
+	if connPaid == 0 {
+		return c.Status(fiber.StatusPaymentRequired).JSON(fiber.Map{
+			"error":  "connection_required",
+			"message": "Payez 250 FCFA pour discuter avec cet utilisateur",
+			"amount": models.ConnectionFee,
+		})
+	}
+
 	// Find or create conversation
 	var conv models.Conversation
 	result := database.DB.

@@ -261,7 +261,7 @@ func generateOTP() string {
 func sendSMS(cfg *config.Config, phone, message string) error {
 	if cfg.TwilioSID == "" || cfg.TwilioToken == "" {
 		// Dev mode: log OTP to console
-		log.Printf("[SMS] to %s: %s", phone, message)
+		log.Printf("[SMS] to %s: OTP envoyé", phone)
 		return nil
 	}
 

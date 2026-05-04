@@ -19,7 +19,10 @@ import {
   getMyPlaceReservations,
   cancelPlaceReservation,
   getPlaces,
+  initiateReservationPayment,
+  confirmReservationPayment,
 } from "@/lib/api";
+import OMPaymentModal from "@/components/OMPaymentModal";
 
 interface Place {
   id: number;
@@ -55,6 +58,10 @@ export default function ReservationsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingReservationId, setPendingReservationId] = useState<
+    number | null
+  >(null);
 
   const [form, setForm] = useState({
     place_id: "",
@@ -88,13 +95,16 @@ export default function ReservationsPage() {
     if (!form.place_id || !form.date) return;
     setSubmitting(true);
     try {
-      await createPlaceReservation({
+      const res = await createPlaceReservation({
         place_id: parseInt(form.place_id, 10),
         date: form.date,
         end_date: form.end_date || undefined,
         persons: parseInt(form.persons, 10) || 2,
         notes: form.notes || undefined,
       });
+      const created = res as unknown as { id: number };
+      setPendingReservationId(created.id);
+      setShowPaymentModal(true);
       setForm({
         place_id: "",
         date: "",
@@ -103,7 +113,6 @@ export default function ReservationsPage() {
         notes: "",
       });
       setShowForm(false);
-      await loadReservations();
     } catch {
       /* ignore */
     } finally {
@@ -327,6 +336,28 @@ export default function ReservationsPage() {
           )}
         </section>
       </main>
+
+      {/* Payment Modal for reservation fee */}
+      <OMPaymentModal
+        open={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          loadReservations();
+        }}
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          loadReservations();
+        }}
+        title="Paiement réservation"
+        description="Frais de réservation de lieu : 500 FCFA par Orange Money."
+        amount={500}
+        initiatePayment={() =>
+          initiateReservationPayment(pendingReservationId!)
+        }
+        confirmPayment={(paymentId, phone, otp) =>
+          confirmReservationPayment(paymentId, phone, otp)
+        }
+      />
     </div>
   );
 }

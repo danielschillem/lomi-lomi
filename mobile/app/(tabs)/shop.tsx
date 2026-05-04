@@ -14,7 +14,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getProducts, createOrder, initiatePayment } from "@/lib/api";
+import {
+  getProducts,
+  createOrder,
+  getOMUssdCode,
+  confirmOMPayment,
+} from "@/lib/api";
 
 interface Product {
   id: number;
@@ -39,6 +44,14 @@ export default function ShopScreen() {
   const [showCart, setShowCart] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [ordering, setOrdering] = useState(false);
+  // OM 3-step checkout
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "ussd" | "otp">(
+    "cart",
+  );
+  const [ussdCode, setUssdCode] = useState("");
+  const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
+  const [otp, setOtp] = useState("");
+  const [confirming, setConfirming] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -92,8 +105,13 @@ export default function ShopScreen() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
-    if (!payPhone.trim()) {
-      Alert.alert("Erreur", "Entrez votre numéro Orange Money");
+    const cleanPhone = payPhone.replace(/\s/g, "");
+    const digits = cleanPhone.replace(/\+/g, "");
+    if (!cleanPhone || digits.length < 8 || digits.length > 15) {
+      Alert.alert(
+        "Erreur",
+        "Entrez un numéro Orange Money valide (ex: 07XXXXXX)",
+      );
       return;
     }
     setOrdering(true);
@@ -105,29 +123,57 @@ export default function ShopScreen() {
         })),
       });
       const order = orderRes as { id: number };
-      const payRes = await initiatePayment({
-        order_id: order.id,
-        phone: payPhone.trim(),
-      });
-      const pay = payRes as { payment_url?: string; status?: string };
-
-      if (pay.payment_url) {
-        Alert.alert(
-          "Paiement Orange Money",
-          "Vous allez être redirigé vers Orange Money pour finaliser le paiement.",
-        );
-      } else {
-        Alert.alert("Commande créée", "Votre commande a été enregistrée !");
-      }
-
-      setCart([]);
-      setShowCart(false);
-      setPayPhone("");
-      router.push("/orders");
+      setCurrentOrderId(order.id);
+      const ussdRes = await getOMUssdCode(order.id);
+      const ussd = ussdRes as { ussd_code: string };
+      setUssdCode(ussd.ussd_code);
+      setCheckoutStep("ussd");
     } catch (e: unknown) {
       Alert.alert("Erreur", (e as Error).message);
     }
     setOrdering(false);
+  };
+
+  const handleConfirmOTP = async () => {
+    if (!currentOrderId || !otp.trim() || !payPhone.trim()) return;
+    setConfirming(true);
+    try {
+      const cleanPhone = payPhone.replace(/\s/g, "");
+      const res = await confirmOMPayment(
+        currentOrderId,
+        cleanPhone,
+        otp.trim(),
+      );
+      const pay = res as { status?: string; message?: string; error?: string };
+      if (pay.status === "paid") {
+        Alert.alert(
+          "Succès",
+          "Paiement confirmé ! Commande en cours de traitement.",
+        );
+        setCart([]);
+        setShowCart(false);
+        setPayPhone("");
+        setOtp("");
+        setCheckoutStep("cart");
+        setCurrentOrderId(null);
+        router.push("/orders");
+      } else {
+        Alert.alert(
+          "Échec",
+          pay.message || pay.error || "Paiement échoué. Vérifiez le code OTP.",
+        );
+      }
+    } catch (e: unknown) {
+      Alert.alert("Erreur", (e as Error).message);
+    }
+    setConfirming(false);
+  };
+
+  const resetCheckout = () => {
+    setCheckoutStep("cart");
+    setUssdCode("");
+    setOtp("");
+    setCurrentOrderId(null);
   };
 
   const formatPrice = (price: number) => {
@@ -214,72 +260,207 @@ export default function ShopScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Panier</Text>
-              <TouchableOpacity onPress={() => setShowCart(false)}>
+              <Text style={styles.modalTitle}>
+                {checkoutStep === "cart"
+                  ? "Panier"
+                  : checkoutStep === "ussd"
+                    ? "Code USSD"
+                    : "Confirmation"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowCart(false);
+                  resetCheckout();
+                }}
+              >
                 <Ionicons name="close" size={24} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            <FlatList
-              data={cart}
-              keyExtractor={(item) => item.product.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.cartRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.cartName}>{item.product.name}</Text>
-                    <Text style={styles.cartPrice}>
-                      {formatPrice(item.product.price)} × {item.quantity}
-                    </Text>
-                  </View>
-                  <View style={styles.qtyRow}>
-                    <TouchableOpacity
-                      onPress={() => removeFromCart(item.product.id)}
-                    >
-                      <Ionicons
-                        name="remove-circle"
-                        size={28}
-                        color="#ef4444"
-                      />
-                    </TouchableOpacity>
-                    <Text style={styles.qtyText}>{item.quantity}</Text>
-                    <TouchableOpacity onPress={() => addToCart(item.product)}>
-                      <Ionicons name="add-circle" size={28} color="#7c3aed" />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            />
+            {checkoutStep === "cart" && (
+              <>
+                <FlatList
+                  data={cart}
+                  keyExtractor={(item) => item.product.id.toString()}
+                  renderItem={({ item }) => (
+                    <View style={styles.cartRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.cartName}>{item.product.name}</Text>
+                        <Text style={styles.cartPrice}>
+                          {formatPrice(item.product.price)} × {item.quantity}
+                        </Text>
+                      </View>
+                      <View style={styles.qtyRow}>
+                        <TouchableOpacity
+                          onPress={() => removeFromCart(item.product.id)}
+                        >
+                          <Ionicons
+                            name="remove-circle"
+                            size={28}
+                            color="#ef4444"
+                          />
+                        </TouchableOpacity>
+                        <Text style={styles.qtyText}>{item.quantity}</Text>
+                        <TouchableOpacity
+                          onPress={() => addToCart(item.product)}
+                        >
+                          <Ionicons
+                            name="add-circle"
+                            size={28}
+                            color="#7c3aed"
+                          />
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                />
 
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalPrice}>{formatPrice(totalPrice)}</Text>
-            </View>
-
-            <TextInput
-              style={styles.phoneInput}
-              value={payPhone}
-              onChangeText={setPayPhone}
-              placeholder="Numéro Orange Money (ex: 0777123456)"
-              placeholderTextColor="#666"
-              keyboardType="phone-pad"
-            />
-
-            <TouchableOpacity
-              style={[styles.checkoutBtn, ordering && { opacity: 0.5 }]}
-              onPress={handleCheckout}
-              disabled={ordering}
-            >
-              {ordering ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="card" size={20} color="#fff" />
-                  <Text style={styles.checkoutText}>
-                    Payer via Orange Money
+                <View style={styles.totalRow}>
+                  <Text style={styles.totalLabel}>Total</Text>
+                  <Text style={styles.totalPrice}>
+                    {formatPrice(totalPrice)}
                   </Text>
-                </>
-              )}
-            </TouchableOpacity>
+                </View>
+
+                <TextInput
+                  style={styles.phoneInput}
+                  value={payPhone}
+                  onChangeText={setPayPhone}
+                  placeholder="07XXXXXX"
+                  placeholderTextColor="#666"
+                  keyboardType="phone-pad"
+                />
+
+                <TouchableOpacity
+                  style={[styles.checkoutBtn, ordering && { opacity: 0.5 }]}
+                  onPress={handleCheckout}
+                  disabled={ordering}
+                >
+                  {ordering ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons name="phone-portrait" size={20} color="#fff" />
+                      <Text style={styles.checkoutText}>
+                        Commander {formatPrice(totalPrice)}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </>
+            )}
+
+            {checkoutStep === "ussd" && (
+              <View style={{ alignItems: "center", paddingVertical: 20 }}>
+                <Text
+                  style={{
+                    color: "#f97316",
+                    fontSize: 14,
+                    marginBottom: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  Composez ce code USSD sur votre téléphone :
+                </Text>
+                <View
+                  style={{
+                    backgroundColor: "#1a1a1a",
+                    borderRadius: 12,
+                    paddingVertical: 16,
+                    paddingHorizontal: 24,
+                    marginBottom: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#f97316",
+                      fontSize: 24,
+                      fontWeight: "bold",
+                      fontFamily: "monospace",
+                      textAlign: "center",
+                    }}
+                  >
+                    {ussdCode}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 12,
+                    textAlign: "center",
+                    marginBottom: 24,
+                  }}
+                >
+                  Vous recevrez un code OTP par SMS après validation
+                </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.checkoutBtn,
+                    { backgroundColor: "#7c3aed", width: "100%" },
+                  ]}
+                  onPress={() => setCheckoutStep("otp")}
+                >
+                  <Ionicons name="checkmark-circle" size={20} color="#fff" />
+                  <Text style={styles.checkoutText}>
+                    J&apos;ai reçu mon code OTP
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={resetCheckout}
+                  style={{ marginTop: 16 }}
+                >
+                  <Text style={{ color: "#666", fontSize: 13 }}>Annuler</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {checkoutStep === "otp" && (
+              <View style={{ paddingVertical: 20 }}>
+                <Text style={{ color: "#999", fontSize: 13, marginBottom: 8 }}>
+                  Code OTP reçu par SMS
+                </Text>
+                <TextInput
+                  style={[
+                    styles.phoneInput,
+                    { textAlign: "center", fontSize: 20, letterSpacing: 4 },
+                  ]}
+                  value={otp}
+                  onChangeText={setOtp}
+                  placeholder="Code OTP"
+                  placeholderTextColor="#666"
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.checkoutBtn,
+                    { backgroundColor: "#16a34a" },
+                    (confirming || !otp.trim()) && { opacity: 0.5 },
+                  ]}
+                  onPress={handleConfirmOTP}
+                  disabled={confirming || !otp.trim()}
+                >
+                  {confirming ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <>
+                      <Ionicons name="checkmark-done" size={20} color="#fff" />
+                      <Text style={styles.checkoutText}>
+                        Confirmer le paiement
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setCheckoutStep("ussd")}
+                  style={{ marginTop: 16, alignItems: "center" }}
+                >
+                  <Text style={{ color: "#666", fontSize: 13 }}>
+                    ← Revoir le code USSD
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </Modal>
@@ -426,7 +607,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#f97316",
     paddingVertical: 16,
     borderRadius: 12,
     gap: 8,

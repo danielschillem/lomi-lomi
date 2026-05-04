@@ -157,6 +157,20 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 	var users []models.User
 	query.Limit(20).Find(&users)
 
+	// Batch-load preferences for all discovered users (avoid N+1)
+	userIDs := make([]uint, len(users))
+	for i, u := range users {
+		userIDs[i] = u.ID
+	}
+	var allPrefs []models.UserPreference
+	if len(userIDs) > 0 {
+		database.DB.Where("user_id IN ?", userIDs).Find(&allPrefs)
+	}
+	prefsMap := make(map[uint]models.UserPreference, len(allPrefs))
+	for _, p := range allPrefs {
+		prefsMap[p.UserID] = p
+	}
+
 	// Build enriched response with age, distance, interests
 	type DiscoverProfile struct {
 		models.User
@@ -165,7 +179,7 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 		Interests string  `json:"interests"`
 	}
 
-	var results []DiscoverProfile
+	results := make([]DiscoverProfile, 0, len(users))
 	for _, u := range users {
 		dp := DiscoverProfile{User: u, Distance: -1}
 
@@ -190,17 +204,12 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 			continue
 		}
 
-		// Attach interests from target user's preferences
-		var targetPrefs models.UserPreference
-		if database.DB.Where("user_id = ?", u.ID).First(&targetPrefs).Error == nil {
-			dp.Interests = targetPrefs.Interests
+		// Attach interests from batch-loaded preferences
+		if tp, ok := prefsMap[u.ID]; ok {
+			dp.Interests = tp.Interests
 		}
 
 		results = append(results, dp)
-	}
-
-	if results == nil {
-		results = []DiscoverProfile{}
 	}
 
 	return c.JSON(results)

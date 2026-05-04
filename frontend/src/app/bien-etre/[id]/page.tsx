@@ -23,8 +23,11 @@ import {
   getWellnessProvider,
   createWellnessBooking,
   getMatches,
+  initiateBookingPayment,
+  confirmBookingPayment,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import OMPaymentModal from "@/components/OMPaymentModal";
 
 interface WellnessService {
   id: number;
@@ -110,6 +113,8 @@ export default function ProviderPage() {
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [pendingBookingId, setPendingBookingId] = useState<number | null>(null);
 
   // Matches for duo invitation
   const [matches, setMatches] = useState<MatchUser[]>([]);
@@ -195,7 +200,7 @@ export default function ProviderPage() {
     setBookingLoading(true);
     setBookingError("");
     try {
-      await createWellnessBooking({
+      const res = await createWellnessBooking({
         service_id: selectedService.id,
         date: bookingDate,
         start_time: bookingTime,
@@ -203,13 +208,14 @@ export default function ProviderPage() {
         guest_id: persons === 2 ? guestId : undefined,
         notes: notes || undefined,
       });
-      setBookingSuccess(true);
+      const created = res as unknown as { id: number };
+      setPendingBookingId(created.id);
+      setShowPaymentModal(true);
       setSelectedService(null);
       setBookingDate("");
       setBookingTime("");
       setPersons(1);
       setNotes("");
-      setTimeout(() => setBookingSuccess(false), 5000);
     } catch (err: unknown) {
       setBookingError(
         err instanceof Error ? err.message : "Erreur lors de la réservation",
@@ -666,6 +672,28 @@ export default function ProviderPage() {
           </div>
         )}
       </div>
+
+      {/* Payment Modal for booking fee */}
+      <OMPaymentModal
+        open={showPaymentModal}
+        onClose={() => {
+          setShowPaymentModal(false);
+          setBookingSuccess(true);
+          setTimeout(() => setBookingSuccess(false), 5000);
+        }}
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          setBookingSuccess(true);
+          setTimeout(() => setBookingSuccess(false), 5000);
+        }}
+        title="Paiement rendez-vous"
+        description="Frais de prise de rendez-vous bien-être : 500 FCFA par Orange Money."
+        amount={500}
+        initiatePayment={() => initiateBookingPayment(pendingBookingId!)}
+        confirmPayment={(paymentId, phone, otp) =>
+          confirmBookingPayment(paymentId, phone, otp)
+        }
+      />
     </div>
   );
 }

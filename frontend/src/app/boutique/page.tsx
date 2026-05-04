@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Suspense, useState, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ShoppingBag,
@@ -12,17 +12,20 @@ import {
   ShoppingCart,
   Package,
   X,
-  CreditCard,
   Check,
   Clock,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
+  Phone,
+  AlertCircle,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import {
   getProducts,
   createOrder,
-  initiatePayment,
+  getOMUssdCode,
+  confirmOMPayment,
   getOrders,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -73,18 +76,29 @@ export default function BoutiquePage() {
 
 function BoutiqueContent() {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [ordering, setOrdering] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
-  const [orderCanceled, setOrderCanceled] = useState(false);
   const [category, setCategory] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersOpen, setOrdersOpen] = useState(false);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  // OM 3-step checkout state
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "ussd" | "otp">(
+    "cart",
+  );
+  const [ussdCode, setUssdCode] = useState("");
+  const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
+  const [otp, setOtp] = useState("");
+  const [confirming, setConfirming] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
   useEffect(() => {
     getProducts()
@@ -92,18 +106,6 @@ function BoutiqueContent() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  // Orange Money redirect params
-  useEffect(() => {
-    if (searchParams.get("success") === "true") {
-      setOrderSuccess(true);
-      setTimeout(() => setOrderSuccess(false), 6000);
-    }
-    if (searchParams.get("canceled") === "true") {
-      setOrderCanceled(true);
-      setTimeout(() => setOrderCanceled(false), 6000);
-    }
-  }, [searchParams]);
 
   const loadOrders = useCallback(async () => {
     if (!user) return;
@@ -159,6 +161,15 @@ function BoutiqueContent() {
 
   async function handleOrder() {
     if (!user) return;
+
+    // Validate phone
+    const cleanPhone = phone.replace(/\s/g, "");
+    if (!cleanPhone || cleanPhone.replace(/\+/g, "").length < 8) {
+      setPhoneError("Entrez un numéro Orange Money valide (ex: 07XXXXXX)");
+      return;
+    }
+    setPhoneError("");
+    setPaymentError("");
     setOrdering(true);
     try {
       const order = (await createOrder({
@@ -167,20 +178,52 @@ function BoutiqueContent() {
           quantity: i.quantity,
         })),
       })) as unknown as Order;
-      // Initiate Orange Money payment
-      const payment = await initiatePayment(order.id);
-      if (payment.payment_url) {
-        window.location.href = payment.payment_url;
-      } else {
-        // Dev mode: payment simulated
+      setCurrentOrderId(order.id);
+      // Get USSD code
+      const ussd = await getOMUssdCode(order.id);
+      setUssdCode(ussd.ussd_code);
+      setCheckoutStep("ussd");
+    } catch {
+      setPaymentError("Erreur lors de la création de la commande.");
+    }
+    setOrdering(false);
+  }
+
+  async function handleConfirmOTP() {
+    if (!currentOrderId || !otp.trim() || !phone.trim()) return;
+    setConfirming(true);
+    setPaymentError("");
+    try {
+      const cleanPhone = phone.replace(/\s/g, "");
+      const res = await confirmOMPayment(
+        currentOrderId,
+        cleanPhone,
+        otp.trim(),
+      );
+      if (res.status === "paid") {
         setCart([]);
-        setOrderSuccess(true);
-        setTimeout(() => setOrderSuccess(false), 6000);
-        setOrdering(false);
+        setCheckoutStep("cart");
+        setOtp("");
+        setPhone("");
+        setCartOpen(false);
+        router.push(`/boutique/orders/${currentOrderId}?paid=true`);
+      } else {
+        setPaymentError(
+          res.message || res.error || "Paiement échoué. Vérifiez le code OTP.",
+        );
       }
     } catch {
-      setOrdering(false);
+      setPaymentError("Erreur lors de la confirmation. Réessayez.");
     }
+    setConfirming(false);
+  }
+
+  function resetCheckout() {
+    setCheckoutStep("cart");
+    setUssdCode("");
+    setOtp("");
+    setPaymentError("");
+    setCurrentOrderId(null);
   }
 
   return (
@@ -218,14 +261,6 @@ function BoutiqueContent() {
           <div className="bg-green-50 border border-green-500/20 text-green-600 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
             <Check className="w-4 h-4" />
             Paiement confirmé ! Votre commande sera livrée sous 48h.
-          </div>
-        )}
-
-        {/* Order canceled */}
-        {orderCanceled && (
-          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm rounded-lg px-4 py-3 mb-6 flex items-center gap-2">
-            <X className="w-4 h-4" />
-            Paiement annulé. Votre commande reste en attente.
           </div>
         )}
 
@@ -272,16 +307,40 @@ function BoutiqueContent() {
                           className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             o.status === "paid"
                               ? "bg-green-50 text-green-600"
-                              : o.status === "pending"
-                                ? "bg-amber-500/10 text-amber-400"
-                                : "bg-surface-2 text-muted"
+                              : o.status === "delivered"
+                                ? "bg-blue-50 text-blue-600"
+                                : o.status === "pending"
+                                  ? "bg-amber-500/10 text-amber-400"
+                                  : o.status === "payment_failed"
+                                    ? "bg-red-50 text-red-500"
+                                    : o.status === "payment_expired"
+                                      ? "bg-gray-100 text-gray-500"
+                                      : o.status === "canceled"
+                                        ? "bg-red-50 text-red-400"
+                                        : o.status === "preparing"
+                                          ? "bg-violet-50 text-violet-500"
+                                          : o.status === "shipped"
+                                            ? "bg-blue-50 text-blue-500"
+                                            : "bg-surface-2 text-muted"
                           }`}
                         >
                           {o.status === "paid"
                             ? "Payée"
                             : o.status === "pending"
                               ? "En attente"
-                              : o.status}
+                              : o.status === "payment_failed"
+                                ? "Échec paiement"
+                                : o.status === "payment_expired"
+                                  ? "Expiré"
+                                  : o.status === "canceled"
+                                    ? "Annulée"
+                                    : o.status === "preparing"
+                                      ? "En préparation"
+                                      : o.status === "shipped"
+                                        ? "Expédiée"
+                                        : o.status === "delivered"
+                                          ? "Livrée"
+                                          : o.status}
                         </span>
                       </div>
                       <div className="space-y-1">
@@ -304,24 +363,31 @@ function BoutiqueContent() {
                         <span className="text-sm font-semibold text-white">
                           {Math.round(o.total_amount)} FCFA
                         </span>
-                        {o.status === "pending" && (
+                        {(o.status === "pending" ||
+                          o.status === "payment_failed" ||
+                          o.status === "payment_expired") && (
                           <button
                             onClick={async () => {
                               try {
-                                const payment = await initiatePayment(o.id);
-                                if (payment.payment_url) {
-                                  window.location.href = payment.payment_url;
-                                } else {
-                                  window.location.reload();
-                                }
+                                setCurrentOrderId(o.id);
+                                const ussd = await getOMUssdCode(o.id);
+                                setUssdCode(ussd.ussd_code);
+                                setCheckoutStep("ussd");
+                                setCartOpen(true);
                               } catch {
                                 /* ignore */
                               }
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-600 transition"
+                            className="inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-500 transition"
                           >
-                            <ExternalLink className="w-3 h-3" />
-                            Payer via Orange Money
+                            {o.status === "pending" ? (
+                              <Phone className="w-3 h-3" />
+                            ) : (
+                              <RefreshCw className="w-3 h-3" />
+                            )}
+                            {o.status === "pending"
+                              ? "Payer via Orange Money"
+                              : "Réessayer le paiement"}
                           </button>
                         )}
                       </div>
@@ -432,39 +498,47 @@ function BoutiqueContent() {
 
       {/* Cart Drawer */}
       {cartOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-60 flex justify-end">
           <div
-            className="absolute inset-0 bg-white/70"
-            onClick={() => setCartOpen(false)}
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setCartOpen(false);
+              resetCheckout();
+            }}
           />
-          <div className="relative w-full max-w-md bg-surface border-l border-border flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-border">
-              <h2 className="text-lg font-bold flex items-center gap-2">
+          <div className="relative w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
+            {/* Header */}
+            <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900">
                 <ShoppingCart className="w-5 h-5 text-violet-600" />
                 Panier ({itemCount})
               </h2>
               <button
-                onClick={() => setCartOpen(false)}
-                className="text-muted hover:text-foreground transition"
+                onClick={() => {
+                  setCartOpen(false);
+                  resetCheckout();
+                }}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition"
                 title="Fermer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 text-gray-600" />
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {/* Cart Items - scrollable */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
               {cart.length === 0 ? (
-                <div className="text-center py-8">
-                  <ShoppingCart className="w-12 h-12 text-muted/60 mx-auto mb-3" />
-                  <p className="text-muted text-sm">Votre panier est vide</p>
+                <div className="text-center py-12">
+                  <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-400 text-sm">Votre panier est vide</p>
                 </div>
               ) : (
                 cart.map((item) => (
                   <div
                     key={item.product.id}
-                    className="flex items-center gap-4 bg-surface rounded-xl p-4"
+                    className="flex items-center gap-3 bg-gray-50 rounded-xl p-3"
                   >
-                    <div className="w-14 h-14 rounded-lg bg-surface-2 shrink-0 flex items-center justify-center overflow-hidden">
+                    <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0 flex items-center justify-center overflow-hidden">
                       {item.product.image_url ? (
                         <img
                           src={item.product.image_url}
@@ -472,34 +546,34 @@ function BoutiqueContent() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <Package className="w-6 h-6 text-muted/60" />
+                        <Package className="w-5 h-5 text-gray-400" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold truncate">
+                      <h4 className="text-sm font-semibold text-gray-900 truncate">
                         {item.product.name}
                       </h4>
-                      <p className="text-violet-600 text-sm font-medium">
+                      <p className="text-violet-600 text-xs font-medium">
                         {Math.round(item.product.price)} FCFA
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         onClick={() => updateQuantity(item.product.id, -1)}
-                        className="w-7 h-7 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
+                        className="w-7 h-7 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
                         title="Retirer"
                       >
-                        <Minus className="w-3.5 h-3.5" />
+                        <Minus className="w-3 h-3 text-gray-600" />
                       </button>
-                      <span className="text-sm font-medium w-6 text-center">
+                      <span className="text-sm font-bold text-gray-900 w-6 text-center">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.product.id, 1)}
-                        className="w-7 h-7 rounded-md bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition"
+                        className="w-7 h-7 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition"
                         title="Ajouter"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Plus className="w-3 h-3 text-violet-600" />
                       </button>
                     </div>
                   </div>
@@ -507,34 +581,151 @@ function BoutiqueContent() {
               )}
             </div>
 
+            {/* Checkout Footer - fixed at bottom */}
             {cart.length > 0 && (
-              <div className="shrink-0 border-t border-border p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-muted">Total</span>
-                  <span className="text-xl font-bold text-white">
+              <div className="shrink-0 border-t border-gray-200 bg-white px-5 py-4 pb-6 space-y-4">
+                {/* Total */}
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Total</span>
+                  <span className="text-lg font-bold text-gray-900">
                     {Math.round(total)} FCFA
                   </span>
                 </div>
+
                 {!user ? (
                   <Link
                     href="/login"
-                    className="block text-center bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-lg transition text-sm"
+                    className="block text-center bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl transition text-sm"
                   >
                     Se connecter pour commander
                   </Link>
+                ) : checkoutStep === "cart" ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1.5 block">
+                        Numéro Orange Money
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="tel"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value);
+                            setPhoneError("");
+                          }}
+                          placeholder="07XXXXXX"
+                          className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400/50 focus:border-orange-400 transition"
+                        />
+                      </div>
+                      {phoneError && (
+                        <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          {phoneError}
+                        </p>
+                      )}
+                    </div>
+                    {paymentError && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {paymentError}
+                      </p>
+                    )}
+                    <button
+                      onClick={handleOrder}
+                      disabled={ordering}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-orange-500/25"
+                    >
+                      {ordering ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Création de la commande...
+                        </>
+                      ) : (
+                        <>
+                          <Phone className="w-4 h-4" />
+                          Payer {Math.round(total)} FCFA via Orange Money
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : checkoutStep === "ussd" ? (
+                  <div className="space-y-3">
+                    <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center">
+                      <p className="text-sm text-orange-700 font-medium mb-2">
+                        Composez ce code USSD sur votre téléphone :
+                      </p>
+                      <p className="text-2xl font-bold text-orange-600 font-mono tracking-wide">
+                        {ussdCode}
+                      </p>
+                      <p className="text-xs text-orange-500/70 mt-2">
+                        Vous recevrez un code OTP par SMS
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setCheckoutStep("otp")}
+                      className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-violet-500/25"
+                    >
+                      J&apos;ai reçu mon code OTP
+                    </button>
+                    <button
+                      onClick={resetCheckout}
+                      className="w-full text-gray-400 hover:text-gray-600 text-xs py-1 transition"
+                    >
+                      Annuler
+                    </button>
+                  </div>
                 ) : (
-                  <button
-                    onClick={handleOrder}
-                    disabled={ordering}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition text-sm"
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    {ordering
-                      ? "Redirection vers le paiement..."
-                      : "Payer par carte"}
-                  </button>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-gray-500 mb-1.5 block">
+                        Code OTP reçu par SMS
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Entrez le code OTP"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400 transition text-center tracking-widest font-mono"
+                        maxLength={10}
+                      />
+                    </div>
+                    {paymentError && (
+                      <p className="text-red-500 text-xs flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        {paymentError}
+                      </p>
+                    )}
+                    <button
+                      onClick={handleConfirmOTP}
+                      disabled={confirming || !otp.trim()}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-green-500/25"
+                    >
+                      {confirming ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Vérification en cours...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          Confirmer le paiement
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCheckoutStep("ussd");
+                        setPaymentError("");
+                      }}
+                      className="w-full text-gray-400 hover:text-gray-600 text-xs py-1 transition"
+                    >
+                      ← Revoir le code USSD
+                    </button>
+                  </div>
                 )}
-                <p className="text-muted text-xs text-center mt-3 flex items-center justify-center gap-1">
+                <p className="text-gray-400 text-xs text-center flex items-center justify-center gap-1">
                   <Star className="w-3 h-3" />
                   Livraison discrète garantie
                 </p>

@@ -50,11 +50,10 @@ func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
 			u1, u2 = u2, u1
 		}
 
-		// Avoid duplicate match
+		// Avoid duplicate match (use FirstOrCreate for atomicity)
 		var existingMatch models.Match
-		if database.DB.Where("user1_id = ? AND user2_id = ?", u1, u2).First(&existingMatch).Error != nil {
-			match := models.Match{User1ID: u1, User2ID: u2}
-			database.DB.Create(&match)
+		result := database.DB.Where("user1_id = ? AND user2_id = ?", u1, u2).FirstOrCreate(&existingMatch, models.Match{User1ID: u1, User2ID: u2})
+		if result.RowsAffected > 0 {
 
 			// Get usernames for notifications
 			var liker, liked models.User
@@ -111,7 +110,7 @@ func (h *MatchHandler) PassUser(c *fiber.Ctx) error {
 func (h *MatchHandler) GetMatches(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
-	var matches []models.Match
+	matches := make([]models.Match, 0)
 	database.DB.
 		Preload("User1").
 		Preload("User2").
@@ -154,7 +153,7 @@ func (h *MatchHandler) Unmatch(c *fiber.Ctx) error {
 func (h *MatchHandler) GetNotifications(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
-	var notifs []models.Notification
+	notifs := make([]models.Notification, 0)
 	database.DB.
 		Where("user_id = ?", userID).
 		Order("created_at DESC").

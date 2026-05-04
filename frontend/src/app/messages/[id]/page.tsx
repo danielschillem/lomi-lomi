@@ -43,9 +43,12 @@ import {
   editMessage,
   searchMessages,
   uploadMessageImage,
+  initiateConnectionPayment,
+  confirmConnectionPayment,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWS } from "@/lib/ws-context";
+import OMPaymentModal from "@/components/OMPaymentModal";
 
 interface Message {
   id: number;
@@ -142,6 +145,10 @@ export default function ChatPage() {
   // Image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Connection payment state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [connectionPaid, setConnectionPaid] = useState(false);
 
   // Load conversation metadata to get receiverId and other user info
   useEffect(() => {
@@ -689,8 +696,12 @@ export default function ChatPage() {
       // Add to local messages (WS push is for the OTHER user)
       setMessages((prev) => [...prev, res]);
       setContent("");
-    } catch {
-      // ignore
+      setConnectionPaid(true);
+    } catch (err) {
+      const msg = (err as Error).message || "";
+      if (msg === "connection_required") {
+        setShowPaymentModal(true);
+      }
     } finally {
       setSending(false);
     }
@@ -1329,6 +1340,32 @@ export default function ChatPage() {
           </button>
         </form>
       </div>
+
+      {/* Payment Modal for connection fee */}
+      <OMPaymentModal
+        open={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          setConnectionPaid(true);
+          // Re-send the message automatically
+          if (content.trim() && receiverId) {
+            sendMessage({ receiver_id: receiverId, content: content.trim() })
+              .then((res) => {
+                setMessages((prev) => [...prev, res as unknown as Message]);
+                setContent("");
+              })
+              .catch(() => {});
+          }
+        }}
+        title="Mise en relation"
+        description={`Pour discuter avec ${otherUser?.username || "cet utilisateur"}, un paiement unique de 250 FCFA est requis.`}
+        amount={250}
+        initiatePayment={() => initiateConnectionPayment(receiverId)}
+        confirmPayment={(paymentId, phone, otp) =>
+          confirmConnectionPayment(paymentId, phone, otp)
+        }
+      />
     </div>
   );
 }

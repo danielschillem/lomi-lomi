@@ -27,7 +27,11 @@ func (h *PlaceHandler) GetPlaces(c *fiber.Ctx) error {
 		query = query.Where("city LIKE ?", "%"+city+"%")
 	}
 
-	var places []models.Place
+	if city != "" && len(city) > 100 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Recherche trop longue"})
+	}
+
+	places := make([]models.Place, 0)
 	query.Order("rating DESC").Find(&places)
 
 	return c.JSON(places)

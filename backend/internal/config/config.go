@@ -17,11 +17,16 @@ type Config struct {
 	DBName             string
 	DBSSLMode          string
 	JWTSecret          string
-	CORSOrigin         string
-	OrangeMoneyBaseURL string
-	OrangeMoneyAPIKey  string
-	OrangeMoneyPIN     string
-	UploadDir          string
+	CORSOrigin            string
+	OMEnv                 string // "production" or "test"
+	OMTestURL             string
+	OMProdURL             string
+	OMMerchantMSISDN      string
+	OMAPIUsername         string
+	OMAPIPassword         string
+	OMProvider            string
+	OMPayID               string
+	UploadDir             string
 	SMTPHost           string
 	SMTPPort           string
 	SMTPUser           string
@@ -44,11 +49,16 @@ func Load() *Config {
 		DBName:             getEnv("DB_NAME", "lomilomi"),
 		DBSSLMode:          getEnv("DB_SSLMODE", "disable"),
 		JWTSecret:          getEnv("JWT_SECRET", "change-me-in-production"),
-		CORSOrigin:         getEnv("CORS_ORIGIN", "http://localhost:3000"),
-		OrangeMoneyBaseURL: getEnv("OM_BASE_URL", "https://api.orange.com/orange-money-webpay/dev/v1"),
-		OrangeMoneyAPIKey:  getEnv("OM_API_KEY", ""),
-		OrangeMoneyPIN:     getEnv("OM_PIN", ""),
-		UploadDir:          getEnv("UPLOAD_DIR", "./uploads"),
+		CORSOrigin:            getEnv("CORS_ORIGIN", "http://localhost:3000"),
+		OMEnv:                 getEnv("ORANGE_MONEY_ENV", "test"),
+		OMTestURL:             getEnv("ORANGE_MONEY_TEST_URL", "https://testom.orange.bf/"),
+		OMProdURL:             getEnv("ORANGE_MONEY_PROD_URL", "https://apiom.orange.bf/"),
+		OMMerchantMSISDN:      getEnv("ORANGE_MONEY_MERCHANT_MSISDN", ""),
+		OMAPIUsername:         getEnv("ORANGE_MONEY_API_USERNAME", ""),
+		OMAPIPassword:         getEnv("ORANGE_MONEY_API_PASSWORD", ""),
+		OMProvider:            getEnv("ORANGE_MONEY_PROVIDER", "101"),
+		OMPayID:               getEnv("ORANGE_MONEY_PAYID", "12"),
+		UploadDir:             getEnv("UPLOAD_DIR", "./uploads"),
 		SMTPHost:           getEnv("SMTP_HOST", ""),
 		SMTPPort:           getEnv("SMTP_PORT", "587"),
 		SMTPUser:           getEnv("SMTP_USER", ""),
@@ -97,6 +107,14 @@ func (c *Config) DSN() string {
 		" password=" + c.DBPass +
 		" dbname=" + c.DBName +
 		" sslmode=" + c.DBSSLMode
+}
+
+// OMBaseURL returns the Orange Money API URL based on the configured environment.
+func (c *Config) OMBaseURL() string {
+	if c.OMEnv == "production" {
+		return strings.TrimRight(c.OMProdURL, "/")
+	}
+	return strings.TrimRight(c.OMTestURL, "/")
 }
 
 func getEnv(key, fallback string) string {

@@ -70,3 +70,37 @@ type DeliveryAddress struct {
 
 	User User `gorm:"foreignKey:UserID" json:"-"`
 }
+
+// DeliveryTracking represents a real-time delivery mission linked to a shop order.
+// Statuses: pending → accepted → picking_up → picked_up → delivering → delivered | canceled
+type DeliveryTracking struct {
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+
+	OrderID          uint   `gorm:"uniqueIndex;not null" json:"order_id"`
+	ClientID         uint   `gorm:"not null;index" json:"client_id"`
+	DeliveryPersonID *uint  `gorm:"index" json:"delivery_person_id"`
+	Status           string `gorm:"size:30;default:pending" json:"status"`
+	// Pickup = point de retrait chez le vendeur/boutique
+	PickupLat     float64 `json:"pickup_lat"`
+	PickupLng     float64 `json:"pickup_lng"`
+	PickupAddress string  `gorm:"size:500" json:"pickup_address"`
+	// Dropoff = adresse de livraison du client
+	DropoffLat     float64 `json:"dropoff_lat"`
+	DropoffLng     float64 `json:"dropoff_lng"`
+	DropoffAddress string  `gorm:"size:500" json:"dropoff_address"`
+	// Position en temps réel du livreur
+	DeliveryPersonLat float64 `json:"delivery_person_lat"`
+	DeliveryPersonLng float64 `json:"delivery_person_lng"`
+	// Timestamps des étapes
+	AcceptedAt  *time.Time `json:"accepted_at"`
+	PickedUpAt  *time.Time `json:"picked_up_at"`
+	DeliveredAt *time.Time `json:"delivered_at"`
+	Note        string     `gorm:"size:500" json:"note"`
+
+	Order          Order `gorm:"foreignKey:OrderID" json:"order,omitempty"`
+	Client         User  `gorm:"foreignKey:ClientID" json:"client,omitempty"`
+	DeliveryPerson *User `gorm:"foreignKey:DeliveryPersonID" json:"delivery_person,omitempty"`
+}

@@ -183,9 +183,23 @@ export default function OrdersPage() {
                   <span className="text-sm font-semibold text-foreground">
                     {order.total_amount.toLocaleString("fr-FR")} FCFA
                   </span>
-                  <span className="text-xs text-violet-600 font-medium">
-                    Voir le détail →
-                  </span>
+                  <div className="flex items-center gap-3">
+                    {(order.status === "shipped" ||
+                      order.status === "confirmed" ||
+                      order.status === "preparing") && (
+                      <Link
+                        href={`/boutique/suivi/${order.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-green-600 font-medium flex items-center gap-1 hover:underline"
+                      >
+                        <Truck className="w-3 h-3" />
+                        Suivre
+                      </Link>
+                    )}
+                    <span className="text-xs text-violet-600 font-medium">
+                      Voir le détail →
+                    </span>
+                  </div>
                 </div>
               </Link>
             );

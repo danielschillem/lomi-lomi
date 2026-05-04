@@ -12,9 +12,16 @@ import {
 } from "react-native";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getMessages, sendMessage, markConversationRead } from "@/lib/api";
+import {
+  getMessages,
+  sendMessage,
+  markConversationRead,
+  initiateConnectionPayment,
+  confirmConnectionPayment,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWS } from "@/lib/ws-context";
+import OMPaymentModal from "@/app/components/OMPaymentModal";
 
 interface Message {
   id: number;
@@ -35,6 +42,7 @@ export default function ChatScreen() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const conversationId = parseInt(id || "0", 10);
@@ -98,8 +106,11 @@ export default function ChatScreen() {
         ]);
         setText("");
       }
-    } catch {
-      /* empty */
+    } catch (err) {
+      const msg = (err as Error).message || "";
+      if (msg === "connection_required") {
+        setShowPayment(true);
+      }
     }
     setSending(false);
   };
@@ -173,6 +184,41 @@ export default function ChatScreen() {
           />
         </TouchableOpacity>
       </View>
+
+      <OMPaymentModal
+        visible={showPayment}
+        onClose={() => setShowPayment(false)}
+        onSuccess={() => {
+          setShowPayment(false);
+          // Re-send after payment
+          if (text.trim()) {
+            sendMessage({ receiver_id: otherUserId, content: text.trim() })
+              .then((res) => {
+                if (res) {
+                  const sent = res as unknown as Message;
+                  setMessages((prev) => [
+                    {
+                      id: sent.id || Date.now(),
+                      content: text.trim(),
+                      sender_id: user?.id || 0,
+                      created_at: new Date().toISOString(),
+                    },
+                    ...prev,
+                  ]);
+                  setText("");
+                }
+              })
+              .catch(() => {});
+          }
+        }}
+        title="Mise en relation"
+        description={`Pour discuter avec ${name || "cet utilisateur"}, un paiement unique de 250 FCFA est requis.`}
+        amount={250}
+        initiatePayment={() => initiateConnectionPayment(otherUserId)}
+        confirmPayment={(paymentId, phone, otp) =>
+          confirmConnectionPayment(paymentId, phone, otp)
+        }
+      />
     </KeyboardAvoidingView>
   );
 }

@@ -47,8 +47,17 @@ func JWTAuth(cfg *config.Config) fiber.Handler {
 			})
 		}
 
-		c.Locals("userID", uint(claims["user_id"].(float64)))
-		c.Locals("username", claims["username"].(string))
+		userIDf, ok := claims["user_id"].(float64)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+				"error": "Token invalide",
+			})
+		}
+		username, _ := claims["username"].(string)
+		userID := uint(userIDf)
+
+		c.Locals("userID", userID)
+		c.Locals("username", username)
 		if role, ok := claims["role"].(string); ok {
 			c.Locals("role", role)
 		} else {
@@ -56,7 +65,6 @@ func JWTAuth(cfg *config.Config) fiber.Handler {
 		}
 
 		// Check if user is banned
-		userID := uint(claims["user_id"].(float64))
 		var user models.User
 		if err := database.DB.Select("is_banned").First(&user, userID).Error; err == nil && user.IsBanned {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
@@ -86,6 +94,25 @@ func RequireOwner() fiber.Handler {
 		if role != "owner" && role != "admin" {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 				"error": "Accès réservé aux propriétaires",
+			})
+		}
+		return c.Next()
+	}
+}
+
+// RequireRole autorise l'accès si le rôle de l'utilisateur figure dans la liste.
+// Le rôle "admin" est toujours implicitement autorisé.
+func RequireRole(roles ...string) fiber.Handler {
+	allowed := make(map[string]bool, len(roles)+1)
+	for _, r := range roles {
+		allowed[r] = true
+	}
+	allowed["admin"] = true
+	return func(c *fiber.Ctx) error {
+		role, _ := c.Locals("role").(string)
+		if !allowed[role] {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Accès non autorisé pour ce rôle",
 			})
 		}
 		return c.Next()

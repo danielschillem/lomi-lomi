@@ -352,6 +352,99 @@ export function getOrders() {
   return request<Record<string, unknown>[]>("/shop/orders");
 }
 
+/* ---- Delivery Tracking ---- */
+export type DeliveryStatus =
+  | "pending"
+  | "accepted"
+  | "picking_up"
+  | "picked_up"
+  | "delivering"
+  | "delivered"
+  | "canceled";
+
+export interface DeliveryTracking {
+  id: number;
+  order_id: number;
+  client_id: number;
+  delivery_person_id?: number;
+  status: DeliveryStatus;
+  pickup_lat: number;
+  pickup_lng: number;
+  pickup_address: string;
+  dropoff_lat: number;
+  dropoff_lng: number;
+  dropoff_address: string;
+  delivery_person_lat: number;
+  delivery_person_lng: number;
+  accepted_at?: string;
+  picked_up_at?: string;
+  delivered_at?: string;
+  note?: string;
+  delivery_person?: { id: number; username: string; avatar_url?: string };
+  order?: Record<string, unknown>;
+}
+
+export function getDeliveryByOrder(orderId: number) {
+  return request<DeliveryTracking>(`/shop/orders/${orderId}/delivery`);
+}
+
+export function getDelivery(deliveryId: number) {
+  return request<DeliveryTracking>(`/delivery/${deliveryId}`);
+}
+
+export function getAvailableDeliveries() {
+  return request<DeliveryTracking[]>("/delivery/available");
+}
+
+export function getMyDeliveries() {
+  return request<DeliveryTracking[]>("/delivery/mine");
+}
+
+export function acceptDelivery(deliveryId: number) {
+  return request<DeliveryTracking>(`/delivery/${deliveryId}/accept`, {
+    method: "POST",
+  });
+}
+
+export function updateDeliveryStatus(
+  deliveryId: number,
+  status: DeliveryStatus,
+) {
+  return request<{ status: DeliveryStatus; message: string }>(
+    `/delivery/${deliveryId}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}
+
+export function updateDeliveryLocation(
+  deliveryId: number,
+  latitude: number,
+  longitude: number,
+) {
+  return request<{ updated: boolean }>(`/delivery/${deliveryId}/location`, {
+    method: "PUT",
+    body: JSON.stringify({ latitude, longitude }),
+  });
+}
+
+export function createDeliveryRequest(
+  orderId: number,
+  data: {
+    pickup_lat: number;
+    pickup_lng: number;
+    pickup_address: string;
+    dropoff_lat?: number;
+    dropoff_lng?: number;
+    dropoff_address?: string;
+    note?: string;
+  },
+) {
+  return request<DeliveryTracking>(`/shop/orders/${orderId}/delivery`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
 /* ---- Places ---- */
 export function getPlaces(params?: { city?: string; category?: string }) {
   const qs = new URLSearchParams();
@@ -411,18 +504,32 @@ export function deleteNotification(id: number) {
   });
 }
 
-/* ---- Orange Money Checkout ---- */
-export function initiatePayment(orderId: number, phone?: string) {
+/* ---- Orange Money (XML-RPC BF) ---- */
+export function getOMUssdCode(orderId: number) {
   return request<{
-    payment_url: string;
-    transaction_id: string;
+    order_id: number;
     amount: number;
     currency: string;
-    status: string;
-    message?: string;
-  }>("/checkout", {
+    ussd_code: string;
+    message: string;
+  }>("/om/ussd-code", {
     method: "POST",
-    body: JSON.stringify({ order_id: orderId, phone: phone || "" }),
+    body: JSON.stringify({ order_id: orderId }),
+  });
+}
+
+export function confirmOMPayment(orderId: number, phone: string, otp: string) {
+  return request<{
+    status: string;
+    transaction_id?: string;
+    amount?: number;
+    currency?: string;
+    message?: string;
+    error?: string;
+    error_code?: string;
+  }>("/om/confirm", {
+    method: "POST",
+    body: JSON.stringify({ order_id: orderId, phone, otp }),
   });
 }
 
@@ -432,6 +539,100 @@ export function checkPaymentStatus(orderId: number) {
     status: string;
     transaction_id: string;
   }>(`/orders/${orderId}/payment-status`);
+}
+
+/* ---- Service Payments (connection, reservation, booking) ---- */
+export function checkConnectionPaid(targetUserId: number) {
+  return request<{ paid: boolean; amount: number }>(
+    `/pay/connection/${targetUserId}`,
+  );
+}
+
+export function initiateConnectionPayment(targetUserId: number) {
+  return request<{
+    payment_id: number;
+    amount: number;
+    currency: string;
+    ussd_code: string;
+    message: string;
+    already_paid?: boolean;
+  }>("/pay/connection/initiate", {
+    method: "POST",
+    body: JSON.stringify({ target_user_id: targetUserId }),
+  });
+}
+
+export function confirmConnectionPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<{
+    status: string;
+    transaction_id?: string;
+    message?: string;
+  }>("/pay/connection/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
+}
+
+export function initiateReservationPayment(reservationId: number) {
+  return request<{
+    payment_id: number;
+    amount: number;
+    currency: string;
+    ussd_code: string;
+    message: string;
+    already_paid?: boolean;
+  }>("/pay/reservation/initiate", {
+    method: "POST",
+    body: JSON.stringify({ reservation_id: reservationId }),
+  });
+}
+
+export function confirmReservationPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<{
+    status: string;
+    transaction_id?: string;
+    message?: string;
+  }>("/pay/reservation/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
+}
+
+export function initiateBookingPayment(bookingId: number) {
+  return request<{
+    payment_id: number;
+    amount: number;
+    currency: string;
+    ussd_code: string;
+    message: string;
+    already_paid?: boolean;
+  }>("/pay/booking/initiate", {
+    method: "POST",
+    body: JSON.stringify({ booking_id: bookingId }),
+  });
+}
+
+export function confirmBookingPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<{
+    status: string;
+    transaction_id?: string;
+    message?: string;
+  }>("/pay/booking/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
 }
 
 /* ---- Upload ---- */

@@ -388,16 +388,82 @@ export function getOrders() {
   return request<Record<string, unknown>[]>("/shop/orders");
 }
 
-/* ===== Orange Money Payment ===== */
-export function initiatePayment(data: { order_id: number; phone: string }) {
-  return request<Record<string, unknown>>("/checkout", {
+/* ===== Orange Money Payment (XML-RPC BF) ===== */
+export function getOMUssdCode(orderId: number) {
+  return request<Record<string, unknown>>("/om/ussd-code", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify({ order_id: orderId }),
+  });
+}
+
+export function confirmOMPayment(orderId: number, phone: string, otp: string) {
+  return request<Record<string, unknown>>("/om/confirm", {
+    method: "POST",
+    body: JSON.stringify({ order_id: orderId, phone, otp }),
   });
 }
 
 export function checkPaymentStatus(orderId: number) {
   return request<Record<string, unknown>>(`/orders/${orderId}/payment-status`);
+}
+
+/* ===== Service Payments (connection, reservation, booking) ===== */
+export function checkConnectionPaid(targetUserId: number) {
+  return request<Record<string, unknown>>(`/pay/connection/${targetUserId}`);
+}
+
+export function initiateConnectionPayment(targetUserId: number) {
+  return request<Record<string, unknown>>("/pay/connection/initiate", {
+    method: "POST",
+    body: JSON.stringify({ target_user_id: targetUserId }),
+  });
+}
+
+export function confirmConnectionPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<Record<string, unknown>>("/pay/connection/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
+}
+
+export function initiateReservationPayment(reservationId: number) {
+  return request<Record<string, unknown>>("/pay/reservation/initiate", {
+    method: "POST",
+    body: JSON.stringify({ reservation_id: reservationId }),
+  });
+}
+
+export function confirmReservationPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<Record<string, unknown>>("/pay/reservation/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
+}
+
+export function initiateBookingPayment(bookingId: number) {
+  return request<Record<string, unknown>>("/pay/booking/initiate", {
+    method: "POST",
+    body: JSON.stringify({ booking_id: bookingId }),
+  });
+}
+
+export function confirmBookingPayment(
+  paymentId: number,
+  phone: string,
+  otp: string,
+) {
+  return request<Record<string, unknown>>("/pay/booking/confirm", {
+    method: "POST",
+    body: JSON.stringify({ payment_id: paymentId, phone, otp }),
+  });
 }
 
 /* ===== Order tracking ===== */

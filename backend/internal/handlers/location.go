@@ -182,7 +182,7 @@ func (h *LocationHandler) GetActiveShares(c *fiber.Ctx) error {
 		Where("is_active = ? AND expires_at < ?", true, time.Now()).
 		Update("is_active", false)
 
-	var shares []models.LocationShare
+	shares := make([]models.LocationShare, 0)
 	database.DB.
 		Preload("Sender").
 		Preload("Receiver").
@@ -279,7 +279,7 @@ func (h *LocationHandler) GetVTCRide(c *fiber.Ctx) error {
 func (h *LocationHandler) GetMyVTCRides(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
-	var rides []models.VTCRide
+	rides := make([]models.VTCRide, 0)
 	database.DB.
 		Preload("Requester").
 		Preload("Passenger").

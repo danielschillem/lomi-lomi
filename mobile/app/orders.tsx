@@ -7,16 +7,17 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Alert,
+  Linking,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getOrders } from "@/lib/api";
+import { getOrders, initiatePayment } from "@/lib/api";
 
 interface Order {
   id: number;
-  total: number;
+  total_amount: number;
   status: string;
-  payment_status: string;
   created_at: string;
   items: { product_name: string; quantity: number; price: number }[];
 }
@@ -43,13 +44,21 @@ export default function OrdersScreen() {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "completed":
       case "paid":
         return "#22c55e";
+      case "delivered":
+        return "#3b82f6";
       case "pending":
         return "#f59e0b";
-      case "cancelled":
+      case "preparing":
+        return "#8b5cf6";
+      case "shipped":
+        return "#3b82f6";
+      case "payment_failed":
+      case "canceled":
         return "#ef4444";
+      case "payment_expired":
+        return "#6b7280";
       default:
         return "#666";
     }
@@ -59,17 +68,59 @@ export default function OrdersScreen() {
     switch (s) {
       case "pending":
         return "En attente";
-      case "confirmed":
-        return "Confirmée";
-      case "completed":
-        return "Terminée";
-      case "cancelled":
-        return "Annulée";
       case "paid":
         return "Payée";
+      case "preparing":
+        return "En préparation";
+      case "shipped":
+        return "Expédiée";
+      case "delivered":
+        return "Livrée";
+      case "payment_failed":
+        return "Échec paiement";
+      case "payment_expired":
+        return "Expiré";
+      case "canceled":
+        return "Annulée";
+      case "confirmed":
+        return "Confirmée";
       default:
         return s;
     }
+  };
+
+  const canRetryPayment = (s: string) =>
+    s === "pending" || s === "payment_failed" || s === "payment_expired";
+
+  const handleRetry = async (orderId: number) => {
+    Alert.prompt(
+      "Paiement Orange Money",
+      "Entrez votre numéro Orange Money",
+      async (phone) => {
+        if (!phone || phone.replace(/[+\s]/g, "").length < 8) {
+          Alert.alert("Erreur", "Numéro invalide");
+          return;
+        }
+        try {
+          const res = await initiatePayment({
+            order_id: orderId,
+            phone: phone.trim(),
+          });
+          const pay = res as { payment_url?: string; message?: string };
+          if (pay.payment_url) {
+            await Linking.openURL(pay.payment_url);
+          } else {
+            Alert.alert("Succès", pay.message || "Paiement simulé !");
+          }
+          load();
+        } catch (e: unknown) {
+          Alert.alert("Erreur", (e as Error).message);
+        }
+      },
+      "plain-text",
+      "",
+      "phone-pad",
+    );
   };
 
   const formatDate = (dateStr: string) => {
@@ -145,7 +196,20 @@ export default function OrdersScreen() {
               </View>
             </View>
             <Text style={styles.date}>{formatDate(item.created_at)}</Text>
-            <Text style={styles.total}>{formatPrice(item.total)}</Text>
+            <View style={styles.cardFooter}>
+              <Text style={styles.total}>{formatPrice(item.total_amount)}</Text>
+              {canRetryPayment(item.status) && (
+                <TouchableOpacity
+                  style={styles.retryBtn}
+                  onPress={() => handleRetry(item.id)}
+                >
+                  <Ionicons name="refresh" size={14} color="#f97316" />
+                  <Text style={styles.retryText}>
+                    {item.status === "pending" ? "Payer" : "Réessayer"}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </TouchableOpacity>
         )}
       />
@@ -182,6 +246,25 @@ const styles = StyleSheet.create({
     color: "#7c3aed",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  cardFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 8,
+  },
+  retryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: "#f9731620",
+  },
+  retryText: {
+    color: "#f97316",
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

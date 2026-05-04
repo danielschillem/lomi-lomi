@@ -37,7 +37,7 @@ func (h *WellnessHandler) GetProviders(c *fiber.Ctx) error {
 		query = query.Where("mobile_service = ?", true)
 	}
 
-	var providers []models.WellnessProvider
+	providers := make([]models.WellnessProvider, 0)
 	query.Preload("Services", "is_active = true").
 		Order("rating DESC").
 		Find(&providers)
@@ -61,7 +61,7 @@ func (h *WellnessHandler) GetProvider(c *fiber.Ctx) error {
 	}
 
 	// Load reviews separately
-	var reviews []models.WellnessReview
+	reviews := make([]models.WellnessReview, 0)
 	database.DB.Preload("User").
 		Where("provider_id = ?", id).
 		Order("created_at DESC").
@@ -207,7 +207,7 @@ func (h *WellnessHandler) CreateBooking(c *fiber.Ctx) error {
 func (h *WellnessHandler) GetMyBookings(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
-	var bookings []models.WellnessBooking
+	bookings := make([]models.WellnessBooking, 0)
 	database.DB.
 		Preload("Service").
 		Preload("Provider").
@@ -567,7 +567,7 @@ func (h *WellnessHandler) AdminSetAvailability(c *fiber.Ctx) error {
 		})
 	}
 
-	var availabilities []models.WellnessAvailability
+	availabilities := make([]models.WellnessAvailability, 0)
 	database.DB.Where("provider_id = ?", uint(providerID)).Find(&availabilities)
 
 	return c.JSON(availabilities)
@@ -592,7 +592,7 @@ func (h *WellnessHandler) AdminListBookings(c *fiber.Ctx) error {
 	var total int64
 	query.Count(&total)
 
-	var bookings []models.WellnessBooking
+	bookings := make([]models.WellnessBooking, 0)
 	query.
 		Preload("User").
 		Preload("Service").
