@@ -13,7 +13,11 @@ import {
   Flag,
   ImageIcon,
 } from "lucide-react";
-import { getPublicProfile, sendMessage, reportUser } from "@/lib/api";
+import {
+  getPublicProfile,
+  getOrCreateConversation,
+  reportUser,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
 interface Photo {
@@ -65,16 +69,14 @@ export default function UserProfilePage() {
     if (!profile) return;
     setMessaging(true);
     try {
-      const res = await sendMessage({
-        receiver_id: profile.id,
-        content: `Salut ${profile.username} !`,
-      });
-      const convId =
-        (res as Record<string, unknown>).conversation_id ??
-        (res as Record<string, unknown>).id;
-      router.push(`/messages/${convId}`);
+      const conv = (await getOrCreateConversation(profile.id)) as {
+        id: number;
+      };
+      router.push(`/messages/${conv.id}`);
     } catch {
       router.push("/messages");
+    } finally {
+      setMessaging(false);
     }
   }
 

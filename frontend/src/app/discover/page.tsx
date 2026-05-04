@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import {
   discover,
-  sendMessage,
+  getOrCreateConversation,
   likeUser,
   passUser,
   superLike,
@@ -309,16 +309,17 @@ export default function DiscoverPage() {
 
   async function sendHello() {
     if (!matched) return;
-    try {
-      await sendMessage({
-        receiver_id: matched.id,
-        content: `Salut ${matched.username} ! Ravi de matcher avec toi.`,
-      });
-    } catch {
-      // ignore
-    }
+    const target = matched;
     setMatched(null);
     setCurrentIndex((i) => i + 1);
+    try {
+      const conv = (await getOrCreateConversation(target.id)) as {
+        id: number;
+      };
+      router.push(`/messages/${conv.id}`);
+    } catch {
+      router.push("/messages");
+    }
   }
 
   async function handleReport(reason?: string) {

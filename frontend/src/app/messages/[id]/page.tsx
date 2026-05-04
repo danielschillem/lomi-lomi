@@ -45,6 +45,7 @@ import {
   uploadMessageImage,
   initiateConnectionPayment,
   confirmConnectionPayment,
+  checkConnectionPaid,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWS } from "@/lib/ws-context";
@@ -149,6 +150,16 @@ export default function ChatPage() {
   // Connection payment state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [connectionPaid, setConnectionPaid] = useState(false);
+  const [paymentChecked, setPaymentChecked] = useState(false);
+
+  useEffect(() => {
+    if (!receiverId) return;
+    setPaymentChecked(false);
+    checkConnectionPaid(receiverId)
+      .then((res) => setConnectionPaid(Boolean(res?.paid)))
+      .catch(() => {})
+      .finally(() => setPaymentChecked(true));
+  }, [receiverId]);
 
   // Load conversation metadata to get receiverId and other user info
   useEffect(() => {
@@ -1131,10 +1142,41 @@ export default function ChatPage() {
             </div>
           )}
           {messages.length === 0 ? (
-            <div className="text-center text-muted text-sm py-12">
-              <Shield className="w-8 h-8 mx-auto mb-3 text-muted/60" />
-              Envoyez le premier message !
-            </div>
+            paymentChecked && !connectionPaid ? (
+              <div className="mx-auto max-w-md bg-linear-to-br from-violet-50 to-pink-50 border border-violet-200 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-violet-600 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-semibold text-base mb-1">
+                  Débloquez la conversation
+                </h3>
+                <p className="text-sm text-muted mb-4">
+                  Pour discuter avec{" "}
+                  <span className="text-foreground font-medium">
+                    {otherUser?.username || "cet utilisateur"}
+                  </span>
+                  , un paiement unique de{" "}
+                  <span className="text-foreground font-semibold">
+                    250 FCFA
+                  </span>{" "}
+                  via Orange Money est requis.
+                </p>
+                <button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm"
+                >
+                  Débloquer pour 250 FCFA
+                </button>
+                <p className="text-[11px] text-muted mt-3">
+                  Paiement unique, valable à vie pour cette conversation.
+                </p>
+              </div>
+            ) : (
+              <div className="text-center text-muted text-sm py-12">
+                <Shield className="w-8 h-8 mx-auto mb-3 text-muted/60" />
+                Envoyez le premier message !
+              </div>
+            )
           ) : (
             messages.map((msg) => {
               const isMine = msg.sender_id === user?.id;
