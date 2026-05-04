@@ -128,7 +128,7 @@ export default function RegisterScreen() {
           role: string;
         },
       );
-      router.replace("/(tabs)/discover");
+      router.replace("/onboarding");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Erreur d'inscription");
     }
@@ -148,7 +148,7 @@ export default function RegisterScreen() {
     setError("");
     try {
       await register(username.trim(), email.trim().toLowerCase(), password);
-      router.replace("/(tabs)/discover");
+      router.replace("/onboarding");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Erreur d'inscription");
     }

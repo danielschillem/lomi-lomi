@@ -42,6 +42,11 @@ export default function ProfileScreen() {
 
   const menuItems = [
     {
+      icon: "ribbon-outline" as const,
+      label: "Lomi Pass Premium",
+      route: "/premium",
+    },
+    {
       icon: "create-outline" as const,
       label: "Modifier le profil",
       route: "/edit-profile",
