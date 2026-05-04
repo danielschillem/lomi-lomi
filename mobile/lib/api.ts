@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 
 const API =
   (Constants.expoConfig?.extra?.apiUrl as string) ||
-  "http://138.68.66.6/api/v1";
+  "http://134.209.229.141/api/v1";
 
 const storage = {
   async get(key: string): Promise<string | null> {

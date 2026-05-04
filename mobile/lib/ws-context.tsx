@@ -11,7 +11,8 @@ import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const WS_URL =
-  (Constants.expoConfig?.extra?.wsUrl as string) || "ws://138.68.66.6/ws";
+  (Constants.expoConfig?.extra?.wsUrl as string) ||
+  "ws://134.209.229.141/ws";
 
 async function getStoredToken(): Promise<string | null> {
   if (Platform.OS === "web") {

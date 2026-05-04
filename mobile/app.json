@@ -39,12 +39,18 @@
           "photosPermission": "Lomi Lomi a besoin d'accéder à vos photos pour votre profil."
         }
       ],
+      [
+        "expo-notifications",
+        {
+          "color": "#7c3aed"
+        }
+      ],
       "expo-asset",
       "expo-font"
     ],
     "extra": {
-      "apiUrl": "http://138.68.66.6/api/v1",
-      "wsUrl": "ws://138.68.66.6/ws"
+      "apiUrl": "http://134.209.229.141/api/v1",
+      "wsUrl": "ws://134.209.229.141/ws"
     }
   }
 }
