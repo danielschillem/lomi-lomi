@@ -408,12 +408,25 @@ export function checkPaymentStatus(orderId: number) {
 }
 
 /* ===== Service Payments (connection, reservation, booking) ===== */
+export interface OMInitiateResponse {
+  payment_id: number;
+  ussd_code: string;
+  already_paid?: boolean;
+  test_mode?: boolean;
+}
+
+export interface OMConfirmResponse {
+  status: string;
+  transaction_id?: string;
+  message?: string;
+}
+
 export function checkConnectionPaid(targetUserId: number) {
-  return request<Record<string, unknown>>(`/pay/connection/${targetUserId}`);
+  return request<{ paid: boolean }>(`/pay/connection/${targetUserId}`);
 }
 
 export function initiateConnectionPayment(targetUserId: number) {
-  return request<Record<string, unknown>>("/pay/connection/initiate", {
+  return request<OMInitiateResponse>("/pay/connection/initiate", {
     method: "POST",
     body: JSON.stringify({ target_user_id: targetUserId }),
   });
@@ -424,14 +437,14 @@ export function confirmConnectionPayment(
   phone: string,
   otp: string,
 ) {
-  return request<Record<string, unknown>>("/pay/connection/confirm", {
+  return request<OMConfirmResponse>("/pay/connection/confirm", {
     method: "POST",
     body: JSON.stringify({ payment_id: paymentId, phone, otp }),
   });
 }
 
 export function initiateReservationPayment(reservationId: number) {
-  return request<Record<string, unknown>>("/pay/reservation/initiate", {
+  return request<OMInitiateResponse>("/pay/reservation/initiate", {
     method: "POST",
     body: JSON.stringify({ reservation_id: reservationId }),
   });
@@ -442,14 +455,14 @@ export function confirmReservationPayment(
   phone: string,
   otp: string,
 ) {
-  return request<Record<string, unknown>>("/pay/reservation/confirm", {
+  return request<OMConfirmResponse>("/pay/reservation/confirm", {
     method: "POST",
     body: JSON.stringify({ payment_id: paymentId, phone, otp }),
   });
 }
 
 export function initiateBookingPayment(bookingId: number) {
-  return request<Record<string, unknown>>("/pay/booking/initiate", {
+  return request<OMInitiateResponse>("/pay/booking/initiate", {
     method: "POST",
     body: JSON.stringify({ booking_id: bookingId }),
   });
@@ -460,7 +473,7 @@ export function confirmBookingPayment(
   phone: string,
   otp: string,
 ) {
-  return request<Record<string, unknown>>("/pay/booking/confirm", {
+  return request<OMConfirmResponse>("/pay/booking/confirm", {
     method: "POST",
     body: JSON.stringify({ payment_id: paymentId, phone, otp }),
   });
@@ -660,4 +673,311 @@ export function unregisterPushToken() {
   return request<{ message: string }>("/push/register", {
     method: "DELETE",
   });
+}
+
+/* ===== Auth: forgot/reset password ===== */
+export function forgotPassword(email: string) {
+  return request<{ message: string; dev_token?: string }>(
+    "/auth/forgot-password",
+    {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    },
+  );
+}
+
+export function resetPassword(data: { token: string; password: string }) {
+  return request<{ message: string }>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/* ===== Onboarding ===== */
+export function completeOnboarding() {
+  return request<{ message: string }>("/onboarding/complete", {
+    method: "POST",
+  });
+}
+
+export function getPrompts() {
+  return request<{ id: number; question: string; answer: string }[]>(
+    "/prompts",
+  );
+}
+
+export function savePrompts(prompts: { question: string; answer: string }[]) {
+  return request<{ id: number; question: string; answer: string }[]>(
+    "/prompts",
+    {
+      method: "POST",
+      body: JSON.stringify(prompts),
+    },
+  );
+}
+
+/** Upload a selfie photo (URI from expo-image-picker / camera) */
+export function uploadSelfie(uri: string) {
+  const formData = new FormData();
+  const filename = uri.split("/").pop() || "selfie.jpg";
+  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
+  const mimeType = ext === "png" ? "image/png" : "image/jpeg";
+  formData.append("selfie", {
+    uri,
+    name: filename,
+    type: mimeType,
+  } as unknown as Blob);
+  return uploadFile<{ message: string; verified: boolean }>(
+    "/upload/selfie",
+    formData,
+  );
+}
+
+/* ===== Premium ===== */
+export interface PremiumPlan {
+  id: string;
+  name: string;
+  price: number;
+  duration_days: number;
+  features: string[];
+}
+
+export function getPremiumPlans() {
+  return request<{ plans: PremiumPlan[] }>("/premium/plans");
+}
+
+export function getMySubscription() {
+  return request<{
+    is_premium: boolean;
+    plan?: string;
+    ends_at?: string;
+    status?: string;
+  }>("/premium/me");
+}
+
+export function subscribePremium(data: {
+  plan: string;
+  phone: string;
+  tx_id?: string;
+}) {
+  return request<{ message: string; ends_at: string }>("/premium/subscribe", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function cancelSubscription() {
+  return request<{ message: string }>("/premium/subscribe", {
+    method: "DELETE",
+  });
+}
+
+export function superLike(likedId: number) {
+  return request<{ super_liked: boolean; is_match: boolean }>("/superlikes", {
+    method: "POST",
+    body: JSON.stringify({ liked_id: likedId }),
+  });
+}
+
+export function rewind() {
+  return request<{ rewound: string; user_id: number }>("/rewind", {
+    method: "POST",
+  });
+}
+
+export function whoLikedMe() {
+  return request<{
+    count: number;
+    profiles: {
+      id?: number;
+      username?: string;
+      avatar_url?: string;
+      city?: string;
+      type?: string;
+      blurred?: boolean;
+    }[];
+    upgrade: boolean;
+    message?: string;
+  }>("/who-liked-me");
+}
+
+/* ===== Événements ===== */
+export function getEvents(params?: { city?: string; category?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.city) qs.set("city", params.city);
+  if (params?.category) qs.set("category", params.category);
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(`/events${q ? `?${q}` : ""}`);
+}
+
+export function getEvent(id: number) {
+  return request<Record<string, unknown>>(`/events/${id}`);
+}
+
+export function attendEvent(
+  id: number,
+  status: "going" | "interested" | "cancelled",
+) {
+  return request<{ message: string }>(`/events/${id}/attend`, {
+    method: "POST",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function getMyEvents() {
+  return request<Record<string, unknown>[]>("/events/me");
+}
+
+/* ===== Delivery (livreur) ===== */
+export type DeliveryStatus =
+  | "pending"
+  | "accepted"
+  | "picking_up"
+  | "picked_up"
+  | "delivering"
+  | "delivered"
+  | "canceled";
+
+export interface DeliveryTracking {
+  id: number;
+  order_id: number;
+  client_id: number;
+  delivery_person_id?: number;
+  status: DeliveryStatus;
+  pickup_lat: number;
+  pickup_lng: number;
+  pickup_address: string;
+  dropoff_lat: number;
+  dropoff_lng: number;
+  dropoff_address: string;
+  delivery_person_lat: number;
+  delivery_person_lng: number;
+  accepted_at?: string;
+  picked_up_at?: string;
+  delivered_at?: string;
+  note?: string;
+  delivery_person?: { id: number; username: string; avatar_url?: string };
+  order?: Record<string, unknown>;
+}
+
+export function getDeliveryByOrder(orderId: number) {
+  return request<DeliveryTracking>(`/shop/orders/${orderId}/delivery`);
+}
+
+export function getDelivery(deliveryId: number) {
+  return request<DeliveryTracking>(`/delivery/${deliveryId}`);
+}
+
+export function getAvailableDeliveries() {
+  return request<DeliveryTracking[]>("/delivery/available");
+}
+
+export function getMyDeliveries() {
+  return request<DeliveryTracking[]>("/delivery/mine");
+}
+
+export function acceptDelivery(deliveryId: number) {
+  return request<DeliveryTracking>(`/delivery/${deliveryId}/accept`, {
+    method: "POST",
+  });
+}
+
+export function updateDeliveryStatus(
+  deliveryId: number,
+  status: DeliveryStatus,
+) {
+  return request<{ status: DeliveryStatus; message: string }>(
+    `/delivery/${deliveryId}/status`,
+    { method: "PUT", body: JSON.stringify({ status }) },
+  );
+}
+
+export function updateDeliveryLocation(
+  deliveryId: number,
+  latitude: number,
+  longitude: number,
+) {
+  return request<{ updated: boolean }>(`/delivery/${deliveryId}/location`, {
+    method: "PUT",
+    body: JSON.stringify({ latitude, longitude }),
+  });
+}
+
+export function createDeliveryRequest(
+  orderId: number,
+  data: {
+    pickup_lat: number;
+    pickup_lng: number;
+    pickup_address: string;
+    dropoff_lat?: number;
+    dropoff_lng?: number;
+    dropoff_address?: string;
+    note?: string;
+  },
+) {
+  return request<DeliveryTracking>(`/shop/orders/${orderId}/delivery`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+/* ===== Messaging extras ===== */
+export function deleteMessage(messageId: number) {
+  return request<Record<string, unknown>>(`/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export function editMessage(messageId: number, content: string) {
+  return request<Record<string, unknown>>(`/messages/${messageId}`, {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function searchMessages(conversationId: number, q: string) {
+  return request<{ messages: Record<string, unknown>[] }>(
+    `/messages/search?conversation_id=${conversationId}&q=${encodeURIComponent(q)}`,
+  );
+}
+
+/** Upload an image attached to a chat message (URI from picker) */
+export function uploadMessageImage(uri: string) {
+  const formData = new FormData();
+  const filename = uri.split("/").pop() || "image.jpg";
+  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
+  const mimeType = ext === "png" ? "image/png" : "image/jpeg";
+  formData.append("image", {
+    uri,
+    name: filename,
+    type: mimeType,
+  } as unknown as Blob);
+  return uploadFile<{ image_url: string }>(
+    "/messages/upload-image",
+    formData,
+  );
+}
+
+/* ===== Aliases (legacy code in mobile/) =====
+ * Several screens were written before mobile/lib/api.ts split shop-payment
+ * helpers; expose unified names that delegate to the existing functions.
+ */
+export function initiatePayment(data: { order_id: number; phone?: string }) {
+  return getOMUssdCode(data.order_id);
+}
+
+export function getUserPhotos(userId: number) {
+  return getPhotos(userId);
+}
+
+export function getActiveLocationShares() {
+  return getActiveShares();
+}
+
+export function cancelPlaceReservation(id: number) {
+  return cancelReservation(id);
+}
+
+export function getMyPlaceReservations() {
+  return getMyReservations();
 }
