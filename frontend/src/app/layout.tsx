@@ -12,7 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://lomilomi.app",
+    process.env.NEXT_PUBLIC_SITE_URL || "http://134.209.229.141",
   ),
   title: {
     default: "Lomi Lomi - Rencontres discrètes & affinités authentiques",

@@ -3,8 +3,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-ARG NEXT_PUBLIC_API_URL=http://localhost:8888/api/v1
+ARG NEXT_PUBLIC_API_URL=/api/v1
+ARG NEXT_PUBLIC_WS_URL=/ws
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 RUN npm run build
 
 FROM node:20-alpine

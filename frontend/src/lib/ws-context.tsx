@@ -11,7 +11,14 @@ import {
 } from "react";
 import { useAuth } from "./auth-context";
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8888/ws";
+function resolveWsUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_WS_URL || "/ws";
+  if (/^wss?:\/\//i.test(raw)) return raw;
+  if (typeof window === "undefined") return "ws://localhost:8888/ws";
+  const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const path = raw.startsWith("/") ? raw : `/${raw}`;
+  return `${proto}//${window.location.host}${path}`;
+}
 
 interface WSEvent {
   type: string;
@@ -44,7 +51,9 @@ export function WSProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(() => {
     if (!token || !user) return;
 
-    const ws = new WebSocket(`${WS_URL}?token=${encodeURIComponent(token)}`);
+    const ws = new WebSocket(
+      `${resolveWsUrl()}?token=${encodeURIComponent(token)}`,
+    );
     wsRef.current = ws;
 
     ws.onopen = () => {

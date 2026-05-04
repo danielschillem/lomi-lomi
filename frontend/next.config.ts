@@ -11,11 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "138.68.66.6",
-      },
-      {
-        protocol: "https",
-        hostname: "api.lomilomi.app",
+        hostname: "134.209.229.141",
       },
     ],
   },

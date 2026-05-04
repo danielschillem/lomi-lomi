@@ -63,7 +63,7 @@ func Load() *Config {
 		SMTPPort:           getEnv("SMTP_PORT", "587"),
 		SMTPUser:           getEnv("SMTP_USER", ""),
 		SMTPPass:           getEnv("SMTP_PASS", ""),
-		SMTPFrom:           getEnv("SMTP_FROM", "noreply@lomilomi.app"),
+		SMTPFrom:           getEnv("SMTP_FROM", ""),
 		BaseURL:            getEnv("BASE_URL", "http://localhost:8888"),
 		TwilioSID:          getEnv("TWILIO_ACCOUNT_SID", ""),
 		TwilioToken:        getEnv("TWILIO_AUTH_TOKEN", ""),

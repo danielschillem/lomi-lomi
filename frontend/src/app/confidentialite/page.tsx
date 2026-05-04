@@ -95,13 +95,8 @@ export default function ConfidentialitePage() {
             <p>
               Conformément aux lois applicables, vous avez le droit
               d&apos;accéder, corriger, supprimer ou exporter vos données.
-              Contactez-nous à{" "}
-              <a
-                href="mailto:privacy@lomilomi.app"
-                className="text-purple-400 hover:underline"
-              >
-                privacy@lomilomi.app
-              </a>
+              Contactez-nous via le formulaire disponible dans
+              l&apos;application.
             </p>
           </section>
 
@@ -132,13 +127,9 @@ export default function ConfidentialitePage() {
               8. Contact
             </h2>
             <p>
-              Délégué à la protection des données :{" "}
-              <a
-                href="mailto:privacy@lomilomi.app"
-                className="text-purple-400 hover:underline"
-              >
-                privacy@lomilomi.app
-              </a>
+              Pour toute demande relative à la protection des données,
+              contactez-nous via le formulaire disponible dans
+              l&apos;application.
             </p>
           </section>
         </div>

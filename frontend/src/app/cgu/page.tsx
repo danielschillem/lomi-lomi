@@ -128,13 +128,8 @@ export default function CGUPage() {
               9. Contact
             </h2>
             <p>
-              Pour toute question :{" "}
-              <a
-                href="mailto:support@lomilomi.app"
-                className="text-purple-400 hover:underline"
-              >
-                support@lomilomi.app
-              </a>
+              Pour toute question, contactez l&apos;équipe Lomi Lomi via le
+              formulaire de contact disponible dans l&apos;application.
             </p>
           </section>
         </div>
