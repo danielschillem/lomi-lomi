@@ -511,6 +511,7 @@ export function getOMUssdCode(orderId: number) {
     amount: number;
     currency: string;
     ussd_code: string;
+    test_mode?: boolean;
     message: string;
   }>("/om/ussd-code", {
     method: "POST",
@@ -555,6 +556,7 @@ export function initiateConnectionPayment(targetUserId: number) {
     currency: string;
     ussd_code: string;
     message: string;
+    test_mode?: boolean;
     already_paid?: boolean;
   }>("/pay/connection/initiate", {
     method: "POST",
@@ -584,6 +586,7 @@ export function initiateReservationPayment(reservationId: number) {
     currency: string;
     ussd_code: string;
     message: string;
+    test_mode?: boolean;
     already_paid?: boolean;
   }>("/pay/reservation/initiate", {
     method: "POST",
@@ -613,6 +616,7 @@ export function initiateBookingPayment(bookingId: number) {
     currency: string;
     ussd_code: string;
     message: string;
+    test_mode?: boolean;
     already_paid?: boolean;
   }>("/pay/booking/initiate", {
     method: "POST",

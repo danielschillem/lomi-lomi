@@ -14,6 +14,7 @@ interface OMPaymentModalProps {
     payment_id: number;
     ussd_code: string;
     already_paid?: boolean;
+    test_mode?: boolean;
   }>;
   confirmPayment: (
     paymentId: number,
@@ -40,6 +41,7 @@ export default function OMPaymentModal({
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [testMode, setTestMode] = useState(false);
 
   if (!open) return null;
 
@@ -60,6 +62,7 @@ export default function OMPaymentModal({
       }
       setPaymentId(res.payment_id);
       setUssdCode(res.ussd_code);
+      setTestMode(Boolean(res.test_mode));
       setStep("ussd");
     } catch (e) {
       setError((e as Error).message || "Erreur");
@@ -93,6 +96,7 @@ export default function OMPaymentModal({
     setPaymentId(null);
     setError("");
     setPhoneError("");
+    setTestMode(false);
     onClose();
   }
 
@@ -184,6 +188,16 @@ export default function OMPaymentModal({
                   Vous recevrez un OTP par SMS
                 </p>
               </div>
+              {testMode && (
+                <div className="bg-yellow-50 border border-yellow-300 rounded-xl px-3 py-2 text-center">
+                  <p className="text-[11px] font-semibold text-yellow-800">
+                    Mode test : utilisez l&apos;OTP{" "}
+                    <span className="font-mono bg-yellow-200 px-1.5 py-0.5 rounded">
+                      123456
+                    </span>
+                  </p>
+                </div>
+              )}
               <button
                 onClick={() => setStep("otp")}
                 className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition text-sm"
@@ -205,10 +219,16 @@ export default function OMPaymentModal({
                   inputMode="numeric"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Code OTP"
+                  placeholder={testMode ? "123456" : "Code OTP"}
                   className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400/50 focus:border-green-400 transition text-center tracking-widest font-mono"
                   maxLength={10}
                 />
+                {testMode && (
+                  <p className="text-[11px] text-yellow-700 mt-1.5 text-center">
+                    Mode test : OTP{" "}
+                    <span className="font-mono font-semibold">123456</span>
+                  </p>
+                )}
               </div>
               <button
                 onClick={handleConfirm}

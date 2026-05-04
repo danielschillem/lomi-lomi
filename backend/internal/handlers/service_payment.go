@@ -90,6 +90,7 @@ func (h *ServicePaymentHandler) InitiateConnectionPayment(c *fiber.Ctx) error {
 		"amount":     models.ConnectionFee,
 		"currency":   "FCFA",
 		"ussd_code":  ussdCode,
+		"test_mode":  IsOMSimulated(h.Config),
 		"message":    "Composez le code USSD puis entrez le code OTP reçu",
 	})
 }
@@ -193,6 +194,7 @@ func (h *ServicePaymentHandler) InitiateReservationPayment(c *fiber.Ctx) error {
 		"amount":     models.ReservationFee,
 		"currency":   "FCFA",
 		"ussd_code":  ussdCode,
+		"test_mode":  IsOMSimulated(h.Config),
 		"message":    "Composez le code USSD puis entrez le code OTP reçu",
 	})
 }
@@ -292,6 +294,7 @@ func (h *ServicePaymentHandler) InitiateBookingPayment(c *fiber.Ctx) error {
 		"amount":     models.BookingFee,
 		"currency":   "FCFA",
 		"ussd_code":  ussdCode,
+		"test_mode":  IsOMSimulated(h.Config),
 		"message":    "Composez le code USSD puis entrez le code OTP reçu",
 	})
 }

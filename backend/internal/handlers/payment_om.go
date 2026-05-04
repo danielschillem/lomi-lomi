@@ -92,6 +92,7 @@ func (h *OrangeMoneyHandler) GetUSSDCode(c *fiber.Ctx) error {
 		"amount":    amount,
 		"currency":  "XOF",
 		"ussd_code": ussdCode,
+		"test_mode": h.isOMSimulated(),
 		"message":   fmt.Sprintf("Composez %s sur votre téléphone Orange pour générer le code OTP, puis saisissez-le pour confirmer le paiement.", ussdCode),
 	})
 }
@@ -156,22 +157,8 @@ func (h *OrangeMoneyHandler) ConfirmPayment(c *fiber.Ctx) error {
 	amount := int64(order.TotalAmount)
 	txnID := generateTxnID()
 
-	// Dev mode: simulate if no credentials configured
-	if h.Config.OMMerchantMSISDN == "" || h.Config.OMAPIUsername == "" {
-		database.DB.Model(&order).Updates(map[string]interface{}{
-			"status":     "paid",
-			"payment_id": txnID,
-		})
-		return c.JSON(fiber.Map{
-			"status":         "paid",
-			"transaction_id": txnID,
-			"amount":         amount,
-			"currency":       "XOF",
-			"message":        "Paiement simulé (mode dev - credentials OM non configurés)",
-		})
-	}
-
-	// Call Orange Money XML-RPC API
+	// Call Orange Money XML-RPC API (handles simulation mode internally:
+	// if creds are missing, only TestOTP "123456" succeeds).
 	omResp, err := h.callOrangeMoneyXMLRPC(phone, otp, amount, txnID)
 	if err != nil {
 		log.Printf("[OM Payment] API error for order %d: %v", order.ID, err)
@@ -236,8 +223,42 @@ func (h *OrangeMoneyHandler) ConfirmPayment(c *fiber.Ctx) error {
 	})
 }
 
-// callOrangeMoneyXMLRPC sends the XML-RPC payment request to Orange Money BF
+// TestOTP is the magic OTP accepted in simulation mode (when OM credentials
+// are not configured). As soon as OMMerchantMSISDN and OMAPIUsername are set,
+// the simulator is bypassed and the real Orange Money API is called.
+const TestOTP = "123456"
+
+// IsOMSimulated returns true when no real OM credentials are configured.
+// In this mode, callOrangeMoneyXMLRPC short-circuits without hitting the
+// network and only the magic TestOTP succeeds.
+func IsOMSimulated(cfg *config.Config) bool {
+	return cfg.OMMerchantMSISDN == "" || cfg.OMAPIUsername == ""
+}
+
+func (h *OrangeMoneyHandler) isOMSimulated() bool {
+	return IsOMSimulated(h.Config)
+}
+
+// callOrangeMoneyXMLRPC sends the XML-RPC payment request to Orange Money BF.
+// In simulation mode (no creds), it returns a mock response: success only if
+// otp == TestOTP, otherwise a "990413" (OTP incorrect) failure.
 func (h *OrangeMoneyHandler) callOrangeMoneyXMLRPC(customerPhone, otp string, amount int64, extTxnID string) (*omResponse, error) {
+	if h.isOMSimulated() {
+		if otp == TestOTP {
+			log.Printf("[OM Payment][SIM] Accepted TestOTP for txn %s (amount=%d phone=%s)", extTxnID, amount, customerPhone)
+			return &omResponse{
+				Status:  "200",
+				Message: "Paiement simulé accepté (mode test, OTP par défaut)",
+				TransID: extTxnID,
+			}, nil
+		}
+		log.Printf("[OM Payment][SIM] Rejected wrong OTP for txn %s", extTxnID)
+		return &omResponse{
+			Status:  "990413",
+			Message: "Code OTP incorrect (mode test : utilisez " + TestOTP + ")",
+		}, nil
+	}
+
 	xmlReq := omRequest{
 		Type:           "OMPREQ",
 		CustomerMSISDN: customerPhone,
