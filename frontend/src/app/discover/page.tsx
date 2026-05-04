@@ -275,7 +275,7 @@ export default function DiscoverPage() {
       await rewind();
       // Reload profiles
       const data = await discover();
-      setProfiles(data as Profile[]);
+      setProfiles(data as unknown as Profile[]);
       setCurrentIndex(0);
     } catch {
       // Premium required - redirect
