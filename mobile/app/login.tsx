@@ -261,6 +261,14 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
+              onPress={() => router.push("/forgot-password")}
+            >
+              <Text style={styles.link}>
+                <Text style={styles.linkBold}>Mot de passe oublié ?</Text>
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
               onPress={() => {
                 setError("");
                 setMode("phone");

@@ -194,6 +194,37 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Help & Legal */}
+      <Text style={styles.sectionTitle}>Aide & Légal</Text>
+      <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.linkRow}
+          onPress={() => router.push("/faq")}
+        >
+          <Ionicons name="help-circle-outline" size={20} color="#a78bfa" />
+          <Text style={styles.linkLabel}>Questions fréquentes</Text>
+          <Ionicons name="chevron-forward" size={18} color="#444" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.linkRow}
+          onPress={() => router.push("/cgu")}
+        >
+          <Ionicons name="document-text-outline" size={20} color="#a78bfa" />
+          <Text style={styles.linkLabel}>
+            Conditions Générales d&apos;Utilisation
+          </Text>
+          <Ionicons name="chevron-forward" size={18} color="#444" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.linkRow}
+          onPress={() => router.push("/confidentialite")}
+        >
+          <Ionicons name="shield-checkmark-outline" size={20} color="#a78bfa" />
+          <Text style={styles.linkLabel}>Politique de confidentialité</Text>
+          <Ionicons name="chevron-forward" size={18} color="#444" />
+        </TouchableOpacity>
+      </View>
+
       {/* Danger zone */}
       <Text style={styles.sectionTitle}>Zone de danger</Text>
       <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
@@ -265,4 +296,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   deleteText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
+  linkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+  },
+  linkLabel: { flex: 1, color: "#e5e7eb", fontSize: 14 },
 });
