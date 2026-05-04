@@ -39,12 +39,33 @@ export default function ProfileScreen() {
   }
 
   const p = profile || {};
+  const role = (user?.role as string) || (p.role as string) || "user";
+  const isDelivery = role === "delivery" || role === "admin" || role === "owner";
 
-  const menuItems = [
+  const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string; route: string }[] = [
     {
       icon: "ribbon-outline" as const,
       label: "Lomi Pass Premium",
       route: "/premium",
+    },
+    ...(isDelivery
+      ? [
+          {
+            icon: "car-sport-outline" as const,
+            label: "Espace livreur",
+            route: "/livreur",
+          },
+        ]
+      : []),
+    {
+      icon: "sparkles-outline" as const,
+      label: "Bien-être",
+      route: "/bien-etre",
+    },
+    {
+      icon: "calendar-outline" as const,
+      label: "Événements",
+      route: "/evenements",
     },
     {
       icon: "create-outline" as const,
