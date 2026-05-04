@@ -35,7 +35,7 @@ export default function ConversationsPage() {
 
   function loadConversations() {
     getConversations()
-      .then((res) => setConversations(res as unknown as Conversation[]))
+      .then((res) => setConversations((res ?? []) as unknown as Conversation[]))
       .catch(() => {})
       .finally(() => setLoading(false));
   }

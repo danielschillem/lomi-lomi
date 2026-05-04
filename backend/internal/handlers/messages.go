@@ -56,7 +56,7 @@ func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 		UnreadCount int64  `json:"unread_count"`
 	}
 
-	var result []ConvResponse
+	result := make([]ConvResponse, 0, len(conversations))
 	for _, conv := range conversations {
 		var lastMsg models.Message
 		database.DB.Where("conversation_id = ?", conv.ID).Order("created_at DESC").First(&lastMsg)

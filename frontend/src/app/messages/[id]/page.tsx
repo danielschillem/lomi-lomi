@@ -149,7 +149,7 @@ export default function ChatPage() {
     getConversations()
       .then((convos) => {
         const conv = (
-          convos as unknown as Array<{
+          (convos ?? []) as unknown as Array<{
             id: number;
             user1_id: number;
             user2_id: number;
