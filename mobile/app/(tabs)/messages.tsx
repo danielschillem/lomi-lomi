@@ -13,27 +13,20 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { getConversations } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import {
+  ConversationListItem,
+  getConversationLastMessageContent,
+  getConversationLastMessageDate,
+  getConversationOtherUser,
+  getConversationRecipientId,
+} from "@/lib/conversations";
 import ScreenState from "@/app/components/ScreenState";
-
-interface Conversation {
-  id: number;
-  other_user?: {
-    id: number;
-    username: string;
-    avatar_url: string;
-    is_online: boolean;
-  };
-  last_message?: {
-    content: string;
-    created_at: string;
-    sender_id: number;
-  };
-  unread_count: number;
-}
 
 export default function MessagesScreen() {
   const PAGE_SIZE = 20;
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { user } = useAuth();
+  const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,7 +35,9 @@ export default function MessagesScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getConversations();
-      const rows = Array.isArray(res) ? (res as unknown as Conversation[]) : [];
+      const rows = Array.isArray(res)
+        ? (res as unknown as ConversationListItem[])
+        : [];
       setConversations(rows);
       setVisibleCount(PAGE_SIZE);
       setError(null);
@@ -75,18 +70,10 @@ export default function MessagesScreen() {
     setVisibleCount((prev) => prev + PAGE_SIZE);
   };
 
-  const getSafeUser = (conversation: Conversation) => {
-    if (conversation.other_user) return conversation.other_user;
-    return {
-      id: 0,
-      username: "Utilisateur",
-      avatar_url: "",
-      is_online: false,
-    };
-  };
-
   const timeAgo = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const timestamp = new Date(dateStr).getTime();
+    if (!Number.isFinite(timestamp)) return "";
+    const diff = Date.now() - timestamp;
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return "à l'instant";
     if (mins < 60) return `${mins}min`;
@@ -145,8 +132,13 @@ export default function MessagesScreen() {
           ) : null
         }
         renderItem={({ item }) => {
-          const otherUser = getSafeUser(item);
-          const canOpenChat = Boolean(item.other_user?.id);
+          const otherUser = getConversationOtherUser(item, user?.id);
+          const recipientId = getConversationRecipientId(item, user?.id);
+          const messageDate = getConversationLastMessageDate(item);
+          const messageTime = messageDate ? timeAgo(messageDate) : "";
+          const lastMessage = getConversationLastMessageContent(item);
+          const canOpenChat =
+            Number.isFinite(Number(item.id)) && Number(item.id) > 0;
 
           return (
             <TouchableOpacity
@@ -156,9 +148,9 @@ export default function MessagesScreen() {
                 router.push({
                   pathname: "/chat/[id]",
                   params: {
-                    id: item.id,
+                    id: String(item.id),
                     name: otherUser.username,
-                    recipientId: otherUser.id,
+                    recipientId: String(recipientId),
                   },
                 })
               }
@@ -177,18 +169,17 @@ export default function MessagesScreen() {
               <View style={styles.textWrap}>
                 <View style={styles.topRow}>
                   <Text style={styles.name}>{otherUser.username}</Text>
-                  {item.last_message && (
+                  {!!messageTime && (
                     <Text style={styles.time}>
-                      {timeAgo(item.last_message.created_at)}
+                      {messageTime}
                     </Text>
                   )}
                 </View>
                 <View style={styles.bottomRow}>
                   <Text style={styles.lastMsg} numberOfLines={1}>
-                    {item.last_message?.content ||
-                      "Nouveau match ! Dis bonjour "}
+                    {lastMessage || "Nouveau match ! Dis bonjour "}
                   </Text>
-                  {item.unread_count > 0 && (
+                  {(item.unread_count || 0) > 0 && (
                     <View style={styles.badge}>
                       <Text style={styles.badgeText}>{item.unread_count}</Text>
                     </View>
