@@ -31,5 +31,13 @@ type Message struct {
 	IsRead         bool   `gorm:"default:false" json:"is_read"`
 	IsEdited       bool   `gorm:"default:false" json:"is_edited"`
 
+	// Partage de localisation
+	Latitude  *float64 `json:"latitude,omitempty"`
+	Longitude *float64 `json:"longitude,omitempty"`
+
+	// Photos à vue unique
+	ViewOnce bool       `gorm:"default:false" json:"view_once"`
+	ViewedAt *time.Time `json:"viewed_at,omitempty"`
+
 	Sender User `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
 }

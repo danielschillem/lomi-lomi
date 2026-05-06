@@ -264,12 +264,13 @@ func (h *ProfileHandler) NearbyUsers(c *fiber.Ctx) error {
 		Find(&users)
 
 	type NearbyUser struct {
-		ID        uint    `json:"id"`
-		Username  string  `json:"username"`
-		AvatarURL string  `json:"avatar_url"`
-		IsOnline  bool    `json:"is_online"`
-		Distance  float64 `json:"distance"`
-		Angle     float64 `json:"angle"` // bearing in degrees from current user
+		ID         uint       `json:"id"`
+		Username   string     `json:"username"`
+		AvatarURL  string     `json:"avatar_url"`
+		IsOnline   bool       `json:"is_online"`
+		Distance   float64    `json:"distance"`
+		Angle      float64    `json:"angle"` // bearing in degrees from current user
+		LastSeenAt *time.Time `json:"last_seen_at,omitempty"`
 	}
 
 	var nearby []NearbyUser
@@ -281,12 +282,13 @@ func (h *ProfileHandler) NearbyUsers(c *fiber.Ctx) error {
 		// Calculate bearing angle
 		angle := bearing(currentUser.Latitude, currentUser.Longitude, u.Latitude, u.Longitude)
 		nearby = append(nearby, NearbyUser{
-			ID:        u.ID,
-			Username:  u.Username,
-			AvatarURL: u.AvatarURL,
-			IsOnline:  u.IsOnline,
-			Distance:  math.Round(dist*10) / 10,
-			Angle:     math.Round(angle*10) / 10,
+			ID:         u.ID,
+			Username:   u.Username,
+			AvatarURL:  u.AvatarURL,
+			IsOnline:   u.IsOnline,
+			Distance:   math.Round(dist*10) / 10,
+			Angle:      math.Round(angle*10) / 10,
+			LastSeenAt: u.LastSeenAt,
 		})
 	}
 

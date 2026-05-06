@@ -138,9 +138,12 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
 	type SendRequest struct {
-		ReceiverID uint   `json:"receiver_id"`
-		Content    string `json:"content"`
-		ImageURL   string `json:"image_url"`
+		ReceiverID uint     `json:"receiver_id"`
+		Content    string   `json:"content"`
+		ImageURL   string   `json:"image_url"`
+		Latitude   *float64 `json:"latitude,omitempty"`
+		Longitude  *float64 `json:"longitude,omitempty"`
+		ViewOnce   bool     `json:"view_once,omitempty"`
 	}
 
 	var req SendRequest
@@ -188,9 +191,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	).Count(&connPaid)
 	if connPaid == 0 {
 		return c.Status(fiber.StatusPaymentRequired).JSON(fiber.Map{
-			"error":  "connection_required",
+			"error":   "connection_required",
 			"message": "Payez 250 FCFA pour discuter avec cet utilisateur",
-			"amount": models.ConnectionFee,
+			"amount":  models.ConnectionFee,
 		})
 	}
 
@@ -214,6 +217,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		SenderID:       userID,
 		Content:        req.Content,
 		ImageURL:       req.ImageURL,
+		Latitude:       req.Latitude,
+		Longitude:      req.Longitude,
+		ViewOnce:       req.ViewOnce,
 	}
 
 	if err := database.DB.Create(&msg).Error; err != nil {
@@ -237,6 +243,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 				"sender_id":       msg.SenderID,
 				"content":         msg.Content,
 				"image_url":       msg.ImageURL,
+				"latitude":        msg.Latitude,
+				"longitude":       msg.Longitude,
+				"view_once":       msg.ViewOnce,
 				"created_at":      msg.CreatedAt,
 				"is_read":         msg.IsRead,
 				"sender":          map[string]interface{}{"id": msg.Sender.ID, "username": msg.Sender.Username, "avatar_url": msg.Sender.AvatarURL},
