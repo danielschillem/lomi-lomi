@@ -276,7 +276,9 @@ export function getNotifications(page?: number, limit?: number) {
   if (page != null) qs.set("page", String(page));
   if (limit != null) qs.set("limit", String(limit));
   const q = qs.toString();
-  return request<Record<string, unknown>[]>(`/notifications${q ? `?${q}` : ""}`);
+  return request<Record<string, unknown>[]>(
+    `/notifications${q ? `?${q}` : ""}`,
+  );
 }
 
 export function getUnreadCount() {
@@ -306,11 +308,51 @@ export function getMessages(conversationId: number) {
   );
 }
 
-export function sendMessage(data: { receiver_id: number; content: string }) {
+export function sendMessage(data: {
+  receiver_id: number;
+  content?: string;
+  image_url?: string;
+}) {
   return request<Record<string, unknown>>("/messages", {
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+export function uploadMessageImage(uri: string) {
+  const formData = new FormData();
+  const filename = uri.split("/").pop() || "message.jpg";
+  const ext = filename.split(".").pop()?.toLowerCase() || "jpeg";
+  const mimeType = ext === "png" ? "image/png" : "image/jpeg";
+  formData.append("image", {
+    uri,
+    name: filename,
+    type: mimeType,
+  } as unknown as Blob);
+  return uploadFile<{ image_url: string }>("/messages/upload-image", formData);
+}
+
+export function editMessage(messageId: number, content: string) {
+  return request<Record<string, unknown>>(`/messages/${messageId}`, {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function deleteMessage(messageId: number) {
+  return request<{ message: string }>(`/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export function searchMessages(conversationId: number, query: string) {
+  const qs = new URLSearchParams({
+    conversation_id: String(conversationId),
+    q: query,
+  });
+  return request<{ messages: Record<string, unknown>[] }>(
+    `/messages/search?${qs.toString()}`,
+  );
 }
 
 export function getOrCreateConversation(userId: number) {
@@ -999,43 +1041,6 @@ export function createDeliveryRequest(
     method: "POST",
     body: JSON.stringify(data),
   });
-}
-
-/* ===== Messaging extras ===== */
-export function deleteMessage(messageId: number) {
-  return request<Record<string, unknown>>(`/messages/${messageId}`, {
-    method: "DELETE",
-  });
-}
-
-export function editMessage(messageId: number, content: string) {
-  return request<Record<string, unknown>>(`/messages/${messageId}`, {
-    method: "PUT",
-    body: JSON.stringify({ content }),
-  });
-}
-
-export function searchMessages(conversationId: number, q: string) {
-  return request<{ messages: Record<string, unknown>[] }>(
-    `/messages/search?conversation_id=${conversationId}&q=${encodeURIComponent(q)}`,
-  );
-}
-
-/** Upload an image attached to a chat message (URI from picker) */
-export function uploadMessageImage(uri: string) {
-  const formData = new FormData();
-  const filename = uri.split("/").pop() || "image.jpg";
-  const ext = (filename.split(".").pop() || "jpg").toLowerCase();
-  const mimeType = ext === "png" ? "image/png" : "image/jpeg";
-  formData.append("image", {
-    uri,
-    name: filename,
-    type: mimeType,
-  } as unknown as Blob);
-  return uploadFile<{ image_url: string }>(
-    "/messages/upload-image",
-    formData,
-  );
 }
 
 /* ===== Aliases (legacy code in mobile/) =====

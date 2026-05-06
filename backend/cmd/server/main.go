@@ -86,8 +86,9 @@ func main() {
 	})
 
 	// Handlers
+	wsHub := handlers.NewWSHub(cfg)
 	authHandler := handlers.NewAuthHandler(cfg)
-	profileHandler := handlers.NewProfileHandler()
+	profileHandler := handlers.NewProfileHandler(wsHub)
 	shopHandler := handlers.NewShopHandler()
 	placeHandler := handlers.NewPlaceHandler()
 	adminHandler := handlers.NewAdminHandler()
@@ -103,7 +104,6 @@ func main() {
 	premiumHandler := handlers.NewPremiumHandler()
 	eventHandler := handlers.NewEventHandler()
 	profileExtHandler := handlers.NewProfileExtHandler(cfg)
-	wsHub := handlers.NewWSHub(cfg)
 	messageHandler := handlers.NewMessageHandler(wsHub, cfg)
 	locationHandler := handlers.NewLocationHandler(wsHub)
 	deliveryTrackingHandler := handlers.NewDeliveryTrackingHandler(wsHub)
@@ -173,7 +173,6 @@ func main() {
 	api.Delete("/messages/:id", jwt, messageHandler.DeleteMessage)
 	api.Put("/messages/:id", jwt, messageHandler.EditMessage)
 	api.Get("/messages/search", jwt, messageHandler.SearchMessages)
-
 
 	// Location sharing
 	api.Post("/location/share", jwt, locationHandler.StartLocationShare)

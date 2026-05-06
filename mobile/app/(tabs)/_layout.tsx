@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
 import { ActivityIndicator, View, Text } from "react-native";
 import { useEffect, useState } from "react";
-import { getUnreadCount } from "@/lib/api";
+import { getConversations, getUnreadCount } from "@/lib/api";
 
 function BadgeIcon({
   name,
@@ -52,12 +52,26 @@ function BadgeIcon({
 export default function TabsLayout() {
   const { user, loading } = useAuth();
   const [unread, setUnread] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     const load = () => {
       getUnreadCount()
         .then((r) => setUnread(r.count))
+        .catch(() => {});
+
+      getConversations()
+        .then((rows) => {
+          const list = Array.isArray(rows)
+            ? (rows as Array<{ unread_count?: number }>)
+            : [];
+          const total = list.reduce(
+            (sum, c) => sum + Number(c.unread_count || 0),
+            0,
+          );
+          setUnreadMessages(total);
+        })
         .catch(() => {});
     };
     load();
@@ -108,6 +122,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="search"
+        options={{
+          title: "Recherche",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="search" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="nearby"
         options={{
           title: "Radar",
@@ -130,7 +153,12 @@ export default function TabsLayout() {
         options={{
           title: "Messages",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles" size={size} color={color} />
+            <BadgeIcon
+              name="chatbubbles"
+              size={size}
+              color={color}
+              badge={unreadMessages}
+            />
           ),
         }}
       />

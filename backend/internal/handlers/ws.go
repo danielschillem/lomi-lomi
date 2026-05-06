@@ -214,6 +214,20 @@ func (h *WSHub) BroadcastToUser(userID uint, msg WSMessage) {
 	h.SendToUser(userID, msg)
 }
 
+// BroadcastAll sends a message to all connected users.
+func (h *WSHub) BroadcastAll(msg WSMessage) {
+	h.mu.RLock()
+	userIDs := make([]uint, 0, len(h.clients))
+	for uid := range h.clients {
+		userIDs = append(userIDs, uid)
+	}
+	h.mu.RUnlock()
+
+	for _, uid := range userIDs {
+		h.SendToUser(uid, msg)
+	}
+}
+
 // BroadcastToRole envoie un message à tous les utilisateurs connectés ayant le rôle donné.
 // Le rôle est résolu en chargeant les IDs depuis la DB pour les connexions actives.
 func (h *WSHub) BroadcastToRole(role string, msg WSMessage) {

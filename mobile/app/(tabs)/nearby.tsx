@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Location from "expo-location";
 import { updateLocation, nearbyUsers } from "@/lib/api";
+import { useWS } from "@/lib/ws-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const RADAR_SIZE = SCREEN_WIDTH - 64;
@@ -34,6 +35,9 @@ export default function NearbyScreen() {
   const [radius, setRadius] = useState(10);
   const [hasLocation, setHasLocation] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const watchRef = useRef<Location.LocationSubscription | null>(null);
+  const lastPushRef = useRef<number>(0);
+  const { onMessage } = useWS();
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(0.3)).current;
 
@@ -98,6 +102,25 @@ export default function NearbyScreen() {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude,
         });
+
+        watchRef.current = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.Balanced,
+            timeInterval: 8000,
+            distanceInterval: 20,
+          },
+          async (position) => {
+            const now = Date.now();
+            if (now - lastPushRef.current < 7000) return;
+            lastPushRef.current = now;
+            await updateLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            }).catch(() => {});
+            await loadNearby();
+          },
+        );
+
         setHasLocation(true);
         await loadNearby();
       } catch {
@@ -105,14 +128,32 @@ export default function NearbyScreen() {
       }
       setLoading(false);
     })();
+
+    return () => {
+      if (watchRef.current) {
+        watchRef.current.remove();
+        watchRef.current = null;
+      }
+    };
   }, [loadNearby]);
 
-  // Refresh every 30s
+  // Refresh every 12s
   useEffect(() => {
     if (!hasLocation) return;
-    const interval = setInterval(loadNearby, 30000);
+    const interval = setInterval(loadNearby, 12000);
     return () => clearInterval(interval);
   }, [hasLocation, loadNearby]);
+
+  // Refresh immediately when someone updates location/profile via WS
+  useEffect(() => {
+    if (!hasLocation) return;
+    const unsub = onMessage((msg) => {
+      if (msg.type === "profile_updated") {
+        loadNearby();
+      }
+    });
+    return unsub;
+  }, [hasLocation, onMessage, loadNearby]);
 
   const changeRadius = async (newRadius: number) => {
     setRadius(newRadius);

@@ -11,10 +11,12 @@ import (
 	"github.com/lomilomi/backend/internal/models"
 )
 
-type ProfileHandler struct{}
+type ProfileHandler struct {
+	WSHub *WSHub
+}
 
-func NewProfileHandler() *ProfileHandler {
-	return &ProfileHandler{}
+func NewProfileHandler(wsHub *WSHub) *ProfileHandler {
+	return &ProfileHandler{WSHub: wsHub}
 }
 
 func (h *ProfileHandler) GetProfile(c *fiber.Ctx) error {
@@ -421,6 +423,17 @@ func (h *ProfileHandler) UpdateMyLocation(c *fiber.Ctx) error {
 		"latitude":  req.Latitude,
 		"longitude": req.Longitude,
 	})
+
+	if h.WSHub != nil {
+		h.WSHub.BroadcastAll(WSMessage{
+			Type: "profile_updated",
+			Data: map[string]interface{}{
+				"user_id":   userID,
+				"latitude":  req.Latitude,
+				"longitude": req.Longitude,
+			},
+		})
+	}
 
 	return c.JSON(fiber.Map{"message": "Position mise à jour"})
 }
