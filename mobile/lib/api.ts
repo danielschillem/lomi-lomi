@@ -383,6 +383,7 @@ export function nearbyUsers(radius: number = 10) {
       is_online: boolean;
       distance: number;
       angle: number;
+      last_seen_at?: string | null;
     }[];
   }>(`/nearby?radius=${radius}`);
 }

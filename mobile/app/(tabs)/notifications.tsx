@@ -1,4 +1,5 @@
 ﻿import { useEffect, useState, useCallback } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -8,8 +9,8 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  Pressable,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import {
   getNotifications,
@@ -35,6 +36,8 @@ export default function NotificationsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
 
   const load = useCallback(async () => {
     try {
@@ -45,7 +48,9 @@ export default function NotificationsScreen() {
       setError(null);
     } catch (err) {
       setNotifs([]);
-      setError((err as Error)?.message || "Impossible de charger les notifications");
+      setError(
+        (err as Error)?.message || "Impossible de charger les notifications",
+      );
     }
     setLoading(false);
     setRefreshing(false);
@@ -95,6 +100,40 @@ export default function NotificationsScreen() {
     ]);
   };
 
+  const handleSelect = (id: number) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = () => {
+    if (selected.size === 0) return;
+    Alert.alert("Supprimer", `Supprimer ${selected.size} notification(s) ?`, [
+      { text: "Annuler", style: "cancel" },
+      {
+        text: "Supprimer",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const ids = Array.from(selected);
+            await Promise.all(ids.map((id) => deleteNotification(id)));
+            setNotifs((prev) => prev.filter((n) => !selected.has(n.id)));
+            setSelected(new Set());
+            setSelectMode(false);
+          } catch {
+            /* empty */
+          }
+        },
+      },
+    ]);
+  };
+
   const getIcon = (type: string) => {
     switch (type) {
       case "match":
@@ -119,7 +158,13 @@ export default function NotificationsScreen() {
   };
 
   if (loading) {
-    return <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des notifications" />;
+    return (
+      <ScreenState
+        mode="loading"
+        title="Chargement..."
+        subtitle="Récupération des notifications"
+      />
+    );
   }
 
   if (error && notifs.length === 0) {
@@ -139,11 +184,58 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topBar}>
+        {selectMode ? (
+          <>
+            <Pressable
+              style={styles.topBarBtn}
+              onPress={handleDeleteSelected}
+              disabled={selected.size === 0}
+            >
+              <Ionicons
+                name="trash"
+                size={22}
+                color={selected.size === 0 ? "#888" : "#f44"}
+              />
+              <Text
+                style={[
+                  styles.topBarText,
+                  { color: selected.size === 0 ? "#888" : "#f44" },
+                ]}
+              >
+                Supprimer
+              </Text>
+            </Pressable>
+            <Pressable
+              style={styles.topBarBtn}
+              onPress={() => {
+                setSelectMode(false);
+                setSelected(new Set());
+              }}
+            >
+              <Ionicons name="close" size={22} color="#fff" />
+              <Text style={styles.topBarText}>Annuler</Text>
+            </Pressable>
+          </>
+        ) : (
+          <Pressable
+            style={styles.topBarBtn}
+            onPress={() => setSelectMode(true)}
+          >
+            <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
+            <Text style={styles.topBarText}>Sélectionner</Text>
+          </Pressable>
+        )}
+      </View>
       <FlatList
         data={notifs.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
         ListEmptyComponent={
-          <ScreenState mode="empty" title="Aucune notification" subtitle="Tu es à jour pour le moment." />
+          <ScreenState
+            mode="empty"
+            title="Aucune notification"
+            subtitle="Tu es à jour pour le moment."
+          />
         }
         refreshControl={
           <RefreshControl
@@ -163,9 +255,29 @@ export default function NotificationsScreen() {
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={[styles.row, !item.is_read && styles.unread]}
-            onLongPress={() => handleDelete(item.id)}
+            style={[
+              styles.row,
+              !item.is_read && styles.unread,
+              selectMode && styles.selectableRow,
+            ]}
+            onLongPress={() => setSelectMode(true)}
+            onPress={() => {
+              if (selectMode) {
+                handleSelect(item.id);
+              } else {
+                // future: marquer comme lu individuellement ici
+              }
+            }}
           >
+            {selectMode && (
+              <View style={styles.checkboxWrap}>
+                <Ionicons
+                  name={selected.has(item.id) ? "checkbox" : "square-outline"}
+                  size={22}
+                  color={selected.has(item.id) ? "#7c3aed" : "#888"}
+                />
+              </View>
+            )}
             <View style={styles.iconWrap}>
               <Ionicons name={getIcon(item.type)} size={24} color="#7c3aed" />
             </View>
@@ -182,6 +294,25 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a0a0a" },
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "#181828",
+    borderBottomWidth: 1,
+    borderBottomColor: "#222",
+  },
+  topBarBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 18,
+  },
+  topBarText: {
+    color: "#fff",
+    fontSize: 15,
+    marginLeft: 6,
+  },
   footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
@@ -190,7 +321,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#1a1a1a",
   },
+  selectableRow: {
+    paddingLeft: 0,
+  },
   unread: { backgroundColor: "#1a1a2a" },
+  checkboxWrap: {
+    width: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   iconWrap: {
     width: 44,
     height: 44,

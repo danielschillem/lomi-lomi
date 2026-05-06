@@ -27,6 +27,7 @@ interface NearbyUser {
   is_online: boolean;
   distance: number;
   angle: number;
+  last_seen_at?: string | null;
 }
 
 export default function NearbyScreen() {
@@ -277,6 +278,16 @@ export default function NearbyScreen() {
         {/* Users */}
         {users.map((user) => {
           const pos = getUserPosition(user);
+          // Calcul du temps écoulé depuis last_seen_at
+          let seenAgo = null;
+          if (user.last_seen_at) {
+            const last = new Date(user.last_seen_at).getTime();
+            const now = Date.now();
+            const diff = Math.floor((now - last) / 1000);
+            if (diff < 60) seenAgo = `${diff}s`;
+            else if (diff < 3600) seenAgo = `${Math.floor(diff / 60)}min`;
+            else seenAgo = `${Math.floor(diff / 3600)}h`;
+          }
           return (
             <TouchableOpacity
               key={user.id}
@@ -294,6 +305,11 @@ export default function NearbyScreen() {
                 </View>
               )}
               {user.is_online && <View style={styles.onlineDot} />}
+              {seenAgo && !user.is_online && (
+                <View style={styles.seenBadgeDot}>
+                  <Text style={styles.seenBadgeText}>{seenAgo}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           );
         })}
@@ -322,36 +338,55 @@ export default function NearbyScreen() {
       {/* User list */}
       {users.length > 0 && (
         <View style={styles.userList}>
-          {users.slice(0, 5).map((user) => (
-            <TouchableOpacity
-              key={user.id}
-              style={styles.userRow}
-              onPress={() => router.push(`/user/${user.id}`)}
-            >
-              {user.avatar_url ? (
-                <Image
-                  source={{ uri: user.avatar_url }}
-                  style={styles.userListAvatar}
-                />
-              ) : (
-                <View
-                  style={[styles.userListAvatar, styles.userAvatarPlaceholder]}
-                >
-                  <Ionicons name="person" size={18} color="#999" />
+          {users.slice(0, 5).map((user) => {
+            let seenAgo = null;
+            if (user.last_seen_at) {
+              const last = new Date(user.last_seen_at).getTime();
+              const now = Date.now();
+              const diff = Math.floor((now - last) / 1000);
+              if (diff < 60) seenAgo = `${diff}s`;
+              else if (diff < 3600) seenAgo = `${Math.floor(diff / 60)}min`;
+              else seenAgo = `${Math.floor(diff / 3600)}h`;
+            }
+            return (
+              <TouchableOpacity
+                key={user.id}
+                style={styles.userRow}
+                onPress={() => router.push(`/user/${user.id}`)}
+              >
+                {user.avatar_url ? (
+                  <Image
+                    source={{ uri: user.avatar_url }}
+                    style={styles.userListAvatar}
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.userListAvatar,
+                      styles.userAvatarPlaceholder,
+                    ]}
+                  >
+                    <Ionicons name="person" size={18} color="#999" />
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.userName}>{user.username}</Text>
+                  <Text style={styles.userDist}>{user.distance} km</Text>
                 </View>
-              )}
-              <View style={{ flex: 1 }}>
-                <Text style={styles.userName}>{user.username}</Text>
-                <Text style={styles.userDist}>{user.distance} km</Text>
-              </View>
-              {user.is_online && (
-                <View style={styles.onlineBadge}>
-                  <Text style={styles.onlineBadgeText}>En ligne</Text>
-                </View>
-              )}
-              <Ionicons name="chevron-forward" size={18} color="#666" />
-            </TouchableOpacity>
-          ))}
+                {user.is_online ? (
+                  <View style={styles.onlineBadge}>
+                    <Text style={styles.onlineBadgeText}>En ligne</Text>
+                  </View>
+                ) : seenAgo ? (
+                  <View style={styles.seenBadgeList}>
+                    <Text style={styles.seenBadgeText}>{seenAgo}</Text>
+                  </View>
+                ) : null}
+                <Ionicons name="chevron-forward" size={18} color="#666" />
+              </TouchableOpacity>
+            );
+          })}
+          // ...existing code...
         </View>
       )}
     </View>
@@ -567,4 +602,29 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   onlineBadgeText: { color: "#22c55e", fontSize: 11, fontWeight: "600" },
+  seenBadgeDot: {
+    position: "absolute",
+    bottom: -2,
+    left: 0,
+    backgroundColor: "#222",
+    borderRadius: 6,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  seenBadgeList: {
+    backgroundColor: "#222",
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: "#333",
+  },
+  seenBadgeText: {
+    color: "#aaa",
+    fontSize: 11,
+    fontWeight: "600",
+  },
 });
