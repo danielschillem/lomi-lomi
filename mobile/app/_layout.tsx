@@ -52,6 +52,8 @@ function InnerLayout() {
         <Stack.Screen name="bookings" options={{ title: "Mes rendez-vous" }} />
         <Stack.Screen name="orders" options={{ title: "Mes commandes" }} />
         <Stack.Screen name="rides" options={{ title: "Mes courses" }} />
+        <Stack.Screen name="location" options={{ title: "Partage de position" }} />
+        <Stack.Screen name="carte" options={{ title: "Carte des lieux" }} />
       </Stack>
     </>
   );

@@ -11,11 +11,13 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { getConversations } from "@/lib/api";
+import ScreenState from "@/app/components/ScreenState";
 
 interface Conversation {
   id: number;
-  other_user: {
+  other_user?: {
     id: number;
     username: string;
     avatar_url: string;
@@ -30,30 +32,57 @@ interface Conversation {
 }
 
 export default function MessagesScreen() {
+  const PAGE_SIZE = 20;
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await getConversations();
-      setConversations(
-        Array.isArray(res) ? (res as unknown as Conversation[]) : [],
-      );
-    } catch {
+      const rows = Array.isArray(res) ? (res as unknown as Conversation[]) : [];
+      setConversations(rows);
+      setVisibleCount(PAGE_SIZE);
+      setError(null);
+    } catch (err) {
       setConversations([]);
+      setError((err as Error)?.message || "Impossible de charger les conversations");
     }
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [PAGE_SIZE]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
+    setError(null);
     load();
+  };
+
+  const loadMore = () => {
+    if (visibleCount >= conversations.length) return;
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  };
+
+  const getSafeUser = (conversation: Conversation) => {
+    if (conversation.other_user) return conversation.other_user;
+    return {
+      id: 0,
+      username: "Utilisateur",
+      avatar_url: "",
+      is_online: false,
+    };
   };
 
   const timeAgo = (dateStr: string) => {
@@ -68,29 +97,37 @@ export default function MessagesScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-      </View>
+      <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des conversations" />
     );
   }
 
-  if (conversations.length === 0) {
+  if (error && conversations.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="chatbubble-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Pas encore de conversations</Text>
-        <Text style={styles.emptySubtext}>
-          Commence par liker des profils !
-        </Text>
-      </View>
+      <ScreenState
+        mode="error"
+        title="Erreur de chargement"
+        subtitle={error}
+        buttonLabel="Réessayer"
+        onPressButton={() => {
+          setLoading(true);
+          load();
+        }}
+      />
     );
   }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={conversations}
+        data={conversations.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={
+          <ScreenState
+            mode="empty"
+            title="Pas encore de conversations"
+            subtitle="Commence par liker des profils !"
+          />
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -98,54 +135,69 @@ export default function MessagesScreen() {
             tintColor="#7c3aed"
           />
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.row}
-            onPress={() =>
-              router.push({
-                pathname: "/chat/[id]",
-                params: {
-                  id: item.id,
-                  name: item.other_user.username,
-                  recipientId: item.other_user.id,
-                },
-              })
-            }
-          >
-            <View style={styles.avatarWrap}>
-              <Image
-                source={{
-                  uri:
-                    item.other_user.avatar_url ||
-                    "https://via.placeholder.com/48/1a1a1a/666?text=?",
-                }}
-                style={styles.avatar}
-              />
-              {item.other_user.is_online && <View style={styles.onlineDot} />}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          visibleCount < conversations.length ? (
+            <View style={styles.footer}>
+              <ActivityIndicator size="small" color="#7c3aed" />
             </View>
-            <View style={styles.textWrap}>
-              <View style={styles.topRow}>
-                <Text style={styles.name}>{item.other_user.username}</Text>
-                {item.last_message && (
-                  <Text style={styles.time}>
-                    {timeAgo(item.last_message.created_at)}
+          ) : null
+        }
+        renderItem={({ item }) => {
+          const otherUser = getSafeUser(item);
+          const canOpenChat = Boolean(item.other_user?.id);
+
+          return (
+            <TouchableOpacity
+              style={[styles.row, !canOpenChat && styles.rowDisabled]}
+              disabled={!canOpenChat}
+              onPress={() =>
+                router.push({
+                  pathname: "/chat/[id]",
+                  params: {
+                    id: item.id,
+                    name: otherUser.username,
+                    recipientId: otherUser.id,
+                  },
+                })
+              }
+            >
+              <View style={styles.avatarWrap}>
+                <Image
+                  source={{
+                    uri:
+                      otherUser.avatar_url ||
+                      "https://via.placeholder.com/48/1a1a1a/666?text=?",
+                  }}
+                  style={styles.avatar}
+                />
+                {otherUser.is_online && <View style={styles.onlineDot} />}
+              </View>
+              <View style={styles.textWrap}>
+                <View style={styles.topRow}>
+                  <Text style={styles.name}>{otherUser.username}</Text>
+                  {item.last_message && (
+                    <Text style={styles.time}>
+                      {timeAgo(item.last_message.created_at)}
+                    </Text>
+                  )}
+                </View>
+                <View style={styles.bottomRow}>
+                  <Text style={styles.lastMsg} numberOfLines={1}>
+                    {item.last_message?.content ||
+                      "Nouveau match ! Dis bonjour "}
                   </Text>
-                )}
+                  {item.unread_count > 0 && (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>{item.unread_count}</Text>
+                    </View>
+                  )}
+                </View>
               </View>
-              <View style={styles.bottomRow}>
-                <Text style={styles.lastMsg} numberOfLines={1}>
-                  {item.last_message?.content ||
-                    "Nouveau match ! Dis bonjour "}
-                </Text>
-                {item.unread_count > 0 && (
-                  <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{item.unread_count}</Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
@@ -153,20 +205,18 @@ export default function MessagesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
+  footer: {
+    paddingVertical: 14,
   },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
-  emptySubtext: { color: "#444", fontSize: 14, marginTop: 4 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#1a1a1a",
+  },
+  rowDisabled: {
+    opacity: 0.7,
   },
   avatarWrap: { position: "relative" },
   avatar: {

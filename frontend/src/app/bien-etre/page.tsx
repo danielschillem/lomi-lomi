@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   Sparkles,
   MapPin,
   Star,
-  Phone,
   Home,
   Search,
   Filter,
@@ -173,9 +173,11 @@ export default function WellnessPage() {
                 {/* Image */}
                 <div className="h-48 bg-surface-2 flex items-center justify-center relative">
                   {provider.image_url ? (
-                    <img
+                    <Image
                       src={provider.image_url}
                       alt={provider.name}
+                      width={1200}
+                      height={800}
                       className="w-full h-full object-cover"
                     />
                   ) : (

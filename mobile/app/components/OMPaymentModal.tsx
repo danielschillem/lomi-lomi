@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { isValidOtp, isValidPhone, normalizePhone } from "@/lib/validation";
 
 interface OMPaymentModalProps {
   visible: boolean;
@@ -58,8 +59,8 @@ export default function OMPaymentModal({
   }
 
   async function handleInitiate() {
-    const cleanPhone = phone.replace(/\s/g, "");
-    if (!cleanPhone || cleanPhone.replace(/\+/g, "").length < 8) {
+    const cleanPhone = normalizePhone(phone);
+    if (!isValidPhone(cleanPhone)) {
       setError("Numéro invalide");
       return;
     }
@@ -81,11 +82,15 @@ export default function OMPaymentModal({
   }
 
   async function handleConfirm() {
-    if (!paymentId || !otp.trim()) return;
+    if (!paymentId) return;
+    if (!isValidOtp(otp)) {
+      setError("Code OTP invalide");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
-      const cleanPhone = phone.replace(/\s/g, "");
+      const cleanPhone = normalizePhone(phone);
       const res = await confirmPayment(paymentId, cleanPhone, otp.trim());
       if (res.status === "paid") {
         onSuccess(res.transaction_id || "");
@@ -126,7 +131,10 @@ export default function OMPaymentModal({
               <TextInput
                 style={styles.input}
                 value={phone}
-                onChangeText={setPhone}
+                onChangeText={(v) => {
+                  setPhone(v);
+                  if (error) setError("");
+                }}
                 placeholder="07XXXXXX"
                 placeholderTextColor="#666"
                 keyboardType="phone-pad"
@@ -171,7 +179,10 @@ export default function OMPaymentModal({
               <TextInput
                 style={[styles.input, styles.otpInput]}
                 value={otp}
-                onChangeText={setOtp}
+                onChangeText={(v) => {
+                  setOtp(v);
+                  if (error) setError("");
+                }}
                 placeholder="Code OTP"
                 placeholderTextColor="#666"
                 keyboardType="number-pad"

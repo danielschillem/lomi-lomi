@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { MessageCircle, ArrowLeft, User, Circle } from "lucide-react";
 import { getConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -142,9 +143,11 @@ export default function ConversationsPage() {
                   <div className="relative shrink-0">
                     <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {other?.avatar_url ? (
-                        <img
+                        <Image
                           src={other.avatar_url}
                           alt={other.username}
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
                         />
                       ) : (

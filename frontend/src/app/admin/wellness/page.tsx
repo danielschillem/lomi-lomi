@@ -7,13 +7,7 @@ import {
   Edit,
   Trash2,
   X,
-  Search,
   Clock,
-  Calendar,
-  Check,
-  AlertCircle,
-  MapPin,
-  Users,
   LocateFixed,
 } from "lucide-react";
 import {
@@ -180,7 +174,6 @@ export default function AdminWellnessPage() {
 
   // Bookings
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [bookingsTotal, setBookingsTotal] = useState(0);
   const [bookingsPage, setBookingsPage] = useState(1);
   const [bookingsStatus, setBookingsStatus] = useState("");
   const [loadingBookings, setLoadingBookings] = useState(false);
@@ -202,7 +195,6 @@ export default function AdminWellnessPage() {
     try {
       const res = await adminListWellnessBookings(bookingsPage, bookingsStatus);
       setBookings(res.bookings as unknown as Booking[]);
-      setBookingsTotal(res.total);
     } catch {
       /* ignore */
     }

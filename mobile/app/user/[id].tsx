@@ -23,27 +23,40 @@ import { useAuth } from "@/lib/auth-context";
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user: me } = useAuth();
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
-  const [photos, setPhotos] = useState<Record<string, unknown>[]>([]);
+  const [profile, setProfile] = useState<Record<string, any> | null>(null);
+  const [photos, setPhotos] = useState<Record<string, any>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const userId = parseInt(id || "0", 10);
+  const isValidUserId = Number.isFinite(userId) && userId > 0;
+
+  const loadProfile = async () => {
+    setLoadError(null);
+    if (!isValidUserId) {
+      setProfile(null);
+      setPhotos([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const [p, ph] = await Promise.all([
+        getPublicProfile(userId),
+        getPhotos(userId).catch(() => []),
+      ]);
+      setProfile(p);
+      setPhotos(Array.isArray(ph) ? ph : []);
+    } catch (e: unknown) {
+      setProfile(null);
+      setPhotos([]);
+      setLoadError((e as Error).message || "Impossible de charger ce profil.");
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [p, ph] = await Promise.all([
-          getPublicProfile(userId),
-          getPhotos(userId).catch(() => []),
-        ]);
-        setProfile(p);
-        setPhotos(Array.isArray(ph) ? ph : []);
-      } catch {
-        setPhotos([]);
-      }
-      setLoading(false);
-    })();
-  }, [userId]);
+    void loadProfile();
+  }, [isValidUserId, userId]);
 
   const handleMessage = async () => {
     try {
@@ -107,6 +120,31 @@ export default function UserProfileScreen() {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#7c3aed" />
+      </View>
+    );
+  }
+
+  if (!isValidUserId) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Profil introuvable</Text>
+      </View>
+    );
+  }
+
+  if (loadError && !profile) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => {
+            setLoading(true);
+            void loadProfile();
+          }}
+        >
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -245,4 +283,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   safetyText: { color: "#f59e0b", fontSize: 14, fontWeight: "500" },
+  retryBtn: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

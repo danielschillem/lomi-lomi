@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   ShoppingBag,
   Plus,
@@ -275,9 +276,11 @@ export default function AdminProductsView() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {p.image_url ? (
-                        <img
+                        <Image
                           src={p.image_url}
                           alt=""
+                          width={40}
+                          height={40}
                           className="w-10 h-10 rounded-lg object-cover shrink-0"
                         />
                       ) : (

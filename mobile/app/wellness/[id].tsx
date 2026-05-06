@@ -17,6 +17,7 @@ import {
   createWellnessBooking,
   createWellnessReview,
 } from "@/lib/api";
+import { isValid24hTime, isValidIsoDate } from "@/lib/validation";
 
 interface Service {
   id: number;
@@ -28,10 +29,11 @@ interface Service {
 
 export default function WellnessDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [provider, setProvider] = useState<Record<string, unknown> | null>(
+  const [provider, setProvider] = useState<Record<string, any> | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [bookingService, setBookingService] = useState<Service | null>(null);
   const [bookDate, setBookDate] = useState("");
   const [bookTime, setBookTime] = useState("");
@@ -41,22 +43,42 @@ export default function WellnessDetailScreen() {
   const [reviewComment, setReviewComment] = useState("");
 
   const providerId = parseInt(id || "0", 10);
+  const isValidProviderId = Number.isFinite(providerId) && providerId > 0;
+
+  const loadProvider = async () => {
+    setLoadError(null);
+    if (!isValidProviderId) {
+      setProvider(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getWellnessProvider(providerId);
+      setProvider((res as { provider?: Record<string, any> }).provider ?? res);
+    } catch (e: unknown) {
+      setProvider(null);
+      setLoadError(
+        (e as Error).message || "Impossible de charger ce prestataire.",
+      );
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await getWellnessProvider(providerId);
-        setProvider(res);
-      } catch {
-        /* empty */
-      }
-      setLoading(false);
-    })();
-  }, [providerId]);
+    void loadProvider();
+  }, [isValidProviderId, providerId]);
 
   const handleBook = async () => {
     if (!bookingService || !bookDate || !bookTime) {
       Alert.alert("Erreur", "Choisissez une date et une heure");
+      return;
+    }
+    if (!isValidIsoDate(bookDate)) {
+      Alert.alert("Erreur", "Date invalide (format attendu: YYYY-MM-DD)");
+      return;
+    }
+    if (!isValid24hTime(bookTime)) {
+      Alert.alert("Erreur", "Heure invalide (format attendu: HH:MM)");
       return;
     }
     setBooking(true);
@@ -64,7 +86,9 @@ export default function WellnessDetailScreen() {
       await createWellnessBooking({
         service_id: bookingService.id,
         date: bookDate,
+        start_time: bookTime,
         time: bookTime,
+        persons: 1,
         notes: bookNotes,
       });
       Alert.alert("Succès", "Rendez-vous réservé !");
@@ -107,10 +131,35 @@ export default function WellnessDetailScreen() {
     );
   }
 
-  if (!provider) {
+  if (!isValidProviderId) {
     return (
       <View style={styles.center}>
         <Text style={{ color: "#666" }}>Prestataire introuvable</Text>
+      </View>
+    );
+  }
+
+  if (loadError && !provider) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => {
+            setLoading(true);
+            void loadProvider();
+          }}
+        >
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Prestataire introuvable</Text>
       </View>
     );
   }
@@ -263,6 +312,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
   heroImage: { width: "100%", height: 250, backgroundColor: "#1a1a1a" },
   body: { padding: 20 },
   name: { color: "#fff", fontSize: 24, fontWeight: "bold" },
@@ -324,4 +374,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   confirmText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  retryBtn: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

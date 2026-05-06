@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { getOrderTracking } from "@/lib/api";
 import {
   CheckCircle,
@@ -184,9 +185,11 @@ export default function OrderTrackingPage() {
                 <div key={i} className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-gray-100 shrink-0 flex items-center justify-center overflow-hidden">
                     {item.product?.image_url ? (
-                      <img
+                      <Image
                         src={item.product.image_url}
                         alt={item.product?.name || "Produit"}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                       />
                     ) : (

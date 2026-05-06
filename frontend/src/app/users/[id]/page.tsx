@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -136,9 +137,11 @@ export default function UserProfilePage() {
           {/* Avatar */}
           <div className="relative h-48 bg-linear-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center">
             {profile.avatar_url ? (
-              <img
+              <Image
                 src={profile.avatar_url}
                 alt={profile.username}
+                width={112}
+                height={112}
                 className="w-28 h-28 rounded-full object-cover border-4 border-white"
               />
             ) : (
@@ -201,9 +204,11 @@ export default function UserProfilePage() {
                       key={photo.id}
                       className="aspect-square rounded-lg overflow-hidden"
                     >
-                      <img
+                      <Image
                         src={photo.url}
                         alt={`Photo ${photo.position + 1}`}
+                        width={240}
+                        height={240}
                         className="w-full h-full object-cover"
                       />
                     </div>

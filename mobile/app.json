@@ -46,7 +46,15 @@
         }
       ],
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "http://134.209.229.141/api/v1",

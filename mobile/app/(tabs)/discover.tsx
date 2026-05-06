@@ -1,5 +1,6 @@
-﻿import { useEffect, useState, useRef } from "react";
+﻿import { useEffect, useState, useRef, useCallback } from "react";
 import {
+  ScrollView,
   View,
   Text,
   Image,
@@ -7,12 +8,15 @@ import {
   Animated,
   PanResponder,
   Dimensions,
-  ActivityIndicator,
   TouchableOpacity,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { discover, likeUser, passUser, updateLocation } from "@/lib/api";
 import * as Location from "expo-location";
+import { useFocusEffect, useIsFocused } from "@react-navigation/native";
+import { useWS } from "@/lib/ws-context";
+import ScreenState from "@/app/components/ScreenState";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -33,8 +37,27 @@ export default function DiscoverScreen() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [matchPopup, setMatchPopup] = useState<string | null>(null);
+  const [hasRealtimeUpdates, setHasRealtimeUpdates] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const isFocused = useIsFocused();
+  const { onMessage } = useWS();
   const position = useRef(new Animated.ValueXY()).current;
+
+  const loadProfiles = useCallback(async () => {
+    try {
+      const res = await discover();
+      setProfiles(Array.isArray(res) ? (res as unknown as Profile[]) : []);
+      setError(null);
+    } catch (err) {
+      setProfiles([]);
+      setError((err as Error)?.message || "Impossible de charger les profils");
+    }
+    setLoading(false);
+    setRefreshing(false);
+    setHasRealtimeUpdates(false);
+  }, []);
 
   useEffect(() => {
     // Update GPS location silently before loading profiles
@@ -55,17 +78,35 @@ export default function DiscoverScreen() {
       }
     })();
     loadProfiles();
-  }, []);
+  }, [loadProfiles]);
 
-  const loadProfiles = async () => {
-    try {
-      const res = await discover();
-      setProfiles(Array.isArray(res) ? (res as unknown as Profile[]) : []);
-    } catch {
-      setProfiles([]);
-    }
-    setLoading(false);
-  };
+  useFocusEffect(
+    useCallback(() => {
+      loadProfiles();
+    }, [loadProfiles]),
+  );
+
+  useEffect(() => {
+    if (!isFocused) return;
+    const interval = setInterval(() => {
+      loadProfiles();
+    }, 25000);
+    return () => clearInterval(interval);
+  }, [isFocused, loadProfiles]);
+
+  useEffect(() => {
+    if (!isFocused) return;
+    const unsub = onMessage((msg) => {
+      if (
+        msg.type === "user_created" ||
+        msg.type === "profile_updated" ||
+        msg.type === "match_created"
+      ) {
+        setHasRealtimeUpdates(true);
+      }
+    });
+    return unsub;
+  }, [isFocused, onMessage]);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -87,6 +128,7 @@ export default function DiscoverScreen() {
 
   const swipeRight = async () => {
     const profile = profiles[currentIndex];
+    if (!profile) return;
     Animated.spring(position, {
       toValue: { x: SCREEN_WIDTH + 100, y: 0 },
       useNativeDriver: false,
@@ -100,12 +142,13 @@ export default function DiscoverScreen() {
         setTimeout(() => setMatchPopup(null), 3000);
       }
     } catch {
-      /* empty */
+      setError("Like impossible pour le moment");
     }
   };
 
   const swipeLeft = async () => {
     const profile = profiles[currentIndex];
+    if (!profile) return;
     Animated.spring(position, {
       toValue: { x: -SCREEN_WIDTH - 100, y: 0 },
       useNativeDriver: false,
@@ -115,7 +158,7 @@ export default function DiscoverScreen() {
     try {
       await passUser(profile.id);
     } catch {
-      /* empty */
+      setError("Action indisponible, réessaie");
     }
   };
 
@@ -150,35 +193,94 @@ export default function DiscoverScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-      </View>
+      <ScreenState
+        mode="loading"
+        title="Chargement..."
+        subtitle="Récupération des profils"
+      />
     );
   }
 
   const current = profiles[currentIndex];
+  const onRefresh = () => {
+    setRefreshing(true);
+    setCurrentIndex(0);
+    loadProfiles();
+  };
 
   if (!current) {
+    if (error) {
+      return (
+        <ScreenState
+          mode="error"
+          title="Erreur de chargement"
+          subtitle={error}
+          buttonLabel="Réessayer"
+          onPressButton={() => {
+            setLoading(true);
+            setRefreshing(true);
+            loadProfiles();
+          }}
+        />
+      );
+    }
     return (
-      <View style={styles.center}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.center}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#7c3aed"
+          />
+        }
+      >
+        {hasRealtimeUpdates && (
+          <TouchableOpacity style={styles.updatesBanner} onPress={onRefresh}>
+            <Ionicons name="flash-outline" size={16} color="#fff" />
+            <Text style={styles.updatesBannerText}>
+              Nouveaux profils disponibles - Appuie pour actualiser
+            </Text>
+          </TouchableOpacity>
+        )}
         <Ionicons name="heart-dislike" size={64} color="#333" />
         <Text style={styles.emptyText}>Plus de profils pour le moment</Text>
         <TouchableOpacity
           style={styles.reloadBtn}
           onPress={() => {
             setCurrentIndex(0);
-            setLoading(true);
+            setRefreshing(true);
             loadProfiles();
           }}
         >
           <Text style={styles.reloadText}>Recharger</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor="#7c3aed"
+        />
+      }
+    >
+      {hasRealtimeUpdates && (
+        <TouchableOpacity style={styles.updatesBanner} onPress={onRefresh}>
+          <Ionicons name="flash-outline" size={16} color="#fff" />
+          <Text style={styles.updatesBannerText}>
+            Nouveaux profils disponibles - Appuie pour actualiser
+          </Text>
+        </TouchableOpacity>
+      )}
+      {error ? <Text style={styles.errorBanner}>{error}</Text> : null}
       {/* Match popup */}
       {matchPopup && (
         <View style={styles.matchPopup}>
@@ -274,14 +376,20 @@ export default function DiscoverScreen() {
           <Ionicons name="heart" size={32} color="#7c3aed" />
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a", alignItems: "center" },
+  scroll: { flex: 1, backgroundColor: "#0a0a0a" },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "#0a0a0a",
+    alignItems: "center",
+    paddingBottom: 24,
+  },
   center: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
@@ -293,8 +401,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#1a1a1a",
     marginTop: 16,
-    position: "absolute",
-    top: 0,
   },
   image: { width: "100%", height: "75%", backgroundColor: "#1a1a1a" },
   info: { padding: 16 },
@@ -337,9 +443,8 @@ const styles = StyleSheet.create({
   stampText: { fontSize: 28, fontWeight: "bold", color: "#fff" },
   buttons: {
     flexDirection: "row",
-    position: "absolute",
-    bottom: 48,
     gap: 32,
+    marginTop: 24,
   },
   actionBtn: {
     width: 64,
@@ -370,4 +475,28 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   reloadText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  updatesBanner: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  updatesBannerText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  errorBanner: {
+    marginTop: 10,
+    color: "#fca5a5",
+    fontSize: 12,
+    backgroundColor: "rgba(239,68,68,0.15)",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
 });

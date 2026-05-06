@@ -1,11 +1,10 @@
 ﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   Users,
   Search,
-  ShieldCheck,
-  Shield,
   Trash2,
   ChevronLeft,
   ChevronRight,
@@ -159,9 +158,11 @@ export default function AdminUsersPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-surface-2 overflow-hidden shrink-0 flex items-center justify-center">
                         {u.avatar_url ? (
-                          <img
+                          <Image
                             src={u.avatar_url}
                             alt=""
+                            width={36}
+                            height={36}
                             className="w-full h-full object-cover"
                           />
                         ) : (

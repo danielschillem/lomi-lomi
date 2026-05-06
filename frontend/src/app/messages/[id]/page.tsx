@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -21,7 +22,6 @@ import {
   Car,
   X,
   Loader2,
-  Phone,
   Image as ImageIcon,
   Search,
   Trash2,
@@ -88,7 +88,6 @@ export default function ChatPage() {
   const typingSendRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Location sharing state
-  const [showActions, setShowActions] = useState(false);
   const [activeShare, setActiveShare] = useState<{
     id: number;
     sender_id: number;
@@ -203,18 +202,7 @@ export default function ChatPage() {
     [user, receiverId],
   );
 
-  // Load messages initially
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-      return;
-    }
-    if (user) {
-      loadMessages();
-    }
-  }, [user, authLoading, router, conversationId]);
-
-  async function loadMessages() {
+  const loadMessages = useCallback(async () => {
     try {
       const res = await getMessages(conversationId, { limit: 50 });
       const msgs = (res.messages ?? []) as unknown as Message[];
@@ -228,7 +216,18 @@ export default function ChatPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [conversationId, deriveReceiver]);
+
+  // Load messages initially
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push("/login");
+      return;
+    }
+    if (user) {
+      loadMessages();
+    }
+  }, [user, authLoading, router, loadMessages]);
 
   // Load older messages (infinite scroll)
   async function loadOlderMessages() {
@@ -444,7 +443,12 @@ export default function ChatPage() {
           prev && prev.id === (d.share_id as number) ? null : prev,
         );
         if (activeShare && activeShare.id === (d.share_id as number)) {
-          stopSharingLocation();
+          if (locationWatchRef.current !== null) {
+            navigator.geolocation.clearWatch(locationWatchRef.current);
+            locationWatchRef.current = null;
+          }
+          setActiveShare(null);
+          setSharingLocation(false);
         }
       }
 
@@ -744,9 +748,11 @@ export default function ChatPage() {
             >
               <div className="relative w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden shrink-0">
                 {otherUser.avatar_url ? (
-                  <img
+                  <Image
                     src={otherUser.avatar_url}
                     alt={otherUser.username}
+                    width={36}
+                    height={36}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -818,7 +824,6 @@ export default function ChatPage() {
             <button
               onClick={() => {
                 setShowVTCForm(!showVTCForm);
-                setShowActions(false);
               }}
               className={`p-2 rounded-lg transition ${
                 showVTCForm
@@ -1279,10 +1284,14 @@ export default function ChatPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="block mb-1"
+                            title="Ouvrir l'image dans un nouvel onglet"
+                            aria-label="Ouvrir l'image dans un nouvel onglet"
                           >
-                            <img
+                            <Image
                               src={msg.image_url}
                               alt="Image"
+                              width={640}
+                              height={360}
                               className="max-w-full rounded-lg max-h-60 object-cover"
                             />
                           </a>

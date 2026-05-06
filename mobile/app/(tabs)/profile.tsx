@@ -15,7 +15,7 @@ import { getProfile } from "@/lib/api";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
+  const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -88,6 +88,16 @@ export default function ProfileScreen() {
       icon: "location-outline" as const,
       label: "Mes adresses",
       route: "/addresses",
+    },
+    {
+      icon: "navigate-outline" as const,
+      label: "Partage de position",
+      route: "/location",
+    },
+    {
+      icon: "map-outline" as const,
+      label: "Carte des lieux",
+      route: "/carte",
     },
     { icon: "car-outline" as const, label: "Mes courses", route: "/rides" },
     {

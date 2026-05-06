@@ -14,22 +14,32 @@ import { getVTCRide, updateVTCRideStatus } from "@/lib/api";
 
 export default function RideDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [ride, setRide] = useState<Record<string, unknown> | null>(null);
+  const [ride, setRide] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const rideId = parseInt(id || "0", 10);
+  const isValidRideId = Number.isFinite(rideId) && rideId > 0;
+
+  const loadRide = async () => {
+    setLoadError(null);
+    if (!isValidRideId) {
+      setRide(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getVTCRide(rideId);
+      setRide(res);
+    } catch (e: unknown) {
+      setLoadError((e as Error).message || "Impossible de charger cette course.");
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await getVTCRide(rideId);
-        setRide(res);
-      } catch {
-        /* empty */
-      }
-      setLoading(false);
-    })();
-  }, [rideId]);
+    void loadRide();
+  }, [isValidRideId, rideId]);
 
   const handleCancel = () => {
     Alert.alert("Annuler", "Annuler cette course ?", [
@@ -57,10 +67,35 @@ export default function RideDetailScreen() {
     );
   }
 
+  if (!isValidRideId) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Course introuvable</Text>
+      </View>
+    );
+  }
+
+  if (loadError && !ride) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryLoadBtn}
+          onPress={() => {
+            setLoading(true);
+            void loadRide();
+          }}
+        >
+          <Text style={styles.retryLoadText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   if (!ride) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: "#666" }}>Course introuvable</Text>
+        <Text style={styles.emptyText}>Course introuvable</Text>
       </View>
     );
   }
@@ -119,6 +154,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
   card: {
     backgroundColor: "#111",
     borderRadius: 12,
@@ -160,4 +196,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   cancelText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
+  retryLoadBtn: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryLoadText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

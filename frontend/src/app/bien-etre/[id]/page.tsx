@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -14,8 +15,6 @@ import {
   Users,
   BadgeCheck,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
   Send,
   Check,
 } from "lucide-react";
@@ -94,7 +93,6 @@ const dayNames = [
 
 export default function ProviderPage() {
   const params = useParams();
-  const router = useRouter();
   const { user } = useAuth();
   const providerId = Number(params.id);
 
@@ -275,9 +273,11 @@ export default function ProviderPage() {
           {/* Image */}
           <div className="h-64 bg-surface-2 flex items-center justify-center relative">
             {provider.image_url ? (
-              <img
+              <Image
                 src={provider.image_url}
                 alt={provider.name}
+                width={1200}
+                height={500}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -635,9 +635,11 @@ export default function ProviderPage() {
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {review.user?.avatar_url ? (
-                        <img
+                        <Image
                           src={review.user.avatar_url}
                           alt=""
+                          width={32}
+                          height={32}
                           className="w-full h-full object-cover"
                         />
                       ) : (

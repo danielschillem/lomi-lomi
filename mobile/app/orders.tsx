@@ -9,10 +9,15 @@ import {
   RefreshControl,
   Alert,
   Linking,
+  Modal,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { getOrders, initiatePayment } from "@/lib/api";
+import ScreenState from "@/app/components/ScreenState";
+import { isValidPhone, normalizePhone } from "@/lib/validation";
 
 interface Order {
   id: number;
@@ -23,24 +28,51 @@ interface Order {
 }
 
 export default function OrdersScreen() {
+  const PAGE_SIZE = 20;
   const [orders, setOrders] = useState<Order[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [retryingOrderId, setRetryingOrderId] = useState<number | null>(null);
+  const [retryModalVisible, setRetryModalVisible] = useState(false);
+  const [retryPhone, setRetryPhone] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await getOrders();
-      setOrders(Array.isArray(res) ? (res as unknown as Order[]) : []);
-    } catch {
+      const rows = Array.isArray(res) ? (res as unknown as Order[]) : [];
+      setOrders(rows);
+      setVisibleCount(PAGE_SIZE);
+      setError(null);
+    } catch (err) {
       setOrders([]);
+      setError((err as Error)?.message || "Impossible de charger les commandes");
     }
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [PAGE_SIZE]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    setError(null);
+    load();
+  };
+
+  const loadMore = () => {
+    if (visibleCount >= orders.length) return;
+    setVisibleCount((prev) => prev + PAGE_SIZE);
+  };
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -93,34 +125,40 @@ export default function OrdersScreen() {
     s === "pending" || s === "payment_failed" || s === "payment_expired";
 
   const handleRetry = async (orderId: number) => {
-    Alert.prompt(
-      "Paiement Orange Money",
-      "Entrez votre numéro Orange Money",
-      async (phone) => {
-        if (!phone || phone.replace(/[+\s]/g, "").length < 8) {
-          Alert.alert("Erreur", "Numéro invalide");
-          return;
-        }
-        try {
-          const res = await initiatePayment({
-            order_id: orderId,
-            phone: phone.trim(),
-          });
-          const pay = res as { payment_url?: string; message?: string };
-          if (pay.payment_url) {
-            await Linking.openURL(pay.payment_url);
-          } else {
-            Alert.alert("Succès", pay.message || "Paiement simulé !");
-          }
-          load();
-        } catch (e: unknown) {
-          Alert.alert("Erreur", (e as Error).message);
-        }
-      },
-      "plain-text",
-      "",
-      "phone-pad",
-    );
+    setRetryingOrderId(orderId);
+    setRetryModalVisible(true);
+  };
+
+  const confirmRetry = async () => {
+    if (!retryingOrderId) return;
+    const cleanPhone = normalizePhone(retryPhone);
+    if (!isValidPhone(cleanPhone)) {
+      Alert.alert("Erreur", "Numéro invalide");
+      return;
+    }
+    try {
+      const res = await initiatePayment({
+        order_id: retryingOrderId,
+        phone: cleanPhone,
+      });
+      const pay = res as { payment_url?: string; ussd_code?: string; message?: string };
+      if (pay.payment_url) {
+        await Linking.openURL(pay.payment_url);
+      } else if (pay.ussd_code) {
+        Alert.alert(
+          "Code USSD",
+          `Composez ${pay.ussd_code} puis confirmez le paiement Orange Money.`,
+        );
+      } else {
+        Alert.alert("Succès", pay.message || "Paiement simulé !");
+      }
+      setRetryModalVisible(false);
+      setRetryingOrderId(null);
+      setRetryPhone("");
+      load();
+    } catch (e: unknown) {
+      Alert.alert("Erreur", (e as Error).message);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -136,36 +174,50 @@ export default function OrdersScreen() {
     price.toLocaleString("fr-FR") + " FCFA";
 
   if (loading) {
+    return <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des commandes" />;
+  }
+
+  if (error && orders.length === 0) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-      </View>
+      <ScreenState
+        mode="error"
+        title="Erreur de chargement"
+        subtitle={error}
+        buttonLabel="Réessayer"
+        onPressButton={() => {
+          setLoading(true);
+          load();
+        }}
+      />
     );
   }
 
   if (orders.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="receipt-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Aucune commande</Text>
-      </View>
+      <ScreenState mode="empty" title="Aucune commande" subtitle="Tes commandes apparaîtront ici." />
     );
   }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={orders}
+        data={orders.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              load();
-            }}
+            onRefresh={onRefresh}
             tintColor="#7c3aed"
           />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          visibleCount < orders.length ? (
+            <View style={styles.footer}>
+              <ActivityIndicator size="small" color="#7c3aed" />
+            </View>
+          ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -213,19 +265,40 @@ export default function OrdersScreen() {
           </TouchableOpacity>
         )}
       />
+      <Modal visible={retryModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Paiement Orange Money</Text>
+            <Text style={styles.modalDesc}>Entrez votre numéro Orange Money</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={retryPhone}
+              onChangeText={setRetryPhone}
+              placeholder="07XXXXXX"
+              placeholderTextColor="#666"
+              keyboardType="phone-pad"
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setRetryModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Annuler</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.modalConfirmBtn} onPress={confirmRetry}>
+                <Text style={styles.modalConfirmText}>Valider</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
+  footer: { paddingVertical: 14 },
   card: {
     margin: 12,
     marginBottom: 0,
@@ -267,4 +340,44 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: "#111",
+    borderRadius: 12,
+    padding: 16,
+  },
+  modalTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
+  modalDesc: { color: "#999", fontSize: 13, marginTop: 4, marginBottom: 12 },
+  modalInput: {
+    backgroundColor: "#1a1a1a",
+    color: "#fff",
+    borderRadius: 10,
+    padding: 12,
+  },
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+    marginTop: 14,
+  },
+  modalCancelBtn: {
+    borderWidth: 1,
+    borderColor: "#333",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  modalCancelText: { color: "#bbb", fontSize: 13, fontWeight: "600" },
+  modalConfirmBtn: {
+    backgroundColor: "#f97316",
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  modalConfirmText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });

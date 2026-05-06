@@ -45,6 +45,17 @@ export async function clearToken() {
   await storage.remove("token");
 }
 
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function canRetryRequest(method?: string, status?: number) {
+  const upper = (method || "GET").toUpperCase();
+  if (upper !== "GET") return false;
+  if (status == null) return true; // network error
+  return status === 429 || status >= 500;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = await getToken();
 
@@ -54,14 +65,40 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   };
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API}${path}`, { ...options, headers });
+  const retries = 2;
+  const method = (options.method || "GET").toUpperCase();
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Erreur ${res.status}`);
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${API}${path}`, { ...options, headers });
+
+      if (res.ok) {
+        return res.json();
+      }
+
+      if (attempt < retries && canRetryRequest(method, res.status)) {
+        await wait(250 * (attempt + 1));
+        continue;
+      }
+
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Erreur ${res.status}`);
+    } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError ||
+        ((err as Error)?.message || "").toLowerCase().includes("network");
+      if (attempt < retries && canRetryRequest(method)) {
+        await wait(250 * (attempt + 1));
+        continue;
+      }
+      if (isNetworkError) {
+        throw new Error("Réseau indisponible. Vérifie ta connexion Internet.");
+      }
+      throw err;
+    }
   }
 
-  return res.json();
+  throw new Error("Échec de requête réseau");
 }
 
 /** Upload multipart (avatar, photos) - no Content-Type header (browser sets boundary) */
@@ -234,8 +271,12 @@ export function unmatch(matchId: number) {
 }
 
 /* ===== Notifications ===== */
-export function getNotifications() {
-  return request<Record<string, unknown>[]>("/notifications");
+export function getNotifications(page?: number, limit?: number) {
+  const qs = new URLSearchParams();
+  if (page != null) qs.set("page", String(page));
+  if (limit != null) qs.set("limit", String(limit));
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(`/notifications${q ? `?${q}` : ""}`);
 }
 
 export function getUnreadCount() {
@@ -306,12 +347,24 @@ export function nearbyUsers(radius: number = 10) {
 
 /* ===== Location Sharing ===== */
 export function startLocationShare(data: {
-  target_user_id: number;
-  duration_minutes: number;
+  target_user_id?: number;
+  receiver_id?: number;
+  latitude?: number;
+  longitude?: number;
+  duration_minutes?: number;
+  duration?: number;
 }) {
+  const payload = {
+    receiver_id: data.receiver_id ?? data.target_user_id,
+    target_user_id: data.target_user_id ?? data.receiver_id,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    duration: data.duration ?? data.duration_minutes,
+    duration_minutes: data.duration_minutes ?? data.duration,
+  };
   return request<Record<string, unknown>>("/location/share", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 
@@ -485,8 +538,12 @@ export function getOrderTracking(orderId: number) {
 }
 
 /* ===== Places ===== */
-export function getPlaces() {
-  return request<Record<string, unknown>[]>("/places");
+export function getPlaces(params?: { city?: string; category?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.city) qs.set("city", params.city);
+  if (params?.category) qs.set("category", params.category);
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(`/places${q ? `?${q}` : ""}`);
 }
 
 export function getPlace(id: number) {
@@ -518,8 +575,19 @@ export function cancelReservation(id: number) {
 }
 
 /* ===== Wellness (Bien-être) ===== */
-export function getWellnessProviders() {
-  return request<Record<string, unknown>[]>("/wellness/providers");
+export function getWellnessProviders(params?: {
+  category?: string;
+  city?: string;
+  mobile?: boolean;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.category) qs.set("category", params.category);
+  if (params?.city) qs.set("city", params.city);
+  if (params?.mobile) qs.set("mobile", "true");
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(
+    `/wellness/providers${q ? `?${q}` : ""}`,
+  );
 }
 
 export function getWellnessProvider(id: number) {
@@ -533,12 +601,24 @@ export function getWellnessService(id: number) {
 export function createWellnessBooking(data: {
   service_id: number;
   date: string;
-  time: string;
+  time?: string;
+  start_time?: string;
+  persons?: number;
+  guest_id?: number;
   notes?: string;
 }) {
+  const payload = {
+    service_id: data.service_id,
+    date: data.date,
+    start_time: data.start_time ?? data.time,
+    time: data.time ?? data.start_time,
+    persons: data.persons ?? 1,
+    guest_id: data.guest_id,
+    notes: data.notes,
+  };
   return request<Record<string, unknown>>("/wellness/bookings", {
     method: "POST",
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 }
 

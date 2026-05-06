@@ -11,7 +11,6 @@ import {
   Users,
   X,
   Check,
-  AlertCircle,
   Sparkles,
   Send,
 } from "lucide-react";

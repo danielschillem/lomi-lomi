@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ShieldOff, UserX } from "lucide-react";
 import { getBlockedUsers, unblockUser } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -83,9 +84,11 @@ export default function BlockedUsersPage() {
             >
               <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0">
                 {block.blocked.avatar_url ? (
-                  <img
+                  <Image
                     src={block.blocked.avatar_url}
                     alt={block.blocked.username}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                   />
                 ) : (

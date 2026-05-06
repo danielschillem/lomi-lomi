@@ -16,8 +16,9 @@ import { getPlace, createPlaceReservation } from "@/lib/api";
 
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [place, setPlace] = useState<Record<string, unknown> | null>(null);
+  const [place, setPlace] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showBook, setShowBook] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -26,18 +27,27 @@ export default function PlaceDetailScreen() {
   const [booking, setBooking] = useState(false);
 
   const placeId = parseInt(id || "0", 10);
+  const isValidPlaceId = Number.isFinite(placeId) && placeId > 0;
+
+  const loadPlace = async () => {
+    setLoadError(null);
+    if (!isValidPlaceId) {
+      setPlace(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getPlace(placeId);
+      setPlace(res);
+    } catch (e: unknown) {
+      setLoadError((e as Error).message || "Impossible de charger ce lieu.");
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await getPlace(placeId);
-        setPlace(res);
-      } catch {
-        /* empty */
-      }
-      setLoading(false);
-    })();
-  }, [placeId]);
+    void loadPlace();
+  }, [isValidPlaceId, placeId]);
 
   const handleReserve = async () => {
     if (!date || !time) {
@@ -69,10 +79,35 @@ export default function PlaceDetailScreen() {
     );
   }
 
+  if (!isValidPlaceId) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Lieu introuvable</Text>
+      </View>
+    );
+  }
+
+  if (loadError && !place) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryLoadBtn}
+          onPress={() => {
+            setLoading(true);
+            void loadPlace();
+          }}
+        >
+          <Text style={styles.retryLoadText}>Réessayer</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   if (!place) {
     return (
       <View style={styles.center}>
-        <Text style={{ color: "#666" }}>Lieu introuvable</Text>
+        <Text style={styles.emptyText}>Lieu introuvable</Text>
       </View>
     );
   }
@@ -170,6 +205,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
   heroImage: { width: "100%", height: 250, backgroundColor: "#1a1a1a" },
   body: { padding: 20 },
   name: { color: "#fff", fontSize: 24, fontWeight: "bold" },
@@ -217,4 +253,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   confirmText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+  retryLoadBtn: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryLoadText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

@@ -47,11 +47,19 @@ export default function ChatScreen() {
 
   const conversationId = parseInt(id || "0", 10);
   const otherUserId = parseInt(recipientId || "0", 10);
+  const isValidConversationId =
+    Number.isFinite(conversationId) && conversationId > 0;
+  const isValidReceiverId = Number.isFinite(otherUserId) && otherUserId > 0;
 
   useEffect(() => {
+    if (!isValidConversationId) {
+      setMessages([]);
+      setLoading(false);
+      return;
+    }
     loadMessages();
     markConversationRead(conversationId).catch(() => {});
-  }, [conversationId]);
+  }, [conversationId, isValidConversationId]);
 
   // Listen for real-time messages via WebSocket
   useEffect(() => {
@@ -71,9 +79,10 @@ export default function ChatScreen() {
       }
     });
     return unsub;
-  }, [conversationId, onMessage]);
+  }, [conversationId, onMessage, isValidConversationId]);
 
   const loadMessages = async () => {
+    if (!isValidConversationId) return;
     try {
       const res = await getMessages(conversationId);
       const msgs = (res as { messages?: unknown[] })?.messages;
@@ -86,7 +95,7 @@ export default function ChatScreen() {
   };
 
   const handleSend = async () => {
-    if (!text.trim() || sending) return;
+    if (!text.trim() || sending || !isValidReceiverId) return;
     setSending(true);
     try {
       const res = await sendMessage({

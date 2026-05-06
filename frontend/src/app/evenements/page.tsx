@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { getEvents, attendEvent } from "@/lib/api";
 import { Calendar, MapPin, Users, Tag } from "lucide-react";
 
@@ -36,7 +37,7 @@ export default function EvenementsPage() {
   const [city, setCity] = useState("");
   const [attending, setAttending] = useState<Record<number, string>>({});
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getEvents({
@@ -47,11 +48,11 @@ export default function EvenementsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [category, city]);
 
   useEffect(() => {
     load();
-  }, [category, city]);
+  }, [load]);
 
   async function handleAttend(id: number, status: "going" | "interested") {
     try {
@@ -127,9 +128,11 @@ export default function EvenementsPage() {
             className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-purple-700 transition"
           >
             {event.image_url && (
-              <img
+              <Image
                 src={event.image_url}
                 alt={event.title}
+                width={1200}
+                height={640}
                 className="w-full h-40 object-cover"
               />
             )}

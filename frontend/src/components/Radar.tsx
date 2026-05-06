@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Radar as RadarIcon, User, Wifi, WifiOff } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { nearbyUsers } from "@/lib/api";
 
@@ -307,9 +308,11 @@ export default function Radar({ className = "" }: Props) {
               <div className="relative shrink-0">
                 <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden">
                   {u.avatar_url ? (
-                    <img
+                    <Image
                       src={u.avatar_url}
                       alt={u.username}
+                      width={32}
+                      height={32}
                       className="w-full h-full object-cover"
                     />
                   ) : (

@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ShoppingBag,
@@ -83,7 +84,7 @@ function BoutiqueContent() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [ordering, setOrdering] = useState(false);
-  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [orderSuccess] = useState(false);
   const [category, setCategory] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersOpen, setOrdersOpen] = useState(false);
@@ -450,9 +451,11 @@ function BoutiqueContent() {
               >
                 <div className="h-48 bg-surface-2 flex items-center justify-center">
                   {product.image_url ? (
-                    <img
+                    <Image
                       src={product.image_url}
                       alt={product.name}
+                      width={640}
+                      height={384}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -540,9 +543,11 @@ function BoutiqueContent() {
                   >
                     <div className="w-12 h-12 rounded-lg bg-gray-200 shrink-0 flex items-center justify-center overflow-hidden">
                       {item.product.image_url ? (
-                        <img
+                        <Image
                           src={item.product.image_url}
                           alt={item.product.name}
+                          width={48}
+                          height={48}
                           className="w-full h-full object-cover"
                         />
                       ) : (

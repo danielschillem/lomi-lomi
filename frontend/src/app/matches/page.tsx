@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Heart,
   ArrowLeft,
@@ -123,9 +124,11 @@ export default function MatchesPage() {
                   <Link href={`/users/${other.id}`}>
                     <div className="relative h-36 bg-surface-2 flex items-center justify-center">
                       {other.avatar_url ? (
-                        <img
+                        <Image
                           src={other.avatar_url}
                           alt={other.username}
+                          fill
+                          sizes="(max-width: 768px) 50vw, 25vw"
                           className="w-full h-full object-cover"
                         />
                       ) : (

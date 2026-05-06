@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   User,
@@ -271,9 +272,11 @@ export default function ProfilePage() {
               <div className="relative">
                 <div className="w-20 h-20 rounded-full bg-surface-2 border-2 border-violet-500/50 flex items-center justify-center overflow-hidden">
                   {profile?.avatar_url ? (
-                    <img
+                    <Image
                       src={profile.avatar_url}
                       alt="Avatar"
+                      width={80}
+                      height={80}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -461,9 +464,11 @@ export default function ProfilePage() {
               <div className="grid grid-cols-3 gap-3">
                 {photos.map((photo) => (
                   <div key={photo.id} className="relative group aspect-square">
-                    <img
+                    <Image
                       src={photo.url}
                       alt={`Photo ${photo.position + 1}`}
+                      width={300}
+                      height={300}
                       className="w-full h-full object-cover rounded-lg"
                     />
                     <button

@@ -68,13 +68,6 @@ function DeliveryMap({
   const centerLat = hasDriver ? driverLat : dropoffLat;
   const centerLng = hasDriver ? driverLng : dropoffLng;
 
-  const markers = [
-    hasDriver ? `${driverLat},${driverLng},Livreur` : null,
-    hasDropoff ? `${dropoffLat},${dropoffLng},Destination` : null,
-  ]
-    .filter(Boolean)
-    .join("|");
-
   const src = `https://www.openstreetmap.org/export/embed.html?bbox=${centerLng - 0.02},${centerLat - 0.02},${centerLng + 0.02},${centerLat + 0.02}&layer=mapnik&marker=${centerLat},${centerLng}`;
 
   return (

@@ -10,11 +10,13 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   getNotifications,
   markNotificationsRead,
   deleteNotification,
 } from "@/lib/api";
+import ScreenState from "@/app/components/ScreenState";
 
 interface Notification {
   id: number;
@@ -27,24 +29,37 @@ interface Notification {
 }
 
 export default function NotificationsScreen() {
+  const PAGE_SIZE = 20;
   const [notifs, setNotifs] = useState<Notification[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const res = await getNotifications();
-      setNotifs(Array.isArray(res) ? (res as unknown as Notification[]) : []);
-    } catch {
+      const res = await getNotifications(1, 100);
+      const rows = Array.isArray(res) ? (res as unknown as Notification[]) : [];
+      setNotifs(rows);
+      setVisibleCount(PAGE_SIZE);
+      setError(null);
+    } catch (err) {
       setNotifs([]);
+      setError((err as Error)?.message || "Impossible de charger les notifications");
     }
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [PAGE_SIZE]);
 
   useEffect(() => {
     load();
   }, [load]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
 
   useEffect(() => {
     // Mark all as read on mount
@@ -53,7 +68,13 @@ export default function NotificationsScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
+    setError(null);
     load();
+  };
+
+  const loadMore = () => {
+    if (visibleCount >= notifs.length) return;
+    setVisibleCount((prev) => prev + PAGE_SIZE);
   };
 
   const handleDelete = (id: number) => {
@@ -98,33 +119,47 @@ export default function NotificationsScreen() {
   };
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-      </View>
-    );
+    return <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des notifications" />;
   }
 
-  if (notifs.length === 0) {
+  if (error && notifs.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="notifications-off-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Aucune notification</Text>
-      </View>
+      <ScreenState
+        mode="error"
+        title="Erreur de chargement"
+        subtitle={error}
+        buttonLabel="Réessayer"
+        onPressButton={() => {
+          setLoading(true);
+          load();
+        }}
+      />
     );
   }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={notifs}
+        data={notifs.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={
+          <ScreenState mode="empty" title="Aucune notification" subtitle="Tu es à jour pour le moment." />
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor="#7c3aed"
           />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          visibleCount < notifs.length ? (
+            <View style={styles.footer}>
+              <ActivityIndicator size="small" color="#7c3aed" />
+            </View>
+          ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -147,13 +182,7 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
+  footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
     alignItems: "center",

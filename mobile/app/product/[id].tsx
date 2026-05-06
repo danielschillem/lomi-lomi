@@ -15,25 +15,61 @@ import { getProduct } from "@/lib/api";
 
 export default function ProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [product, setProduct] = useState<Record<string, unknown> | null>(null);
+  const [product, setProduct] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const productId = Number.parseInt(id || "", 10);
+  const isValidProductId = Number.isFinite(productId) && productId > 0;
+
+  const loadProduct = async () => {
+    setLoadError(null);
+    if (!isValidProductId) {
+      setProduct(null);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await getProduct(productId);
+      setProduct(res);
+    } catch (e: unknown) {
+      setLoadError((e as Error).message || "Impossible de charger le produit.");
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await getProduct(parseInt(id || "0", 10));
-        setProduct(res);
-      } catch {
-        /* empty */
-      }
-      setLoading(false);
-    })();
-  }, [id]);
+    void loadProduct();
+  }, [isValidProductId, productId]);
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#7c3aed" />
+      </View>
+    );
+  }
+
+  if (!isValidProductId) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>Produit introuvable</Text>
+      </View>
+    );
+  }
+
+  if (loadError && !product) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.emptyText}>{loadError}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => {
+            setLoading(true);
+            void loadProduct();
+          }}
+        >
+          <Text style={styles.retryText}>Réessayer</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -129,4 +165,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   stockText: { fontSize: 14, fontWeight: "500" },
+  retryBtn: {
+    marginTop: 12,
+    backgroundColor: "#7c3aed",
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  retryText: { color: "#fff", fontSize: 14, fontWeight: "600" },
 });

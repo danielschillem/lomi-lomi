@@ -36,8 +36,8 @@ export default function SettingsScreen() {
     getPreferences()
       .then((p) => {
         if (p.max_distance) setMaxDistance(String(p.max_distance));
-        if (p.age_min) setAgeMin(String(p.age_min));
-        if (p.age_max) setAgeMax(String(p.age_max));
+        if (p.min_age) setAgeMin(String(p.min_age));
+        if (p.max_age) setAgeMax(String(p.max_age));
         if (p.show_online !== undefined)
           setShowOnline(p.show_online as boolean);
       })
@@ -72,12 +72,23 @@ export default function SettingsScreen() {
   };
 
   const handleSavePreferences = async () => {
+    const min = parseInt(ageMin) || 18;
+    const max = parseInt(ageMax) || 50;
+    const distance = parseInt(maxDistance) || 50;
+    if (min > max) {
+      Alert.alert("Erreur", "L'âge minimum ne peut pas dépasser l'âge maximum.");
+      return;
+    }
+    if (distance < 1) {
+      Alert.alert("Erreur", "La distance maximale doit être supérieure à 0 km.");
+      return;
+    }
     setSaving(true);
     try {
       await updatePreferences({
-        max_distance: parseInt(maxDistance) || 50,
-        min_age: parseInt(ageMin) || 18,
-        max_age: parseInt(ageMax) || 50,
+        max_distance: distance,
+        min_age: min,
+        max_age: max,
         show_online: showOnline,
       });
       Alert.alert("Succès", "Préférences mises à jour");

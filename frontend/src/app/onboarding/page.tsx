@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   updateProfile,
   uploadAvatar,
@@ -121,9 +122,11 @@ export default function OnboardingPage() {
                 <label className="cursor-pointer">
                   <div className="w-32 h-32 rounded-full overflow-hidden bg-white/10 border-4 border-dashed border-white/30 flex items-center justify-center hover:border-purple-400 transition">
                     {avatarPreview ? (
-                      <img
+                      <Image
                         src={avatarPreview}
                         alt="Preview"
+                        width={128}
+                        height={128}
                         className="w-full h-full object-cover"
                       />
                     ) : (

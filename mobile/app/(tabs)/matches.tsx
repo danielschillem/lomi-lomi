@@ -12,7 +12,9 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { getMatches, unmatch, getOrCreateConversation } from "@/lib/api";
+import ScreenState from "@/app/components/ScreenState";
 
 interface Match {
   id: number;
@@ -26,28 +28,47 @@ interface Match {
 }
 
 export default function MatchesScreen() {
+  const PAGE_SIZE = 20;
   const [matches, setMatches] = useState<Match[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await getMatches();
-      setMatches(Array.isArray(res) ? (res as unknown as Match[]) : []);
-    } catch {
+      const rows = Array.isArray(res) ? (res as unknown as Match[]) : [];
+      setMatches(rows);
+      setVisibleCount(PAGE_SIZE);
+      setError(null);
+    } catch (err) {
       setMatches([]);
+      setError((err as Error)?.message || "Impossible de charger les matchs");
     }
     setLoading(false);
     setRefreshing(false);
-  }, []);
+  }, [PAGE_SIZE]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
+    setError(null);
     load();
+  };
+
+  const loadMore = () => {
+    if (visibleCount >= matches.length) return;
+    setVisibleCount((prev) => prev + PAGE_SIZE);
   };
 
   const handleChat = async (match: Match) => {
@@ -63,7 +84,7 @@ export default function MatchesScreen() {
         },
       });
     } catch {
-      /* empty */
+      Alert.alert("Erreur", "Impossible d'ouvrir le chat pour le moment.");
     }
   };
 
@@ -81,7 +102,7 @@ export default function MatchesScreen() {
               await unmatch(match.id);
               setMatches((prev) => prev.filter((m) => m.id !== match.id));
             } catch {
-              /* empty */
+              Alert.alert("Erreur", "Impossible de supprimer ce match.");
             }
           },
         },
@@ -100,36 +121,51 @@ export default function MatchesScreen() {
   };
 
   if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-      </View>
-    );
+    return <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des matchs" />;
   }
 
-  if (matches.length === 0) {
+  if (error && matches.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="heart-dislike-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Pas encore de matchs</Text>
-        <Text style={styles.emptySubtext}>
-          Continue de swiper pour trouver des matchs !
-        </Text>
-      </View>
+      <ScreenState
+        mode="error"
+        title="Erreur de chargement"
+        subtitle={error}
+        buttonLabel="Réessayer"
+        onPressButton={() => {
+          setLoading(true);
+          load();
+        }}
+      />
     );
   }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={matches}
+        data={matches.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={
+          <ScreenState
+            mode="empty"
+            title="Pas encore de matchs"
+            subtitle="Continue de swiper pour trouver des matchs !"
+          />
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor="#7c3aed"
           />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          visibleCount < matches.length ? (
+            <View style={styles.footer}>
+              <ActivityIndicator size="small" color="#7c3aed" />
+            </View>
+          ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -172,14 +208,7 @@ export default function MatchesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
-  emptySubtext: { color: "#444", fontSize: 14, marginTop: 4 },
+  footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
     alignItems: "center",

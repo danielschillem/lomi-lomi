@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Heart,
@@ -121,32 +122,6 @@ export default function DiscoverPage() {
     }
   }, [user, authLoading, router]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      )
-        return;
-      const current = profiles[currentIndex];
-      if (!current || matched || showFilters) return;
-
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        handlePass();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        handleLike();
-      } else if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handleUndo();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [profiles, currentIndex, matched, showFilters]);
-
   async function loadProfiles() {
     setLoading(true);
     try {
@@ -240,7 +215,7 @@ export default function DiscoverPage() {
     }
   }, [profiles, currentIndex, action]);
 
-  function handleUndo() {
+  const handleUndo = useCallback(() => {
     if (!lastPassed) return;
     // Re-insert profile at current index
     setProfiles((prev) => {
@@ -250,7 +225,41 @@ export default function DiscoverPage() {
     });
     setLastPassed(null);
     setPhotoIndex(0);
-  }
+  }, [lastPassed, currentIndex]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      )
+        return;
+      const current = profiles[currentIndex];
+      if (!current || matched || showFilters) return;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePass();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleLike();
+      } else if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleUndo();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [
+    profiles,
+    currentIndex,
+    matched,
+    showFilters,
+    handlePass,
+    handleLike,
+    handleUndo,
+  ]);
 
   const handleSuperLike = useCallback(async () => {
     const profile = profiles[currentIndex];
@@ -530,9 +539,11 @@ export default function DiscoverPage() {
                     }}
                   >
                     {p.avatar_url ? (
-                      <img
+                      <Image
                         src={p.avatar_url as string}
                         alt={p.username as string}
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded-full object-cover"
                       />
                     ) : (
@@ -701,9 +712,11 @@ export default function DiscoverPage() {
                   <div className="relative shrink-0">
                     <div className="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
                       {p.avatar_url ? (
-                        <img
+                        <Image
                           src={p.avatar_url}
                           alt={p.username}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -740,9 +753,11 @@ export default function DiscoverPage() {
                 <Heart className="w-8 h-8 text-pink-600 animate-pulse" />
                 <div className="w-16 h-16 rounded-full bg-surface-2 border-2 border-pink-500 flex items-center justify-center overflow-hidden">
                   {matched.avatar_url ? (
-                    <img
+                    <Image
                       src={matched.avatar_url}
                       alt={matched.username}
+                      width={64}
+                      height={64}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -852,9 +867,11 @@ export default function DiscoverPage() {
                     return (
                       <>
                         {img ? (
-                          <img
+                          <Image
                             src={img}
                             alt={current.username}
+                            width={1200}
+                            height={600}
                             className="w-full h-full object-cover pointer-events-none"
                             draggable={false}
                           />

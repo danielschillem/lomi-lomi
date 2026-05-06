@@ -95,9 +95,9 @@ export default function AddressesPage() {
 
   async function handleSetDefault(id: number) {
     try {
-      const addr = (await updateDeliveryAddress(id, {
+      await updateDeliveryAddress(id, {
         is_default: true,
-      })) as unknown as Address;
+      });
       setAddresses((prev) =>
         prev.map((a) => ({
           ...a,
