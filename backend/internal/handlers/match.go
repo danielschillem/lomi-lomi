@@ -1,4 +1,4 @@
-﻿package handlers
+package handlers
 
 import (
 	"encoding/json"
@@ -9,10 +9,16 @@ import (
 	"github.com/lomilomi/backend/internal/models"
 )
 
-type MatchHandler struct{}
+type MatchHandler struct {
+	WSHub *WSHub
+}
 
-func NewMatchHandler() *MatchHandler {
-	return &MatchHandler{}
+func NewMatchHandler(wsHub ...*WSHub) *MatchHandler {
+	h := &MatchHandler{}
+	if len(wsHub) > 0 {
+		h.WSHub = wsHub[0]
+	}
+	return h
 }
 
 func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
@@ -62,21 +68,27 @@ func (h *MatchHandler) LikeUser(c *fiber.Ctx) error {
 
 			// Notify both users
 			matchData, _ := json.Marshal(fiber.Map{"match_user_id": req.LikedID})
-			database.DB.Create(&models.Notification{
+			likerNotif := models.Notification{
 				UserID: likerID,
 				Type:   "match",
 				Title:  "Nouveau match !",
 				Body:   "Vous avez matché avec " + liked.Username,
 				Data:   string(matchData),
-			})
+			}
+			if err := database.DB.Create(&likerNotif).Error; err == nil {
+				h.emitNotification(likerNotif)
+			}
 			matchData2, _ := json.Marshal(fiber.Map{"match_user_id": likerID})
-			database.DB.Create(&models.Notification{
+			likedNotif := models.Notification{
 				UserID: req.LikedID,
 				Type:   "match",
 				Title:  "Nouveau match !",
 				Body:   "Vous avez matché avec " + liker.Username,
 				Data:   string(matchData2),
-			})
+			}
+			if err := database.DB.Create(&likedNotif).Error; err == nil {
+				h.emitNotification(likedNotif)
+			}
 
 			// Send push notifications
 			SendPushToUser(likerID, "Nouveau match ! ", "Vous avez matché avec "+liked.Username, map[string]interface{}{"type": "match", "match_user_id": req.LikedID})
@@ -121,6 +133,25 @@ func (h *MatchHandler) GetMatches(c *fiber.Ctx) error {
 	return c.JSON(matches)
 }
 
+func (h *MatchHandler) emitNotification(notification models.Notification) {
+	if h.WSHub == nil {
+		return
+	}
+
+	h.WSHub.SendToUser(notification.UserID, WSMessage{
+		Type: "notification",
+		Data: map[string]interface{}{
+			"id":         notification.ID,
+			"type":       notification.Type,
+			"title":      notification.Title,
+			"body":       notification.Body,
+			"data":       notification.Data,
+			"is_read":    notification.IsRead,
+			"created_at": notification.CreatedAt,
+		},
+	})
+}
+
 // Unmatch removes a match and deletes associated likes.
 func (h *MatchHandler) Unmatch(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
@@ -153,11 +184,21 @@ func (h *MatchHandler) Unmatch(c *fiber.Ctx) error {
 func (h *MatchHandler) GetNotifications(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	if page < 1 {
+		page = 1
+	}
+	limit, _ := strconv.Atoi(c.Query("limit", "50"))
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
+
 	notifs := make([]models.Notification, 0)
 	database.DB.
 		Where("user_id = ?", userID).
 		Order("created_at DESC").
-		Limit(50).
+		Limit(limit).
+		Offset((page - 1) * limit).
 		Find(&notifs)
 
 	return c.JSON(notifs)
@@ -171,6 +212,69 @@ func (h *MatchHandler) MarkNotificationsRead(c *fiber.Ctx) error {
 		Update("is_read", true)
 
 	return c.JSON(fiber.Map{"message": "Notifications marquées comme lues"})
+}
+
+func (h *MatchHandler) MarkNotificationsUnread(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	database.DB.Model(&models.Notification{}).
+		Where("user_id = ? AND is_read = ?", userID, true).
+		Update("is_read", false)
+
+	return c.JSON(fiber.Map{"message": "Notifications marquées comme non lues"})
+}
+
+func (h *MatchHandler) UpdateNotificationRead(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
+	}
+
+	type Req struct {
+		IsRead *bool `json:"is_read"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.IsRead == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "is_read requis"})
+	}
+
+	var notif models.Notification
+	if err := database.DB.Where("id = ? AND user_id = ?", uint(id), userID).First(&notif).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Notification non trouvée"})
+	}
+
+	notif.IsRead = *req.IsRead
+	if err := database.DB.Save(&notif).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de mettre à jour la notification"})
+	}
+
+	return c.JSON(notif)
+}
+
+func (h *MatchHandler) UpdateNotificationsRead(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	type Req struct {
+		IDs    []uint `json:"ids"`
+		IsRead *bool  `json:"is_read"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || req.IsRead == nil || len(req.IDs) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ids et is_read requis"})
+	}
+
+	result := database.DB.Model(&models.Notification{}).
+		Where("user_id = ? AND id IN ?", userID, req.IDs).
+		Update("is_read", *req.IsRead)
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de mettre à jour les notifications"})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Notifications mises à jour",
+		"updated": result.RowsAffected,
+	})
 }
 
 func (h *MatchHandler) UnreadCount(c *fiber.Ctx) error {
@@ -191,9 +295,37 @@ func (h *MatchHandler) DeleteNotification(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID invalide"})
 	}
 
-	database.DB.Where("id = ? AND user_id = ?", uint(id), userID).Delete(&models.Notification{})
+	result := database.DB.Where("id = ? AND user_id = ?", uint(id), userID).Delete(&models.Notification{})
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de supprimer la notification"})
+	}
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Notification non trouvée"})
+	}
 
 	return c.JSON(fiber.Map{"message": "Notification supprimée"})
+}
+
+func (h *MatchHandler) DeleteNotifications(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	type Req struct {
+		IDs []uint `json:"ids"`
+	}
+	var req Req
+	if err := c.BodyParser(&req); err != nil || len(req.IDs) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ids requis"})
+	}
+
+	result := database.DB.Where("user_id = ? AND id IN ?", userID, req.IDs).Delete(&models.Notification{})
+	if result.Error != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de supprimer les notifications"})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Notifications supprimées",
+		"deleted": result.RowsAffected,
+	})
 }
 
 // SuperLike sends a super like to a user (premium).
@@ -239,13 +371,16 @@ func (h *MatchHandler) SuperLike(c *fiber.Ctx) error {
 	// Notify the liked user
 	var liker models.User
 	database.DB.First(&liker, likerID)
-	database.DB.Create(&models.Notification{
+	notif := models.Notification{
 		UserID: req.LikedID,
 		Type:   "superlike",
 		Title:  "Super Like reçu ! ",
 		Body:   liker.Username + " vous a Super Liké !",
 		Data:   `{"type":"superlike","user_id":` + strconv.FormatUint(uint64(likerID), 10) + `}`,
-	})
+	}
+	if err := database.DB.Create(&notif).Error; err == nil {
+		h.emitNotification(notif)
+	}
 	SendPushToUser(req.LikedID, "Super Like reçu ! ", liker.Username+" vous a Super Liké !", map[string]interface{}{"type": "superlike", "user_id": likerID})
 
 	// Check mutual
@@ -262,8 +397,18 @@ func (h *MatchHandler) SuperLike(c *fiber.Ctx) error {
 			database.DB.Create(&match)
 			var liked models.User
 			database.DB.First(&liked, req.LikedID)
-			database.DB.Create(&models.Notification{UserID: likerID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liked.Username})
-			database.DB.Create(&models.Notification{UserID: req.LikedID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liker.Username})
+			likerMatchData, _ := json.Marshal(fiber.Map{"match_user_id": req.LikedID})
+			likerNotif := models.Notification{UserID: likerID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liked.Username, Data: string(likerMatchData)}
+			if err := database.DB.Create(&likerNotif).Error; err == nil {
+				h.emitNotification(likerNotif)
+			}
+			likedMatchData, _ := json.Marshal(fiber.Map{"match_user_id": likerID})
+			likedNotif := models.Notification{UserID: req.LikedID, Type: "match", Title: "Nouveau match !", Body: "Vous avez matché avec " + liker.Username, Data: string(likedMatchData)}
+			if err := database.DB.Create(&likedNotif).Error; err == nil {
+				h.emitNotification(likedNotif)
+			}
+			SendPushToUser(likerID, "Nouveau match ! ", "Vous avez matché avec "+liked.Username, map[string]interface{}{"type": "match", "match_user_id": req.LikedID})
+			SendPushToUser(req.LikedID, "Nouveau match ! ", "Vous avez matché avec "+liker.Username, map[string]interface{}{"type": "match", "match_user_id": likerID})
 		}
 	}
 

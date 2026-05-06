@@ -1,4 +1,4 @@
-﻿package main
+package main
 
 import (
 	"log"
@@ -93,7 +93,7 @@ func main() {
 	placeHandler := handlers.NewPlaceHandler()
 	adminHandler := handlers.NewAdminHandler()
 	wellnessHandler := handlers.NewWellnessHandler()
-	matchHandler := handlers.NewMatchHandler()
+	matchHandler := handlers.NewMatchHandler(wsHub)
 	paymentHandler := handlers.NewOrangeMoneyHandler(cfg)
 	servicePayHandler := handlers.NewServicePaymentHandler(cfg)
 	uploadHandler := handlers.NewUploadHandler(cfg)
@@ -160,8 +160,12 @@ func main() {
 
 	// Notifications
 	api.Get("/notifications", jwt, matchHandler.GetNotifications)
+	api.Patch("/notifications", jwt, matchHandler.UpdateNotificationsRead)
+	api.Delete("/notifications", jwt, matchHandler.DeleteNotifications)
 	api.Get("/notifications/unread", jwt, matchHandler.UnreadCount)
 	api.Put("/notifications/read", jwt, matchHandler.MarkNotificationsRead)
+	api.Put("/notifications/unread", jwt, matchHandler.MarkNotificationsUnread)
+	api.Patch("/notifications/:id", jwt, matchHandler.UpdateNotificationRead)
 	api.Delete("/notifications/:id", jwt, matchHandler.DeleteNotification)
 
 	// Messaging

@@ -291,9 +291,36 @@ export function markNotificationsRead() {
   });
 }
 
+export function markNotificationsUnread() {
+  return request<{ message: string }>("/notifications/unread", {
+    method: "PUT",
+  });
+}
+
+export function updateNotificationRead(id: number, isRead: boolean) {
+  return request<Record<string, unknown>>(`/notifications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_read: isRead }),
+  });
+}
+
+export function updateNotificationsRead(ids: number[], isRead: boolean) {
+  return request<{ message: string; updated: number }>("/notifications", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, is_read: isRead }),
+  });
+}
+
 export function deleteNotification(id: number) {
   return request<{ message: string }>(`/notifications/${id}`, {
     method: "DELETE",
+  });
+}
+
+export function deleteNotifications(ids: number[]) {
+  return request<{ message: string; deleted: number }>("/notifications", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
   });
 }
 

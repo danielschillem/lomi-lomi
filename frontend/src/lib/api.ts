@@ -484,8 +484,14 @@ export function unmatch(matchId: number) {
 }
 
 /* ---- Notifications ---- */
-export function getNotifications() {
-  return request<Record<string, unknown>[]>("/notifications");
+export function getNotifications(page?: number, limit?: number) {
+  const qs = new URLSearchParams();
+  if (page != null) qs.set("page", String(page));
+  if (limit != null) qs.set("limit", String(limit));
+  const q = qs.toString();
+  return request<Record<string, unknown>[]>(
+    `/notifications${q ? `?${q}` : ""}`,
+  );
 }
 
 export function getUnreadCount() {
@@ -498,9 +504,36 @@ export function markNotificationsRead() {
   });
 }
 
+export function markNotificationsUnread() {
+  return request<Record<string, unknown>>("/notifications/unread", {
+    method: "PUT",
+  });
+}
+
+export function updateNotificationRead(id: number, isRead: boolean) {
+  return request<Record<string, unknown>>(`/notifications/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_read: isRead }),
+  });
+}
+
+export function updateNotificationsRead(ids: number[], isRead: boolean) {
+  return request<Record<string, unknown>>("/notifications", {
+    method: "PATCH",
+    body: JSON.stringify({ ids, is_read: isRead }),
+  });
+}
+
 export function deleteNotification(id: number) {
   return request<Record<string, unknown>>(`/notifications/${id}`, {
     method: "DELETE",
+  });
+}
+
+export function deleteNotifications(ids: number[]) {
+  return request<Record<string, unknown>>("/notifications", {
+    method: "DELETE",
+    body: JSON.stringify({ ids }),
   });
 }
 

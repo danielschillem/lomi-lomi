@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth-context";
 import { WSProvider } from "@/lib/ws-context";
+import { PushNotificationsBridge } from "@/lib/push-notifications";
 import Navbar from "@/components/Navbar";
 
 const inter = Inter({
@@ -78,6 +79,7 @@ export default function RootLayout({
         <AuthProvider>
           <WSProvider>
             {children}
+            <PushNotificationsBridge />
             <Navbar />
           </WSProvider>
         </AuthProvider>

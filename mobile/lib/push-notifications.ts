@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef } from "react";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
@@ -17,6 +18,25 @@ Notifications.setNotificationHandler({
 
 /** Register for push notifications and save token to backend. */
 export async function registerForPushNotifications(): Promise<string | null> {
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      if (window.Notification.permission === "default") {
+        await window.Notification.requestPermission();
+      }
+    }
+    return null;
+  }
+
+  // Android notification channel
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#7c3aed",
+    });
+  }
+
   // Check permissions
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
@@ -31,20 +51,16 @@ export async function registerForPushNotifications(): Promise<string | null> {
   }
 
   // Get Expo push token
-  const tokenData = await Notifications.getExpoPushTokenAsync({
-    projectId: undefined, // uses app.json expo.extra.eas.projectId automatically
-  });
+  const constantsWithEAS = Constants as typeof Constants & {
+    easConfig?: { projectId?: string };
+  };
+  const projectId =
+    (Constants.expoConfig?.extra?.eas as { projectId?: string } | undefined)
+      ?.projectId || constantsWithEAS.easConfig?.projectId;
+  const tokenData = await Notifications.getExpoPushTokenAsync(
+    projectId ? { projectId } : undefined,
+  );
   const token = tokenData.data;
-
-  // Android notification channel
-  if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#7c3aed",
-    });
-  }
 
   // Save token to backend
   try {
@@ -86,13 +102,28 @@ export function usePushNotifications(isLoggedIn: boolean) {
         if (data?.type === "message" && data?.conversation_id) {
           router.push({
             pathname: "/chat/[id]",
-            params: { id: data.conversation_id as string },
+            params: { id: String(data.conversation_id) },
           });
         } else if (data?.type === "match" && data?.match_user_id) {
           router.push({
             pathname: "/user/[id]",
-            params: { id: data.match_user_id as string },
+            params: { id: String(data.match_user_id) },
           });
+        } else if (data?.type === "superlike" && data?.user_id) {
+          router.push({
+            pathname: "/user/[id]",
+            params: { id: String(data.user_id) },
+          });
+        } else if (
+          (data?.type === "order" || data?.type === "payment") &&
+          data?.order_id
+        ) {
+          router.push({
+            pathname: "/order/[id]",
+            params: { id: String(data.order_id) },
+          });
+        } else if (String(data?.type || "").startsWith("delivery")) {
+          router.push("/orders");
         }
       });
 
