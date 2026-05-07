@@ -443,13 +443,20 @@ func (h *AuthHandler) RegisterPhone(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Ce pseudo ou numéro est déjà utilisé"})
 	}
 
-	user := models.User{
-		Username:   username,
-		Phone:      phone,
-		IsVerified: true, // Phone-verified users are auto-verified
+	// Keep email NULL for phone registrations to avoid unique-index collisions
+	// on users.email (empty string vs empty string).
+	createData := map[string]any{
+		"username":    username,
+		"phone":       phone,
+		"email":       nil,
+		"is_verified": true, // Phone-verified users are auto-verified
 	}
-	if err := database.DB.Create(&user).Error; err != nil {
+	if err := database.DB.Model(&models.User{}).Create(createData).Error; err != nil {
 		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Ce pseudo ou numéro est déjà utilisé"})
+	}
+	var user models.User
+	if err := database.DB.Where("phone = ?", phone).First(&user).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le compte"})
 	}
 
 	// Create default preferences
