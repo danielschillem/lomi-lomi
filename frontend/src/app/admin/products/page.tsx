@@ -16,6 +16,7 @@ import {
   adminCreateProduct,
   adminUpdateProduct,
   adminDeleteProduct,
+  uploadMedia,
 } from "@/lib/api";
 
 interface Product {
@@ -46,6 +47,7 @@ export default function AdminProductsPage() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -109,6 +111,20 @@ export default function AdminProductsPage() {
       setError(
         err instanceof Error ? err.message : "Erreur lors de la suppression",
       );
+    }
+  }
+
+  async function handleImageUpload(file: File | null) {
+    if (!file) return;
+    setError(null);
+    setUploadingImage(true);
+    try {
+      const res = await uploadMedia(file);
+      setForm((prev) => ({ ...prev, image_url: res.image_url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur upload image");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -216,11 +232,22 @@ export default function AdminProductsPage() {
               className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <input
-              placeholder="URL de l'image"
+              placeholder="URL de l'image (auto après upload)"
               value={form.image_url}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleImageUpload(e.target.files?.[0] ?? null)}
+                className="w-full text-sm"
+              />
+              {uploadingImage && (
+                <p className="text-xs text-muted">Upload image en cours...</p>
+              )}
+            </div>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"

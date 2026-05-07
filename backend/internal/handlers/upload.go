@@ -66,6 +66,40 @@ func (h *UploadHandler) UploadAvatar(c *fiber.Ctx) error {
 	})
 }
 
+// UploadMedia uploads a generic image and returns a public URL.
+func (h *UploadHandler) UploadMedia(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fichier image requis"})
+	}
+
+	if file.Size > 8*1024*1024 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Fichier trop volumineux (max 8 Mo)"})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowed := map[string]bool{".jpg": true, ".jpeg": true, ".png": true, ".webp": true}
+	if !allowed[ext] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format non supporté (jpg, png, webp)"})
+	}
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	filename := fmt.Sprintf("media_%d_%s%s", userID, hex.EncodeToString(b), ext)
+	savePath := filepath.Join(h.Config.UploadDir, filename)
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur lors de l'upload"})
+	}
+
+	imageURL := h.Config.BaseURL + "/uploads/" + filename
+	return c.JSON(fiber.Map{
+		"image_url": imageURL,
+		"message":   "Image uploadée",
+	})
+}
+
 // ---- Email verification ----
 
 func (h *UploadHandler) SendVerification(c *fiber.Ctx) error {

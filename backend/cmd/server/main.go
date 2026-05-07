@@ -249,6 +249,7 @@ func main() {
 	api.Post("/messages/upload-audio", jwt, uploadRL, messageHandler.UploadMessageAudio)
 	api.Post("/upload/selfie", jwt, uploadRL, profileExtHandler.UploadSelfie)
 	api.Post("/upload/avatar", jwt, uploadRL, uploadHandler.UploadAvatar)
+	api.Post("/upload/media", jwt, uploadRL, uploadHandler.UploadMedia)
 
 	// Photo gallery
 	api.Post("/photos", jwt, uploadRL, uploadHandler.UploadPhoto)

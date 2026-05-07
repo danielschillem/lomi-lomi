@@ -21,6 +21,7 @@ import {
   adminSetProviderAvailability,
   adminListWellnessBookings,
   adminUpdateWellnessBookingStatus,
+  uploadMedia,
 } from "@/lib/api";
 
 interface WellnessService {
@@ -178,6 +179,7 @@ export default function AdminWellnessPage() {
   const [bookingsStatus, setBookingsStatus] = useState("");
   const [loadingBookings, setLoadingBookings] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const loadProviders = useCallback(async () => {
     setLoadingProviders(true);
@@ -381,6 +383,20 @@ export default function AdminWellnessPage() {
       setError(
         err instanceof Error ? err.message : "Erreur lors de la mise à jour",
       );
+    }
+  }
+
+  async function handleProviderImageUpload(file: File | null) {
+    if (!file) return;
+    setError(null);
+    setUploadingImage(true);
+    try {
+      const res = await uploadMedia(file);
+      setProviderForm((prev) => ({ ...prev, image_url: res.image_url }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erreur upload image");
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -868,7 +884,7 @@ export default function AdminWellnessPage() {
                   htmlFor="provider-image"
                   className="block text-xs text-muted mb-1"
                 >
-                  Image URL
+                  Image URL (auto après upload)
                 </label>
                 <input
                   id="provider-image"
@@ -881,6 +897,19 @@ export default function AdminWellnessPage() {
                   }
                   className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
                 />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    void handleProviderImageUpload(e.target.files?.[0] ?? null)
+                  }
+                  className="w-full mt-2 text-sm"
+                />
+                {uploadingImage && (
+                  <p className="text-xs text-muted mt-1">
+                    Upload image en cours...
+                  </p>
+                )}
               </div>
               <div className="col-span-2">
                 <div className="flex items-center justify-between mb-1">

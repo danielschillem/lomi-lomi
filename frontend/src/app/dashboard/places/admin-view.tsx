@@ -19,6 +19,7 @@ import {
   adminCreatePlace,
   adminUpdatePlace,
   adminDeletePlace,
+  uploadMedia,
 } from "@/lib/api";
 
 const LocationPicker = dynamic(() => import("./location-picker"), {
@@ -72,6 +73,7 @@ export default function AdminPlacesView() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -135,6 +137,19 @@ export default function AdminPlacesView() {
       load();
     } catch {
       /* ignore */
+    }
+  }
+
+  async function handleImageUpload(file: File | null) {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const res = await uploadMedia(file);
+      setForm((prev) => ({ ...prev, image_url: res.image_url }));
+    } catch {
+      /* ignore */
+    } finally {
+      setUploadingImage(false);
     }
   }
 
@@ -246,11 +261,22 @@ export default function AdminPlacesView() {
               className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
             <input
-              placeholder="URL de l'image"
+              placeholder="URL de l'image (auto après upload)"
               value={form.image_url}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
               className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
             />
+            <div className="space-y-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleImageUpload(e.target.files?.[0] ?? null)}
+                className="w-full text-sm"
+              />
+              {uploadingImage && (
+                <p className="text-xs text-muted">Upload image en cours...</p>
+              )}
+            </div>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"

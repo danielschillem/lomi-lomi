@@ -725,6 +725,25 @@ export async function uploadAvatar(file: File) {
   return res.json() as Promise<{ avatar_url: string; message: string }>;
 }
 
+export async function uploadMedia(file: File) {
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const res = await fetch(`${API}/upload/media`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erreur ${res.status}`);
+  }
+  return res.json() as Promise<{ image_url: string; message: string }>;
+}
+
 /* ---- Photo gallery ---- */
 export async function uploadPhoto(file: File) {
   const token =
