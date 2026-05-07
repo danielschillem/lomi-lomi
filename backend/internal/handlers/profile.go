@@ -201,9 +201,6 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 			if prefs.MaxDistance > 0 && dp.Distance > float64(prefs.MaxDistance) {
 				continue
 			}
-		} else if currentUser.Latitude != 0 && currentUser.Longitude != 0 {
-			// User has no location, skip if distance filter is active
-			continue
 		}
 
 		// Attach interests from batch-loaded preferences
