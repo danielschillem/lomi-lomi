@@ -8,7 +8,7 @@ const faqs: { q: string; a: string }[] = [
   { q: "Comment fonctionne Texto ?", a: "Créez un profil, explorez des profils compatibles avec vos préférences, likez ceux qui vous plaisent. Si l'intérêt est mutuel, c'est un match ! Vous pouvez alors discuter via notre messagerie interactive." },
   { q: "Mes données sont-elles protégées ?", a: "Oui. Vos messages sont chiffrés. Votre email n'est jamais visible par les autres utilisateurs. Nous ne vendons aucune donnée à des tiers." },
   { q: "Comment supprimer mon compte ?", a: "Rendez-vous dans Paramètres > Zone dangereuse > Supprimer mon compte. Confirmez avec votre mot de passe. La suppression est définitive." },
-  { q: "Le service est-il gratuit ?", a: "L'inscription, la découverte et le matching sont gratuits. Une mise en relation pour discuter (250 FCFA) et un abonnement Premium optionnel (TexMe) sont proposés." },
+  { q: "Le service est-il gratuit ?", a: "L'inscription, la découverte et le matching sont gratuits. Une mise en relation pour discuter (250 FCFA) et un abonnement Premium optionnel (TextMe) sont proposés." },
   { q: "Comment signaler un comportement abusif ?", a: "Sur chaque profil, utilisez l'icône de signalement pour notifier un comportement inapproprié. Notre équipe traite chaque signalement sous 24h." },
   { q: "Comment bloquer un utilisateur ?", a: "Depuis la page Découverte ou le profil d'un utilisateur, utilisez l'option Bloquer. L'utilisateur bloqué ne pourra plus vous contacter ni voir votre profil." },
   { q: "Qu'est-ce qu'un profil vérifié ?", a: "Un profil vérifié a confirmé son adresse email et soumis un selfie de vérification. Le badge apparaît sur son profil pour renforcer la confiance." },

@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { ActivityIndicator, View, Text } from "react-native";
 import { useEffect, useState } from "react";
-import { getConversations, getUnreadCount } from "@/lib/api";
+import { getConversations } from "@/lib/api";
 
 function BadgeIcon({
   name,
@@ -53,16 +53,11 @@ function BadgeIcon({
 export default function TabsLayout() {
   const { user, loading } = useAuth();
   const { colors } = useTheme();
-  const [unread, setUnread] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
     if (!user) return;
     const load = () => {
-      getUnreadCount()
-        .then((r) => setUnread(r.count))
-        .catch(() => {});
-
       getConversations()
         .then((rows) => {
           const list = Array.isArray(rows)
@@ -110,50 +105,18 @@ export default function TabsLayout() {
         },
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+        },
         headerStyle: { backgroundColor: colors.headerBg },
         headerTintColor: colors.headerText,
       }}
     >
       <Tabs.Screen
-        name="discover"
-        options={{
-          title: "Découvrir",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="heart" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: "Recherche",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="search" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="nearby"
-        options={{
-          title: "Radar",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="radio" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="matches"
-        options={{
-          title: "Matchs",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="people" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="messages"
         options={{
-          title: "Messages",
+          title: "Discussions",
           tabBarIcon: ({ color, size }) => (
             <BadgeIcon
               name="chatbubbles"
@@ -165,37 +128,39 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="shop"
+        name="calls"
         options={{
-          title: "Boutique",
+          title: "Appels",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bag" size={size} color={color} />
+            <Ionicons name="call" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="notifications"
+        name="contacts"
         options={{
-          title: "Notifs",
+          title: "Contacts",
           tabBarIcon: ({ color, size }) => (
-            <BadgeIcon
-              name="notifications"
-              size={size}
-              color={color}
-              badge={unread}
-            />
+            <Ionicons name="people" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="textme-plus"
         options={{
-          title: "Profil",
+          title: "TextMe+",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
+            <Ionicons name="diamond" size={size} color={color} />
           ),
         }}
       />
+      <Tabs.Screen name="discover" options={{ href: null }} />
+      <Tabs.Screen name="search" options={{ href: null }} />
+      <Tabs.Screen name="nearby" options={{ href: null }} />
+      <Tabs.Screen name="matches" options={{ href: null }} />
+      <Tabs.Screen name="shop" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }

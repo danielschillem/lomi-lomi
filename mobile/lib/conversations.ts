@@ -18,9 +18,15 @@ export interface ConversationListItem {
   updated_at?: string;
   user1_id?: number;
   user2_id?: number;
+  is_group?: boolean;
+  title?: string;
+  avatar_url?: string;
+  member_count?: number;
+  created_by_id?: number;
   user1?: ConversationUser | null;
   user2?: ConversationUser | null;
   other_user?: ConversationUser | null;
+  group_members?: Array<{ user?: ConversationUser; user_id?: number; role?: string }>;
   last_message?: ConversationLastMessage | string | null;
   unread_count?: number;
 }
@@ -54,6 +60,18 @@ export function getConversationOtherUser(
   conversation: ConversationListItem,
   currentUserId?: number,
 ) {
+  if (conversation.is_group) {
+    return normalizeUser(
+      {
+        id: 0,
+        username: conversation.title || "Groupe TextMe",
+        avatar_url: conversation.avatar_url || "",
+        is_online: false,
+      },
+      0,
+    );
+  }
+
   const ownId = asNumber(currentUserId);
   const user1Id = asNumber(conversation.user1_id ?? conversation.user1?.id);
   const user2Id = asNumber(conversation.user2_id ?? conversation.user2?.id);
@@ -80,7 +98,36 @@ export function getConversationRecipientId(
   conversation: ConversationListItem,
   currentUserId?: number,
 ) {
+  if (conversation.is_group) return 0;
   return getConversationOtherUser(conversation, currentUserId).id;
+}
+
+export function getConversationTitle(
+  conversation: ConversationListItem,
+  currentUserId?: number,
+) {
+  if (conversation.is_group) return conversation.title || "Groupe TextMe";
+  return getConversationOtherUser(conversation, currentUserId).username;
+}
+
+export function getConversationAvatar(
+  conversation: ConversationListItem,
+  currentUserId?: number,
+) {
+  if (conversation.is_group) return conversation.avatar_url || "";
+  return getConversationOtherUser(conversation, currentUserId).avatar_url;
+}
+
+export function getConversationSubtitle(
+  conversation: ConversationListItem,
+  currentUserId?: number,
+) {
+  if (conversation.is_group) {
+    const count = asNumber(conversation.member_count) || conversation.group_members?.length || 0;
+    return count > 0 ? `${count} membres` : "Groupe TextMe";
+  }
+  const other = getConversationOtherUser(conversation, currentUserId);
+  return other.is_online ? "En ligne" : "Contact TextMe";
 }
 
 export function getConversationLastMessageContent(

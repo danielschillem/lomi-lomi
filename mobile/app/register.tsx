@@ -89,7 +89,7 @@ export default function RegisterScreen() {
       const res = await verifyOTP(fullPhone, otp);
       if (res.action === "login" && res.token && res.user) {
         await loginWithToken(res.token, res.user);
-        router.replace("/(tabs)/discover");
+        router.replace("/(tabs)/messages");
       } else {
         setVerifiedPhone(fullPhone);
         setStep("profile");

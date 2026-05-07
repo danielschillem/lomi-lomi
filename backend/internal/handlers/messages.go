@@ -1,4 +1,4 @@
-﻿package handlers
+package handlers
 
 import (
 	"crypto/rand"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -27,6 +28,48 @@ func NewMessageHandler(wsHub *WSHub, cfg *config.Config) *MessageHandler {
 	return &MessageHandler{WSHub: wsHub, Config: cfg}
 }
 
+func userCanAccessConversation(userID uint, conv models.Conversation) bool {
+	if conv.IsGroup {
+		var count int64
+		database.DB.Model(&models.ConversationMember{}).
+			Where("conversation_id = ? AND user_id = ?", conv.ID, userID).
+			Count(&count)
+		return count > 0
+	}
+	return conv.User1ID == userID || conv.User2ID == userID
+}
+
+func conversationRecipients(conv models.Conversation, senderID uint) []uint {
+	if conv.IsGroup {
+		var ids []uint
+		database.DB.Model(&models.ConversationMember{}).
+			Where("conversation_id = ? AND user_id != ?", conv.ID, senderID).
+			Pluck("user_id", &ids)
+		return ids
+	}
+
+	if conv.User1ID == senderID {
+		return []uint{conv.User2ID}
+	}
+	if conv.User2ID == senderID {
+		return []uint{conv.User1ID}
+	}
+	return []uint{}
+}
+
+func normalizeMemberIDs(ownerID uint, memberIDs []uint) []uint {
+	seen := map[uint]bool{ownerID: true}
+	result := make([]uint, 0, len(memberIDs))
+	for _, id := range memberIDs {
+		if id == 0 || seen[id] {
+			continue
+		}
+		seen[id] = true
+		result = append(result, id)
+	}
+	return result
+}
+
 func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
@@ -37,23 +80,42 @@ func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 	database.DB.Model(&models.Block{}).Where("blocked_id = ?", userID).Pluck("blocker_id", &blockerIDs)
 	excludeIDs = append(excludeIDs, blockerIDs...)
 
-	query := database.DB.
+	directQuery := database.DB.
 		Preload("User1").
 		Preload("User2").
-		Where("user1_id = ? OR user2_id = ?", userID, userID)
+		Where("(is_group = ? OR is_group IS NULL) AND (user1_id = ? OR user2_id = ?)", false, userID, userID)
 
 	if len(excludeIDs) > 0 {
-		query = query.Where("user1_id NOT IN ? AND user2_id NOT IN ?", excludeIDs, excludeIDs)
+		directQuery = directQuery.Where("user1_id NOT IN ? AND user2_id NOT IN ?", excludeIDs, excludeIDs)
 	}
 
-	var conversations []models.Conversation
-	query.Order("updated_at DESC").Find(&conversations)
+	var directConversations []models.Conversation
+	directQuery.Find(&directConversations)
+
+	var groupIDs []uint
+	database.DB.Model(&models.ConversationMember{}).
+		Where("user_id = ?", userID).
+		Pluck("conversation_id", &groupIDs)
+
+	var groupConversations []models.Conversation
+	if len(groupIDs) > 0 {
+		database.DB.
+			Preload("GroupMembers.User").
+			Where("id IN ? AND is_group = ?", groupIDs, true).
+			Find(&groupConversations)
+	}
+
+	conversations := append(directConversations, groupConversations...)
+	sort.Slice(conversations, func(i, j int) bool {
+		return conversations[i].UpdatedAt.After(conversations[j].UpdatedAt)
+	})
 
 	// Build enriched response with last_message and unread_count
 	type ConvResponse struct {
 		models.Conversation
 		LastMessage string `json:"last_message"`
 		UnreadCount int64  `json:"unread_count"`
+		MemberCount int64  `json:"member_count"`
 	}
 
 	result := make([]ConvResponse, 0, len(conversations))
@@ -66,10 +128,18 @@ func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 			Where("conversation_id = ? AND sender_id != ? AND is_read = ?", conv.ID, userID, false).
 			Count(&unread)
 
+		memberCount := int64(2)
+		if conv.IsGroup {
+			database.DB.Model(&models.ConversationMember{}).
+				Where("conversation_id = ?", conv.ID).
+				Count(&memberCount)
+		}
+
 		result = append(result, ConvResponse{
 			Conversation: conv,
 			LastMessage:  lastMsg.Content,
 			UnreadCount:  unread,
+			MemberCount:  memberCount,
 		})
 	}
 
@@ -92,7 +162,7 @@ func (h *MessageHandler) GetMessages(c *fiber.Ctx) error {
 			"error": "Conversation non trouvée",
 		})
 	}
-	if conv.User1ID != userID && conv.User2ID != userID {
+	if !userCanAccessConversation(userID, conv) {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
 			"error": "Accès interdit",
 		})
@@ -138,15 +208,16 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
 	type SendRequest struct {
-		ReceiverID uint     `json:"receiver_id"`
-		Content    string   `json:"content"`
-		ImageURL   string   `json:"image_url"`
-		AudioURL   string   `json:"audio_url"`
-		CallType   string   `json:"call_type,omitempty"`
-		CallRoom   string   `json:"call_room,omitempty"`
-		Latitude   *float64 `json:"latitude,omitempty"`
-		Longitude  *float64 `json:"longitude,omitempty"`
-		ViewOnce   bool     `json:"view_once,omitempty"`
+		ConversationID uint     `json:"conversation_id,omitempty"`
+		ReceiverID     uint     `json:"receiver_id,omitempty"`
+		Content        string   `json:"content"`
+		ImageURL       string   `json:"image_url"`
+		AudioURL       string   `json:"audio_url"`
+		CallType       string   `json:"call_type,omitempty"`
+		CallRoom       string   `json:"call_room,omitempty"`
+		Latitude       *float64 `json:"latitude,omitempty"`
+		Longitude      *float64 `json:"longitude,omitempty"`
+		ViewOnce       bool     `json:"view_once,omitempty"`
 	}
 
 	var req SendRequest
@@ -161,9 +232,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 			"error": "Contenu, image, audio ou appel requis",
 		})
 	}
-	if req.ReceiverID == 0 {
+	if req.ReceiverID == 0 && req.ConversationID == 0 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Destinataire requis",
+			"error": "Destinataire ou conversation requis",
 		})
 	}
 
@@ -174,45 +245,68 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if blocked
-	var blockCount int64
-	database.DB.Model(&models.Block{}).Where(
-		"(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
-		userID, req.ReceiverID, req.ReceiverID, userID,
-	).Count(&blockCount)
-	if blockCount > 0 {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
-			"error": "Communication impossible avec cet utilisateur",
-		})
-	}
-
-	// Check if connection fee is paid (250 FCFA one-time)
-	var connPaid int64
-	database.DB.Model(&models.ServicePayment{}).Where(
-		"((user_id = ? AND target_user_id = ?) OR (user_id = ? AND target_user_id = ?)) AND type = ? AND status = ?",
-		userID, req.ReceiverID, req.ReceiverID, userID, "connection", "paid",
-	).Count(&connPaid)
-	if connPaid == 0 {
-		return c.Status(fiber.StatusPaymentRequired).JSON(fiber.Map{
-			"error":   "connection_required",
-			"message": "Payez 250 FCFA pour discuter avec cet utilisateur",
-			"amount":  models.ConnectionFee,
-		})
-	}
-
-	// Find or create conversation
 	var conv models.Conversation
-	result := database.DB.
-		Where("(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-			userID, req.ReceiverID, req.ReceiverID, userID).
-		First(&conv)
-
-	if result.Error != nil {
-		conv = models.Conversation{
-			User1ID: userID,
-			User2ID: req.ReceiverID,
+	if req.ConversationID > 0 {
+		if err := database.DB.First(&conv, req.ConversationID).Error; err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Conversation non trouvée"})
 		}
-		database.DB.Create(&conv)
+		if !userCanAccessConversation(userID, conv) {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+		}
+		if !conv.IsGroup && req.ReceiverID == 0 {
+			if conv.User1ID == userID {
+				req.ReceiverID = conv.User2ID
+			} else {
+				req.ReceiverID = conv.User1ID
+			}
+		}
+		if !conv.IsGroup {
+			var blockCount int64
+			database.DB.Model(&models.Block{}).Where(
+				"(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
+				userID, req.ReceiverID, req.ReceiverID, userID,
+			).Count(&blockCount)
+			if blockCount > 0 {
+				return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+					"error": "Communication impossible avec cet utilisateur",
+				})
+			}
+		}
+	} else {
+		if req.ReceiverID == userID {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Destinataire invalide"})
+		}
+
+		var receiver models.User
+		if err := database.DB.First(&receiver, req.ReceiverID).Error; err != nil || receiver.IsBanned {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+		}
+
+		// Check if blocked
+		var blockCount int64
+		database.DB.Model(&models.Block{}).Where(
+			"(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
+			userID, req.ReceiverID, req.ReceiverID, userID,
+		).Count(&blockCount)
+		if blockCount > 0 {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{
+				"error": "Communication impossible avec cet utilisateur",
+			})
+		}
+
+		// Find or create direct conversation. Direct chat is now public/free.
+		result := database.DB.
+			Where("(is_group = ? OR is_group IS NULL) AND ((user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?))",
+				false, userID, req.ReceiverID, req.ReceiverID, userID).
+			First(&conv)
+
+		if result.Error != nil {
+			conv = models.Conversation{
+				User1ID: userID,
+				User2ID: req.ReceiverID,
+			}
+			database.DB.Create(&conv)
+		}
 	}
 
 	msg := models.Message{
@@ -239,27 +333,31 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 
 	database.DB.Preload("Sender").First(&msg, msg.ID)
 
-	// Push message via WebSocket to receiver
+	recipients := conversationRecipients(conv, userID)
+
+	// Push message via WebSocket to direct receiver or group members
 	if h.WSHub != nil {
-		h.WSHub.SendToUser(req.ReceiverID, WSMessage{
-			Type: "message",
-			Data: map[string]interface{}{
-				"id":              msg.ID,
-				"conversation_id": msg.ConversationID,
-				"sender_id":       msg.SenderID,
-				"content":         msg.Content,
-				"image_url":       msg.ImageURL,
-				"audio_url":       msg.AudioURL,
-				"call_type":       msg.CallType,
-				"call_room":       msg.CallRoom,
-				"latitude":        msg.Latitude,
-				"longitude":       msg.Longitude,
-				"view_once":       msg.ViewOnce,
-				"created_at":      msg.CreatedAt,
-				"is_read":         msg.IsRead,
-				"sender":          map[string]interface{}{"id": msg.Sender.ID, "username": msg.Sender.Username, "avatar_url": msg.Sender.AvatarURL},
-			},
-		})
+		for _, recipientID := range recipients {
+			h.WSHub.SendToUser(recipientID, WSMessage{
+				Type: "message",
+				Data: map[string]interface{}{
+					"id":              msg.ID,
+					"conversation_id": msg.ConversationID,
+					"sender_id":       msg.SenderID,
+					"content":         msg.Content,
+					"image_url":       msg.ImageURL,
+					"audio_url":       msg.AudioURL,
+					"call_type":       msg.CallType,
+					"call_room":       msg.CallRoom,
+					"latitude":        msg.Latitude,
+					"longitude":       msg.Longitude,
+					"view_once":       msg.ViewOnce,
+					"created_at":      msg.CreatedAt,
+					"is_read":         msg.IsRead,
+					"sender":          map[string]interface{}{"id": msg.Sender.ID, "username": msg.Sender.Username, "avatar_url": msg.Sender.AvatarURL},
+				},
+			})
+		}
 	}
 
 	// Send push notification to receiver
@@ -275,11 +373,13 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 			pushBody = "Invitation appel audio"
 		}
 	}
-	SendPushToUser(req.ReceiverID, msg.Sender.Username, pushBody, map[string]interface{}{
-		"type":            "message",
-		"conversation_id": msg.ConversationID,
-		"sender_id":       msg.SenderID,
-	})
+	for _, recipientID := range recipients {
+		SendPushToUser(recipientID, msg.Sender.Username, pushBody, map[string]interface{}{
+			"type":            "message",
+			"conversation_id": msg.ConversationID,
+			"sender_id":       msg.SenderID,
+		})
+	}
 
 	return c.Status(fiber.StatusCreated).JSON(msg)
 }
@@ -297,7 +397,7 @@ func (h *MessageHandler) MarkRead(c *fiber.Ctx) error {
 	if err := database.DB.First(&conv, uint(convID)).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Conversation non trouvée"})
 	}
-	if conv.User1ID != userID && conv.User2ID != userID {
+	if !userCanAccessConversation(userID, conv) {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
 	}
 
@@ -334,11 +434,25 @@ func (h *MessageHandler) GetOrCreateConversation(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID utilisateur invalide"})
 	}
 
+	var other models.User
+	if err := database.DB.First(&other, uint(otherID)).Error; err != nil || other.IsBanned {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+	}
+
+	var blockCount int64
+	database.DB.Model(&models.Block{}).Where(
+		"(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
+		userID, uint(otherID), uint(otherID), userID,
+	).Count(&blockCount)
+	if blockCount > 0 {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Communication impossible avec cet utilisateur"})
+	}
+
 	var conv models.Conversation
 	result := database.DB.
 		Preload("User1").Preload("User2").
-		Where("(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-			userID, uint(otherID), uint(otherID), userID).
+		Where("(is_group = ? OR is_group IS NULL) AND ((user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?))",
+			false, userID, uint(otherID), uint(otherID), userID).
 		First(&conv)
 
 	if result.Error != nil {
@@ -351,6 +465,121 @@ func (h *MessageHandler) GetOrCreateConversation(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(conv)
+}
+
+// CreateGroup creates a public TextMe group conversation.
+func (h *MessageHandler) CreateGroup(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var req struct {
+		Title     string `json:"title"`
+		AvatarURL string `json:"avatar_url"`
+		MemberIDs []uint `json:"member_ids"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
+	}
+
+	title := strings.TrimSpace(req.Title)
+	if len(title) < 2 || len(title) > 80 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Nom de groupe requis (2 à 80 caractères)"})
+	}
+
+	memberIDs := normalizeMemberIDs(userID, req.MemberIDs)
+	if len(memberIDs) < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Ajoutez au moins un membre"})
+	}
+	if len(memberIDs) > 99 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Un groupe ne peut pas dépasser 100 membres"})
+	}
+
+	var existingCount int64
+	database.DB.Model(&models.User{}).
+		Where("id IN ? AND is_banned = ?", memberIDs, false).
+		Count(&existingCount)
+	if existingCount != int64(len(memberIDs)) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Un ou plusieurs membres sont invalides"})
+	}
+
+	var blockCount int64
+	database.DB.Model(&models.Block{}).Where(
+		"((blocker_id = ? AND blocked_id IN ?) OR (blocked_id = ? AND blocker_id IN ?))",
+		userID, memberIDs, userID, memberIDs,
+	).Count(&blockCount)
+	if blockCount > 0 {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Impossible d'ajouter un utilisateur bloqué"})
+	}
+
+	conv := models.Conversation{
+		User1ID:     userID,
+		User2ID:     userID,
+		IsGroup:     true,
+		Title:       title,
+		AvatarURL:   strings.TrimSpace(req.AvatarURL),
+		CreatedByID: userID,
+	}
+
+	if err := database.DB.Create(&conv).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le groupe"})
+	}
+
+	members := []models.ConversationMember{
+		{ConversationID: conv.ID, UserID: userID, Role: "admin"},
+	}
+	for _, id := range memberIDs {
+		members = append(members, models.ConversationMember{
+			ConversationID: conv.ID,
+			UserID:         id,
+			Role:           "member",
+		})
+	}
+	if err := database.DB.Create(&members).Error; err != nil {
+		database.DB.Delete(&conv)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible d'ajouter les membres"})
+	}
+
+	database.DB.Preload("GroupMembers.User").First(&conv, conv.ID)
+
+	if h.WSHub != nil {
+		for _, id := range memberIDs {
+			h.WSHub.SendToUser(id, WSMessage{
+				Type: "group_created",
+				Data: map[string]interface{}{
+					"conversation_id": conv.ID,
+					"title":           conv.Title,
+					"created_by_id":   userID,
+				},
+			})
+		}
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(conv)
+}
+
+// GetGroupMembers returns members for a group conversation.
+func (h *MessageHandler) GetGroupMembers(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	convID, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil || convID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID conversation invalide"})
+	}
+
+	var conv models.Conversation
+	if err := database.DB.First(&conv, uint(convID)).Error; err != nil || !conv.IsGroup {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Groupe non trouvé"})
+	}
+	if !userCanAccessConversation(userID, conv) {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+	}
+
+	var members []models.ConversationMember
+	database.DB.
+		Preload("User").
+		Where("conversation_id = ?", conv.ID).
+		Order("role ASC, created_at ASC").
+		Find(&members)
+
+	return c.JSON(fiber.Map{"members": members})
 }
 
 // DeleteMessage soft-deletes a message. Only the sender can delete.
@@ -372,21 +601,19 @@ func (h *MessageHandler) DeleteMessage(c *fiber.Ctx) error {
 
 	database.DB.Delete(&msg)
 
-	// Notify the other party via WS
+	// Notify the other party or group members via WS
 	if h.WSHub != nil {
 		var conv models.Conversation
 		database.DB.First(&conv, msg.ConversationID)
-		receiverID := conv.User1ID
-		if receiverID == userID {
-			receiverID = conv.User2ID
+		for _, receiverID := range conversationRecipients(conv, userID) {
+			h.WSHub.SendToUser(receiverID, WSMessage{
+				Type: "message_deleted",
+				Data: map[string]interface{}{
+					"message_id":      msg.ID,
+					"conversation_id": msg.ConversationID,
+				},
+			})
 		}
-		h.WSHub.SendToUser(receiverID, WSMessage{
-			Type: "message_deleted",
-			Data: map[string]interface{}{
-				"message_id":      msg.ID,
-				"conversation_id": msg.ConversationID,
-			},
-		})
 	}
 
 	return c.JSON(fiber.Map{"message": "Message supprimé"})
@@ -439,19 +666,17 @@ func (h *MessageHandler) EditMessage(c *fiber.Ctx) error {
 	if h.WSHub != nil {
 		var conv models.Conversation
 		database.DB.First(&conv, msg.ConversationID)
-		receiverID := conv.User1ID
-		if receiverID == userID {
-			receiverID = conv.User2ID
+		for _, receiverID := range conversationRecipients(conv, userID) {
+			h.WSHub.SendToUser(receiverID, WSMessage{
+				Type: "message_edited",
+				Data: map[string]interface{}{
+					"message_id":      msg.ID,
+					"conversation_id": msg.ConversationID,
+					"content":         msg.Content,
+					"is_edited":       true,
+				},
+			})
 		}
-		h.WSHub.SendToUser(receiverID, WSMessage{
-			Type: "message_edited",
-			Data: map[string]interface{}{
-				"message_id":      msg.ID,
-				"conversation_id": msg.ConversationID,
-				"content":         msg.Content,
-				"is_edited":       true,
-			},
-		})
 	}
 
 	return c.JSON(msg)
@@ -475,14 +700,14 @@ func (h *MessageHandler) SearchMessages(c *fiber.Ctx) error {
 	if err := database.DB.First(&conv, uint(convID)).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Conversation non trouvée"})
 	}
-	if conv.User1ID != userID && conv.User2ID != userID {
+	if !userCanAccessConversation(userID, conv) {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
 	}
 
 	var messages []models.Message
 	database.DB.
 		Preload("Sender").
-		Where("conversation_id = ? AND content ILIKE ?", uint(convID), "%"+q+"%").
+		Where("conversation_id = ? AND LOWER(content) LIKE ?", uint(convID), "%"+strings.ToLower(q)+"%").
 		Order("created_at DESC").
 		Limit(50).
 		Find(&messages)

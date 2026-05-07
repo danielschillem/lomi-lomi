@@ -336,7 +336,8 @@ export function getMessages(conversationId: number) {
 }
 
 export function sendMessage(data: {
-  receiver_id: number;
+  conversation_id?: number;
+  receiver_id?: number;
   content?: string;
   image_url?: string;
   audio_url?: string;
@@ -409,6 +410,23 @@ export function searchMessages(conversationId: number, query: string) {
 
 export function getOrCreateConversation(userId: number) {
   return request<Record<string, unknown>>(`/conversations/with/${userId}`);
+}
+
+export function createGroupConversation(data: {
+  title: string;
+  member_ids: number[];
+  avatar_url?: string;
+}) {
+  return request<Record<string, unknown>>("/conversations/groups", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getConversationMembers(conversationId: number) {
+  return request<{ members: Record<string, unknown>[] }>(
+    `/conversations/${conversationId}/members`,
+  );
 }
 
 export function markConversationRead(conversationId: number) {

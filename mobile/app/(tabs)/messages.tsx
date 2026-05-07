@@ -18,10 +18,12 @@ import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import {
   ConversationListItem,
+  getConversationAvatar,
   getConversationLastMessageContent,
   getConversationLastMessageDate,
   getConversationOtherUser,
   getConversationRecipientId,
+  getConversationTitle,
 } from "@/lib/conversations";
 import ScreenState from "@/app/components/ScreenState";
 
@@ -110,8 +112,8 @@ export default function MessagesScreen() {
 
   const unreadCount = conversations.filter((c) => (c.unread_count || 0) > 0).length;
   const filtered = conversations.filter((item) => {
+    const name = getConversationTitle(item, user?.id).toLowerCase();
     const other = getConversationOtherUser(item, user?.id);
-    const name = (other.username || "").toLowerCase();
     const msg = getConversationLastMessageContent(item).toLowerCase();
     const q = search.trim().toLowerCase();
     const matchesSearch = !q || name.includes(q) || msg.includes(q);
@@ -196,6 +198,8 @@ export default function MessagesScreen() {
         renderItem={({ item }) => {
           const otherUser = getConversationOtherUser(item, user?.id);
           const recipientId = getConversationRecipientId(item, user?.id);
+          const displayName = getConversationTitle(item, user?.id);
+          const avatarUrl = getConversationAvatar(item, user?.id);
           const messageDate = getConversationLastMessageDate(item);
           const messageTime = messageDate ? timeAgo(messageDate) : "";
           const lastMessage = getConversationLastMessageContent(item);
@@ -215,8 +219,9 @@ export default function MessagesScreen() {
                   pathname: "/chat/[id]",
                   params: {
                     id: String(item.id),
-                    name: otherUser.username,
+                    name: displayName,
                     recipientId: String(recipientId),
+                    isGroup: item.is_group ? "1" : "0",
                   },
                 })
               }
@@ -225,7 +230,7 @@ export default function MessagesScreen() {
                 <Image
                   source={{
                     uri:
-                      otherUser.avatar_url ||
+                      avatarUrl ||
                       "https://via.placeholder.com/48/1a1a1a/666?text=?",
                   }}
                   style={[styles.avatar, { backgroundColor: colors.cardSecondary }]}
@@ -237,7 +242,7 @@ export default function MessagesScreen() {
               <View style={styles.textWrap}>
                 <View style={styles.topRow}>
                   <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
-                    {otherUser.username}
+                    {displayName}
                   </Text>
                   {!!messageTime && (
                     <Text style={[styles.time, { color: colors.textMuted }]}>
@@ -247,7 +252,7 @@ export default function MessagesScreen() {
                 </View>
                 <View style={styles.bottomRow}>
                   <Text style={[styles.lastMsg, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {lastMessage || "Nouveau match ! Dis bonjour "}
+                    {lastMessage || "Démarrez la conversation"}
                   </Text>
                   {(item.unread_count || 0) > 0 && (
                     <View style={styles.badge}>

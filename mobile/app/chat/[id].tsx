@@ -25,13 +25,10 @@ import {
   editMessage,
   deleteMessage,
   searchMessages,
-  initiateConnectionPayment,
-  confirmConnectionPayment,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { useWS } from "@/lib/ws-context";
-import OMPaymentModal from "@/app/components/OMPaymentModal";
 
 interface Message {
   id: number;
@@ -51,10 +48,11 @@ interface Message {
 }
 
 export default function ChatScreen() {
-  const { id, name, recipientId } = useLocalSearchParams<{
+  const { id, name, recipientId, isGroup } = useLocalSearchParams<{
     id: string;
     name: string;
     recipientId: string;
+    isGroup?: string;
   }>();
   const { user } = useAuth();
   const { colors } = useTheme();
@@ -69,7 +67,6 @@ export default function ChatScreen() {
   const [searchMode, setSearchMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [showPayment, setShowPayment] = useState(false);
   const [opInProgress, setOpInProgress] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -79,6 +76,23 @@ export default function ChatScreen() {
   const otherUserId = parseInt(recipientId || "0", 10);
   const isValidConversationId = Number.isFinite(conversationId) && conversationId > 0;
   const isValidReceiverId = Number.isFinite(otherUserId) && otherUserId > 0;
+  const isGroupChat = isGroup === "1" || isGroup === "true";
+  const canSendMessage = isValidConversationId && (isValidReceiverId || isGroupChat);
+  const canCall = isValidReceiverId && !isGroupChat;
+
+  const buildMessagePayload = (extra: {
+    content?: string;
+    image_url?: string;
+    audio_url?: string;
+    call_type?: "audio" | "video";
+    call_room?: string;
+    latitude?: number;
+    longitude?: number;
+  }) => ({
+    conversation_id: conversationId,
+    receiver_id: isValidReceiverId ? otherUserId : undefined,
+    ...extra,
+  });
 
   useEffect(() => {
     if (!isValidConversationId) {
@@ -204,7 +218,7 @@ export default function ChatScreen() {
   };
 
   const handleSend = async () => {
-    if (!text.trim() || sending || !isValidReceiverId) return;
+    if (!text.trim() || sending || !canSendMessage) return;
     const content = text.trim();
     const tempId = -Date.now();
     const optimistic: Message = {
@@ -221,7 +235,7 @@ export default function ChatScreen() {
     setText("");
     setSending(true);
     try {
-      const res = await sendMessage({ receiver_id: otherUserId, content });
+      const res = await sendMessage(buildMessagePayload({ content }));
       if (res) {
         const sent = res as unknown as Message;
         setMessages((prev) =>
@@ -233,20 +247,13 @@ export default function ChatScreen() {
         );
       }
     } catch (err) {
-      const msg = (err as Error).message || "";
-      if (msg === "connection_required") {
-        setShowPayment(true);
-        setText(content);
-        setMessages((prev) => prev.filter((m) => m.id !== tempId));
-      } else {
-        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, pending: false, failed: true } : m));
-      }
+      setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, pending: false, failed: true } : m));
     }
     setSending(false);
   };
 
   const handleSendImage = async () => {
-    if (sending || !isValidReceiverId) return;
+    if (sending || !canSendMessage) return;
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== "granted") {
       Alert.alert("Photo", "Autorise l'accès à la galerie pour envoyer une image.");
@@ -275,7 +282,9 @@ export default function ChatScreen() {
     try {
       const up = await uploadMessageImage(uri);
       const imageUrl = up.image_url;
-      const res = await sendMessage({ receiver_id: otherUserId, content: text.trim() || " ", image_url: imageUrl });
+      const res = await sendMessage(
+        buildMessagePayload({ content: text.trim() || " ", image_url: imageUrl }),
+      );
       const sent = res as unknown as Message;
       setMessages((prev) =>
         prev.map((m) =>
@@ -293,7 +302,7 @@ export default function ChatScreen() {
   };
 
   const shareLocation = async () => {
-    if (!isValidReceiverId || sending) return;
+    if (!canSendMessage || sending) return;
     const perm = await Location.requestForegroundPermissionsAsync();
     if (perm.status !== "granted") {
       Alert.alert("Position", "Autorise la localisation pour partager ta position.");
@@ -303,12 +312,13 @@ export default function ChatScreen() {
       accuracy: Location.Accuracy.Balanced,
     });
     try {
-      const res = await sendMessage({
-        receiver_id: otherUserId,
-        content: "Position partagée",
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
+      const res = await sendMessage(
+        buildMessagePayload({
+          content: "Position partagée",
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        }),
+      );
       if (res) {
         const sent = res as unknown as Message;
         setMessages((prev) => [sent, ...prev]);
@@ -319,18 +329,19 @@ export default function ChatScreen() {
   };
 
   const startCall = async (type: "audio" | "video") => {
-    if (!isValidReceiverId || sending) return;
+    if (!canCall || sending) return;
     const room = `texto-${conversationId}-${Date.now()}`;
     try {
-      const res = await sendMessage({
-        receiver_id: otherUserId,
-        content:
-          type === "video"
-            ? "Invitation appel vidéo"
-            : "Invitation appel audio",
-        call_type: type,
-        call_room: room,
-      });
+      const res = await sendMessage(
+        buildMessagePayload({
+          content:
+            type === "video"
+              ? "Invitation appel vidéo"
+              : "Invitation appel audio",
+          call_type: type,
+          call_room: room,
+        }),
+      );
       if (res) {
         const sent = res as unknown as Message;
         setMessages((prev) => [sent, ...prev]);
@@ -347,7 +358,7 @@ export default function ChatScreen() {
 
   const onTypingChange = (value: string) => {
     setText(value);
-    if (!isValidReceiverId || !value.trim()) return;
+    if (!isValidReceiverId || isGroupChat || !value.trim()) return;
     if (!typingSendRef.current) {
       wsSend({ type: "typing", data: { to_user_id: otherUserId } });
       typingSendRef.current = setTimeout(() => { typingSendRef.current = null; }, 1500);
@@ -427,16 +438,16 @@ export default function ChatScreen() {
         <TouchableOpacity
           style={[styles.iconBtn, { backgroundColor: colors.cardSecondary }]}
           onPress={() => startCall("audio")}
-          disabled={sending || !isValidReceiverId}
+          disabled={sending || !canCall}
         >
-          <Ionicons name="call-outline" size={18} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+          <Ionicons name="call-outline" size={18} color={sending || !canCall ? colors.textMuted : colors.text} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.iconBtn, { backgroundColor: colors.cardSecondary }]}
           onPress={() => startCall("video")}
-          disabled={sending || !isValidReceiverId}
+          disabled={sending || !canCall}
         >
-          <Ionicons name="videocam-outline" size={18} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+          <Ionicons name="videocam-outline" size={18} color={sending || !canCall ? colors.textMuted : colors.text} />
         </TouchableOpacity>
         <TextInput
           style={[styles.searchInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
@@ -603,16 +614,16 @@ export default function ChatScreen() {
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
           onPress={handleSendImage}
-          disabled={sending || !isValidReceiverId}
+          disabled={sending || !canSendMessage}
         >
-          <Ionicons name="image" size={20} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+          <Ionicons name="image" size={20} color={sending || !canSendMessage ? colors.textMuted : colors.text} />
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
           onPress={shareLocation}
-          disabled={sending || !isValidReceiverId}
+          disabled={sending || !canSendMessage}
         >
-          <Ionicons name="location-outline" size={20} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+          <Ionicons name="location-outline" size={20} color={sending || !canSendMessage ? colors.textMuted : colors.text} />
         </TouchableOpacity>
         <TextInput
           style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText, marginRight: 8 }]}
@@ -624,40 +635,13 @@ export default function ChatScreen() {
           maxLength={2000}
         />
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: text.trim() ? colors.accent : colors.cardSecondary }]}
+          style={[styles.actionBtn, { backgroundColor: text.trim() && canSendMessage ? colors.accent : colors.cardSecondary }]}
           onPress={handleSend}
-          disabled={!text.trim() || sending}
+          disabled={!text.trim() || sending || !canSendMessage}
         >
-          <Ionicons name="send" size={20} color={text.trim() ? "#fff" : colors.textMuted} />
+          <Ionicons name="send" size={20} color={text.trim() && canSendMessage ? "#fff" : colors.textMuted} />
         </TouchableOpacity>
       </View>
-
-      <OMPaymentModal
-        visible={showPayment}
-        onClose={() => setShowPayment(false)}
-        onSuccess={() => {
-          setShowPayment(false);
-          if (text.trim()) {
-            sendMessage({ receiver_id: otherUserId, content: text.trim() })
-              .then((res) => {
-                if (res) {
-                  const sent = res as unknown as Message;
-                  setMessages((prev) => [
-                    { id: sent.id || Date.now(), content: text.trim(), sender_id: user?.id || 0, created_at: new Date().toISOString() },
-                    ...prev,
-                  ]);
-                  setText("");
-                }
-              })
-              .catch(() => {});
-          }
-        }}
-        title="Mise en relation"
-        description={`Pour discuter avec ${name || "cet utilisateur"}, un paiement unique de 250 FCFA est requis.`}
-        amount={250}
-        initiatePayment={() => initiateConnectionPayment(otherUserId)}
-        confirmPayment={(paymentId, phone, otp) => confirmConnectionPayment(paymentId, phone, otp)}
-      />
     </KeyboardAvoidingView>
   );
 }

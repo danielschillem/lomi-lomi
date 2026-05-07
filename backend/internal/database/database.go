@@ -1,4 +1,4 @@
-﻿package database
+package database
 
 import (
 	"log"
@@ -55,6 +55,7 @@ func Migrate() {
 		&models.Block{},
 		&models.OTP{},
 		&models.Conversation{},
+		&models.ConversationMember{},
 		&models.Message{},
 		&models.LocationShare{},
 		&models.VTCRide{},

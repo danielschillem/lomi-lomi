@@ -1,4 +1,4 @@
-﻿package handlers
+package handlers
 
 import (
 	"math"
@@ -400,7 +400,20 @@ func (h *ProfileHandler) UpdatePreferences(c *fiber.Ctx) error {
 	return c.JSON(prefs)
 }
 
-// SearchProfiles searches for profiles by username or city.
+func compactPhoneQuery(value string) string {
+	replacer := strings.NewReplacer(" ", "", "-", "", ".", "", "(", "", ")", "")
+	return replacer.Replace(strings.TrimSpace(value))
+}
+
+func phoneLast4(phone string) string {
+	cleaned := compactPhoneQuery(phone)
+	if len(cleaned) <= 4 {
+		return cleaned
+	}
+	return cleaned[len(cleaned)-4:]
+}
+
+// SearchProfiles searches public TextMe contacts by username, city or phone.
 func (h *ProfileHandler) SearchProfiles(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 	q := strings.TrimSpace(c.Query("q"))
@@ -416,15 +429,50 @@ func (h *ProfileHandler) SearchProfiles(c *fiber.Ctx) error {
 	excludeIDs = append(excludeIDs, blockerIDs...)
 	excludeIDs = append(excludeIDs, userID)
 
-	search := "%" + q + "%"
+	search := "%" + strings.ToLower(q) + "%"
+	phoneQuery := compactPhoneQuery(q)
+
+	where := "LOWER(username) LIKE ? OR LOWER(city) LIKE ?"
+	args := []interface{}{search, search}
+	if phoneQuery != "" {
+		where += " OR phone LIKE ?"
+		args = append(args, "%"+phoneQuery+"%")
+	}
+
 	var users []models.User
 	database.DB.
 		Where("id NOT IN ?", excludeIDs).
-		Where("username ILIKE ? OR city ILIKE ?", search, search).
+		Where(where, args...).
 		Limit(20).
 		Find(&users)
 
-	return c.JSON(users)
+	type ContactResponse struct {
+		ID         uint   `json:"id"`
+		Username   string `json:"username"`
+		AvatarURL  string `json:"avatar_url"`
+		City       string `json:"city,omitempty"`
+		IsOnline   bool   `json:"is_online"`
+		IsVerified bool   `json:"is_verified"`
+		PhoneLast4 string `json:"phone_last4,omitempty"`
+	}
+
+	result := make([]ContactResponse, 0, len(users))
+	for _, u := range users {
+		item := ContactResponse{
+			ID:         u.ID,
+			Username:   u.Username,
+			AvatarURL:  u.AvatarURL,
+			City:       u.City,
+			IsOnline:   u.IsOnline,
+			IsVerified: u.IsVerified,
+		}
+		if phoneQuery != "" && u.Phone != "" {
+			item.PhoneLast4 = phoneLast4(u.Phone)
+		}
+		result = append(result, item)
+	}
+
+	return c.JSON(result)
 }
 
 // UpdateMyLocation updates the authenticated user's GPS coordinates.

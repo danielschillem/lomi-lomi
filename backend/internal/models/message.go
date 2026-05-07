@@ -1,4 +1,4 @@
-﻿package models
+package models
 
 import (
 	"time"
@@ -14,9 +14,27 @@ type Conversation struct {
 
 	User1ID uint `gorm:"not null;index" json:"user1_id"`
 	User2ID uint `gorm:"not null;index" json:"user2_id"`
+	IsGroup bool `gorm:"default:false;index" json:"is_group"`
+
+	Title       string `gorm:"size:120" json:"title,omitempty"`
+	AvatarURL   string `gorm:"size:500" json:"avatar_url,omitempty"`
+	CreatedByID uint   `gorm:"index" json:"created_by_id,omitempty"`
 
 	User1 User `gorm:"foreignKey:User1ID" json:"user1,omitempty"`
 	User2 User `gorm:"foreignKey:User2ID" json:"user2,omitempty"`
+
+	GroupMembers []ConversationMember `gorm:"foreignKey:ConversationID" json:"group_members,omitempty"`
+}
+
+type ConversationMember struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+
+	ConversationID uint   `gorm:"not null;uniqueIndex:idx_conversation_member" json:"conversation_id"`
+	UserID         uint   `gorm:"not null;uniqueIndex:idx_conversation_member;index" json:"user_id"`
+	Role           string `gorm:"size:20;default:member" json:"role"` // admin, member
+
+	User User `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }
 
 type Message struct {

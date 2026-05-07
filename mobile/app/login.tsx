@@ -81,7 +81,7 @@ export default function LoginScreen() {
       const res = await verifyOTP(fullPhone, otp);
       if (res.action === "login" && res.token && res.user) {
         await loginWithToken(res.token, res.user);
-        router.replace("/(tabs)/discover");
+        router.replace("/(tabs)/messages");
       } else if (res.action === "register") {
         router.replace({
           pathname: "/register",
@@ -103,7 +103,7 @@ export default function LoginScreen() {
     setError("");
     try {
       await login(email.trim().toLowerCase(), password);
-      router.replace("/(tabs)/discover");
+      router.replace("/(tabs)/messages");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Erreur de connexion");
     }

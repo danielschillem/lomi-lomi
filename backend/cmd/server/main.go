@@ -170,7 +170,9 @@ func main() {
 
 	// Messaging
 	api.Get("/conversations", jwt, messageHandler.GetConversations)
+	api.Post("/conversations/groups", jwt, messageHandler.CreateGroup)
 	api.Get("/conversations/:id/messages", jwt, messageHandler.GetMessages)
+	api.Get("/conversations/:id/members", jwt, messageHandler.GetGroupMembers)
 	api.Post("/messages", jwt, messageHandler.SendMessage)
 	api.Put("/conversations/:id/read", jwt, messageHandler.MarkRead)
 	api.Get("/conversations/with/:userId", jwt, messageHandler.GetOrCreateConversation)

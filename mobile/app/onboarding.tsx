@@ -128,7 +128,7 @@ export default function OnboardingScreen() {
         const filtered = prompts.filter((p) => p.answer.trim().length > 0);
         if (filtered.length > 0) await savePrompts(filtered);
         await completeOnboarding();
-        router.replace("/(tabs)/discover");
+        router.replace("/(tabs)/messages");
       }
     } catch (e: unknown) {
       Alert.alert("Erreur", e instanceof Error ? e.message : "Une erreur est survenue");

@@ -45,7 +45,7 @@ export default function ProfileScreen() {
   const isDelivery = role === "delivery" || role === "admin" || role === "owner";
 
   const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string; route: string }[] = [
-    { icon: "ribbon-outline" as const, label: "TexMe Premium", route: "/premium" },
+    { icon: "ribbon-outline" as const, label: "TextMe Premium", route: "/premium" },
     ...(isDelivery
       ? [{ icon: "car-sport-outline" as const, label: "Espace livreur", route: "/livreur" }]
       : []),

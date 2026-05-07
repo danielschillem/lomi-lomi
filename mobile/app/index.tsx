@@ -16,5 +16,5 @@ export default function Index() {
   }
 
   if (!user) return <Redirect href="/login" />;
-  return <Redirect href="/(tabs)/discover" />;
+  return <Redirect href="/(tabs)/messages" />;
 }
