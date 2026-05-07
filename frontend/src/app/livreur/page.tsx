@@ -98,7 +98,7 @@ function AvailableCard({
             <Package className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-xs text-gray-400">Enlèvement</p>
-              <p className="text-sm text-gray-800">{d.pickup_address || "–"}</p>
+              <p className="text-sm text-gray-800">{d.pickup_address || "-"}</p>
             </div>
           </div>
           <div className="flex gap-2 items-start">
@@ -106,7 +106,7 @@ function AvailableCard({
             <div>
               <p className="text-xs text-gray-400">Livraison</p>
               <p className="text-sm text-gray-800">
-                {d.dropoff_address || "–"}
+                {d.dropoff_address || "-"}
               </p>
             </div>
           </div>
@@ -175,11 +175,11 @@ function ActiveCard({
         <div className="space-y-2">
           <div className="flex gap-2 items-start">
             <Package className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-gray-800">{d.pickup_address || "–"}</p>
+            <p className="text-sm text-gray-800">{d.pickup_address || "-"}</p>
           </div>
           <div className="flex gap-2 items-start">
             <MapPin className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-            <p className="text-sm text-gray-800">{d.dropoff_address || "–"}</p>
+            <p className="text-sm text-gray-800">{d.dropoff_address || "-"}</p>
           </div>
         </div>
 

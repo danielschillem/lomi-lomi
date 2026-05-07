@@ -86,6 +86,14 @@ export default function AdminUsersPage() {
   }
 
   const totalPages = Math.ceil(total / 20) || 1;
+  const formatJoinDate = (createdAt?: string) => {
+    if (!createdAt) return "Date inconnue";
+    const parsed = new Date(createdAt);
+    if (Number.isNaN(parsed.getTime()) || parsed.getFullYear() < 2000) {
+      return "Date inconnue";
+    }
+    return parsed.toLocaleDateString("fr-FR");
+  };
 
   return (
     <div>
@@ -179,8 +187,7 @@ export default function AdminUsersPage() {
                           )}
                         </span>
                         <span className="text-xs text-muted block">
-                          #{u.id} -{" "}
-                          {new Date(u.created_at).toLocaleDateString("fr-FR")}
+                          #{u.id} - {formatJoinDate(u.created_at)}
                         </span>
                       </div>
                     </div>

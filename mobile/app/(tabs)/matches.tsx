@@ -19,12 +19,26 @@ import ScreenState from "@/app/components/ScreenState";
 
 interface Match {
   id: number;
-  matched_user: {
+  matched_user?: {
     id: number;
     username: string;
     avatar_url: string;
     is_online: boolean;
   };
+  user1?: {
+    id: number;
+    username: string;
+    avatar_url: string;
+    is_online: boolean;
+  };
+  user2?: {
+    id: number;
+    username: string;
+    avatar_url: string;
+    is_online: boolean;
+  };
+  user1_id?: number;
+  user2_id?: number;
   created_at: string;
 }
 
@@ -36,6 +50,14 @@ export default function MatchesScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getMatchedUser = useCallback(
+    (match: Match) => {
+      if (match.matched_user) return match.matched_user;
+      return match.user2 || match.user1 || null;
+    },
+    [],
+  );
 
   const load = useCallback(async () => {
     try {
@@ -74,15 +96,17 @@ export default function MatchesScreen() {
   };
 
   const handleChat = async (match: Match) => {
+    const matchedUser = getMatchedUser(match);
+    if (!matchedUser) return;
     try {
-      const conv = await getOrCreateConversation(match.matched_user.id);
+      const conv = await getOrCreateConversation(matchedUser.id);
       const c = conv as { id: number };
       router.push({
         pathname: "/chat/[id]",
         params: {
           id: c.id,
-          name: match.matched_user.username,
-          recipientId: match.matched_user.id,
+          name: matchedUser.username,
+          recipientId: matchedUser.id,
         },
       });
     } catch {
@@ -91,9 +115,11 @@ export default function MatchesScreen() {
   };
 
   const handleUnmatch = (match: Match) => {
+    const matchedUser = getMatchedUser(match);
+    if (!matchedUser) return;
     Alert.alert(
       "Unmatch",
-      `Supprimer le match avec ${match.matched_user.username} ?`,
+      `Supprimer le match avec ${matchedUser.username} ?`,
       [
         { text: "Annuler", style: "cancel" },
         {
@@ -170,12 +196,16 @@ export default function MatchesScreen() {
           ) : null
         }
         renderItem={({ item }) => (
+          (() => {
+            const matchedUser = getMatchedUser(item);
+            if (!matchedUser) return null;
+            return (
           <TouchableOpacity
             style={[styles.row, { borderBottomColor: colors.border }]}
             onPress={() =>
               router.push({
                 pathname: "/user/[id]",
-                params: { id: item.matched_user.id },
+                params: { id: matchedUser.id },
               })
             }
             onLongPress={() => handleUnmatch(item)}
@@ -184,18 +214,18 @@ export default function MatchesScreen() {
               <Image
                 source={{
                   uri:
-                    item.matched_user.avatar_url ||
+                    matchedUser.avatar_url ||
                     "https://via.placeholder.com/56/1a1a1a/666?text=?",
                 }}
                 style={[styles.avatar, { backgroundColor: colors.cardSecondary }]}
               />
-              {item.matched_user.is_online && (
+              {matchedUser.is_online && (
                 <View style={[styles.onlineDot, { borderColor: colors.background }]} />
               )}
             </View>
             <View style={styles.textWrap}>
               <Text style={[styles.name, { color: colors.text }]}>
-                {item.matched_user.username}
+                {matchedUser.username}
               </Text>
               <Text style={[styles.time, { color: colors.textMuted }]}>
                 Match {timeAgo(item.created_at)}
@@ -208,6 +238,8 @@ export default function MatchesScreen() {
               <Ionicons name="chatbubble" size={20} color={colors.accent} />
             </TouchableOpacity>
           </TouchableOpacity>
+            );
+          })()
         )}
       />
     </View>

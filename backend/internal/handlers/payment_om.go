@@ -18,6 +18,7 @@ import (
 	"github.com/lomilomi/backend/internal/config"
 	"github.com/lomilomi/backend/internal/database"
 	"github.com/lomilomi/backend/internal/models"
+	"gorm.io/gorm"
 )
 
 type OrangeMoneyHandler struct {
@@ -175,10 +176,26 @@ func (h *OrangeMoneyHandler) ConfirmPayment(c *fiber.Ctx) error {
 
 	// Check response status
 	if omResp.Status == "200" {
-		database.DB.Model(&order).Updates(map[string]interface{}{
-			"status":     "paid",
-			"payment_id": omResp.TransID,
+		txErr := database.DB.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Model(&order).Updates(map[string]interface{}{
+				"status":     "paid",
+				"payment_id": omResp.TransID,
+			}).Error; err != nil {
+				return err
+			}
+			for _, item := range order.Items {
+				tx.Model(&models.Product{}).
+					Where("id = ? AND stock >= ?", item.ProductID, item.Quantity).
+					UpdateColumn("stock", gorm.Expr("stock - ?", item.Quantity))
+			}
+			return nil
 		})
+		if txErr != nil {
+			log.Printf("[OM Payment] Failed to finalize order %d: %v", order.ID, txErr)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": "Paiement accepté mais erreur de finalisation. Contactez le support.",
+			})
+		}
 
 		// Notify user
 		database.DB.Create(&models.Notification{

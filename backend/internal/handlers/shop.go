@@ -56,7 +56,8 @@ func (h *ShopHandler) CreateOrder(c *fiber.Ctx) error {
 	}
 
 	type CreateOrderReq struct {
-		Items []OrderItemReq `json:"items"`
+		Items             []OrderItemReq `json:"items"`
+		DeliveryAddressID *uint          `json:"delivery_address_id"`
 	}
 
 	var req CreateOrderReq
@@ -101,26 +102,16 @@ func (h *ShopHandler) CreateOrder(c *fiber.Ctx) error {
 	}
 
 	order := models.Order{
-		UserID:      userID,
-		TotalAmount: totalAmount,
-		Status:      "pending",
-		Items:       orderItems,
+		UserID:            userID,
+		TotalAmount:       totalAmount,
+		Status:            "pending",
+		Items:             orderItems,
+		DeliveryAddressID: req.DeliveryAddressID,
 	}
 
-	// Transaction : création commande + décrémentation stock atomique
+	// Transaction : création commande uniquement — décrémentation stock à la confirmation de paiement
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&order).Error; err != nil {
-			return err
-		}
-		for _, item := range req.Items {
-			result := tx.Model(&models.Product{}).
-				Where("id = ? AND stock >= ?", item.ProductID, item.Quantity).
-				UpdateColumn("stock", gorm.Expr("stock - ?", item.Quantity))
-			if result.RowsAffected == 0 {
-				return fiber.NewError(fiber.StatusConflict, "Stock insuffisant (concurrence)")
-			}
-		}
-		return nil
+		return tx.Create(&order).Error
 	})
 	if err != nil {
 		if fe, ok := err.(*fiber.Error); ok {

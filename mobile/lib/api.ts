@@ -247,16 +247,16 @@ export function discover() {
 
 /* ===== Matching ===== */
 export function likeUser(targetId: number) {
-  return request<{ matched: boolean; match_id?: number }>("/likes", {
+  return request<{ liked: boolean; is_match: boolean }>("/likes", {
     method: "POST",
-    body: JSON.stringify({ target_id: targetId }),
+    body: JSON.stringify({ liked_id: targetId }),
   });
 }
 
 export function passUser(targetId: number) {
-  return request<{ message: string }>("/pass", {
+  return request<{ passed: boolean }>("/pass", {
     method: "POST",
-    body: JSON.stringify({ target_id: targetId }),
+    body: JSON.stringify({ passed_id: targetId }),
   });
 }
 
@@ -339,6 +339,11 @@ export function sendMessage(data: {
   receiver_id: number;
   content?: string;
   image_url?: string;
+  audio_url?: string;
+  call_type?: "audio" | "video";
+  call_room?: string;
+  latitude?: number;
+  longitude?: number;
 }) {
   return request<Record<string, unknown>>("/messages", {
     method: "POST",
@@ -357,6 +362,26 @@ export function uploadMessageImage(uri: string) {
     type: mimeType,
   } as unknown as Blob);
   return uploadFile<{ image_url: string }>("/messages/upload-image", formData);
+}
+
+export function uploadMessageAudio(uri: string) {
+  const formData = new FormData();
+  const filename = uri.split("/").pop() || "voice.m4a";
+  const ext = filename.split(".").pop()?.toLowerCase() || "m4a";
+  const mimeType =
+    ext === "mp3"
+      ? "audio/mpeg"
+      : ext === "wav"
+        ? "audio/wav"
+        : ext === "ogg"
+          ? "audio/ogg"
+          : "audio/mp4";
+  formData.append("audio", {
+    uri,
+    name: filename,
+    type: mimeType,
+  } as unknown as Blob);
+  return uploadFile<{ audio_url: string }>("/messages/upload-audio", formData);
 }
 
 export function editMessage(messageId: number, content: string) {

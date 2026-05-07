@@ -138,7 +138,7 @@ export default function DiscoverScreen() {
     });
     try {
       const res = await likeUser(profile.id);
-      if (res.matched) {
+      if ((res as { matched?: boolean; is_match?: boolean }).matched || (res as { matched?: boolean; is_match?: boolean }).is_match) {
         setMatchPopup(profile.username);
         setTimeout(() => setMatchPopup(null), 3000);
       }

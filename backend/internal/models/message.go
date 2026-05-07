@@ -28,6 +28,9 @@ type Message struct {
 	SenderID       uint   `gorm:"not null;index" json:"sender_id"`
 	Content        string `gorm:"type:text;not null" json:"content"`
 	ImageURL       string `gorm:"size:500" json:"image_url,omitempty"`
+	AudioURL       string `gorm:"size:500" json:"audio_url,omitempty"`
+	CallType       string `gorm:"size:10" json:"call_type,omitempty"` // audio, video
+	CallRoom       string `gorm:"size:100" json:"call_room,omitempty"`
 	IsRead         bool   `gorm:"default:false" json:"is_read"`
 	IsEdited       bool   `gorm:"default:false" json:"is_edited"`
 

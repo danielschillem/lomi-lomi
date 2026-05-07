@@ -246,6 +246,7 @@ func main() {
 	// Selfie verification
 	uploadRL := middleware.RateLimitUpload()
 	api.Post("/messages/upload-image", jwt, uploadRL, messageHandler.UploadMessageImage)
+	api.Post("/messages/upload-audio", jwt, uploadRL, messageHandler.UploadMessageAudio)
 	api.Post("/upload/selfie", jwt, uploadRL, profileExtHandler.UploadSelfie)
 	api.Post("/upload/avatar", jwt, uploadRL, uploadHandler.UploadAvatar)
 

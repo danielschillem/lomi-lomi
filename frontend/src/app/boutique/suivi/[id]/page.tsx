@@ -261,7 +261,7 @@ export default function SuiviLivraisonPage() {
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Enlèvement</p>
               <p className="text-sm font-medium text-gray-800">
-                {delivery.pickup_address || "–"}
+                {delivery.pickup_address || "-"}
               </p>
             </div>
           </div>
@@ -272,7 +272,7 @@ export default function SuiviLivraisonPage() {
             <div>
               <p className="text-xs text-gray-400 mb-0.5">Livraison</p>
               <p className="text-sm font-medium text-gray-800">
-                {delivery.dropoff_address || "–"}
+                {delivery.dropoff_address || "-"}
               </p>
             </div>
           </div>

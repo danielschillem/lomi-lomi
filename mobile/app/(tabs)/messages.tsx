@@ -8,9 +8,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import { getConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
@@ -28,6 +30,8 @@ export default function MessagesScreen() {
   const { user } = useAuth();
   const { colors } = useTheme();
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "unread" | "online">("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -104,16 +108,73 @@ export default function MessagesScreen() {
     );
   }
 
+  const unreadCount = conversations.filter((c) => (c.unread_count || 0) > 0).length;
+  const filtered = conversations.filter((item) => {
+    const other = getConversationOtherUser(item, user?.id);
+    const name = (other.username || "").toLowerCase();
+    const msg = getConversationLastMessageContent(item).toLowerCase();
+    const q = search.trim().toLowerCase();
+    const matchesSearch = !q || name.includes(q) || msg.includes(q);
+    if (!matchesSearch) return false;
+    if (filter === "unread") return (item.unread_count || 0) > 0;
+    if (filter === "online") return !!other.is_online;
+    return true;
+  });
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={styles.header}>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Discussions</Text>
+        <View style={[styles.searchWrap, { backgroundColor: colors.cardSecondary }]}>
+          <Ionicons name="search" size={18} color={colors.textMuted} />
+          <TextInput
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Rechercher..."
+            placeholderTextColor={colors.placeholder}
+            style={[styles.searchInput, { color: colors.inputText }]}
+          />
+        </View>
+        <View style={styles.filtersRow}>
+          {[
+            { key: "all", label: "Toutes" },
+            { key: "unread", label: `Non lues ${unreadCount}` },
+            { key: "online", label: "En ligne" },
+          ].map((opt) => {
+            const active = filter === (opt.key as "all" | "unread" | "online");
+            return (
+              <TouchableOpacity
+                key={opt.key}
+                onPress={() => setFilter(opt.key as "all" | "unread" | "online")}
+                style={[
+                  styles.filterChip,
+                  {
+                    backgroundColor: active ? colors.accent : colors.background,
+                    borderColor: active ? colors.accent : colors.border,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.filterChipText,
+                    { color: active ? "#fff" : colors.textSecondary },
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
       <FlatList
-        data={conversations.slice(0, visibleCount)}
+        data={filtered.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
         ListEmptyComponent={
           <ScreenState
             mode="empty"
-            title="Pas encore de conversations"
-            subtitle="Commence par liker des profils !"
+            title="Aucune conversation"
+            subtitle="Aucun résultat pour ce filtre."
           />
         }
         refreshControl={
@@ -175,7 +236,7 @@ export default function MessagesScreen() {
               </View>
               <View style={styles.textWrap}>
                 <View style={styles.topRow}>
-                  <Text style={[styles.name, { color: colors.text }]}>
+                  <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
                     {otherUser.username}
                   </Text>
                   {!!messageTime && (
@@ -204,16 +265,53 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    gap: 10,
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: "800",
+  },
+  searchWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 24,
+    paddingHorizontal: 14,
+    height: 48,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  filtersRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  filterChipText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
   footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
   },
   rowDisabled: { opacity: 0.7 },
   avatarWrap: { position: "relative" },
-  avatar: { width: 56, height: 56, borderRadius: 28 },
+  avatar: { width: 52, height: 52, borderRadius: 26 },
   onlineDot: {
     position: "absolute",
     bottom: 2,
@@ -224,7 +322,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#22c55e",
     borderWidth: 2,
   },
-  textWrap: { flex: 1, marginLeft: 12 },
+  textWrap: { flex: 1, marginLeft: 10 },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -236,7 +334,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
-  name: { fontSize: 16, fontWeight: "600" },
+  name: { fontSize: 15, fontWeight: "700", flex: 1, marginRight: 8 },
   time: { fontSize: 12 },
   lastMsg: { fontSize: 14, flex: 1, marginRight: 8 },
   badge: {

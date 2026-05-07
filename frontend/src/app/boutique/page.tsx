@@ -21,6 +21,20 @@ import {
   AlertCircle,
   RefreshCw,
   Loader2,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  Wheat,
+  Scissors,
+  Gem,
+  Palette,
+  Flame,
+  Gift,
+  Wind,
+  Sprout,
+  Tag,
+  type LucideIcon,
 } from "lucide-react";
 import {
   getProducts,
@@ -28,6 +42,7 @@ import {
   getOMUssdCode,
   confirmOMPayment,
   getOrders,
+  getDeliveryAddresses,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 
@@ -59,6 +74,15 @@ interface Order {
   total_amount: number;
   status: string;
   items: OrderItem[];
+}
+
+interface DeliveryAddress {
+  id: number;
+  label: string;
+  full_name: string;
+  address: string;
+  city: string;
+  is_default: boolean;
 }
 
 export default function BoutiquePage() {
@@ -100,6 +124,10 @@ function BoutiqueContent() {
   const [otp, setOtp] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [addresses, setAddresses] = useState<DeliveryAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<"default" | "asc" | "desc">("default");
 
   useEffect(() => {
     getProducts()
@@ -107,6 +135,28 @@ function BoutiqueContent() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("boutique_cart");
+    if (saved) {
+      try { setCart(JSON.parse(saved)); } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("boutique_cart", JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    if (!user) return;
+    getDeliveryAddresses()
+      .then((res) => {
+        setAddresses(res.addresses);
+        const def = res.addresses.find((a) => a.is_default);
+        if (def) setSelectedAddressId(def.id);
+      })
+      .catch(() => {});
+  }, [user]);
 
   const loadOrders = useCallback(async () => {
     if (!user) return;
@@ -120,9 +170,40 @@ function BoutiqueContent() {
     setOrdersLoading(false);
   }, [user]);
 
-  const filtered = category
-    ? products.filter((p) => p.category === category)
-    : products;
+  const categoryIcons: Record<string, LucideIcon> = {
+    soins: Sparkles,
+    alimentaire: Wheat,
+    textiles: Scissors,
+    bijoux: Gem,
+    artisanat: Palette,
+    ambiance: Flame,
+    coffrets: Gift,
+    yoga: Wind,
+    épices: Sprout,
+  };
+  const getCategoryIcon = (cat: string) => {
+    const Icon = categoryIcons[cat] ?? Tag;
+    return <Icon className="w-3 h-3 inline-block -mt-px" />;
+  };
+
+  const filtered = products
+    .filter((p) => {
+      if (category && p.category !== category) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          p.name.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === "asc") return a.price - b.price;
+      if (sortBy === "desc") return b.price - a.price;
+      return 0;
+    });
 
   const categories = [
     ...new Set(products.map((p) => p.category).filter(Boolean)),
@@ -178,6 +259,7 @@ function BoutiqueContent() {
           product_id: i.product.id,
           quantity: i.quantity,
         })),
+        ...(selectedAddressId ? { delivery_address_id: selectedAddressId } : {}),
       })) as unknown as Order;
       setCurrentOrderId(order.id);
       // Get USSD code
@@ -255,6 +337,17 @@ function BoutiqueContent() {
               </span>
             )}
           </button>
+        </div>
+
+        {/* Hero banner */}
+        <div className="relative mb-8 rounded-2xl overflow-hidden bg-linear-to-br from-violet-700 via-purple-600 to-fuchsia-500 px-6 py-7">
+          <div className="relative z-10">
+            <p className="text-violet-200 text-[10px] font-semibold uppercase tracking-widest mb-1.5">Burkina Faso · Sahel</p>
+            <h2 className="text-2xl font-bold text-white mb-1 leading-tight">Artisanat & Bien-être</h2>
+            <p className="text-violet-200/80 text-sm max-w-xs leading-relaxed">Cosmétiques naturels, bijoux et saveurs du Sahel · direct artisans</p>
+          </div>
+          <div className="absolute right-5 bottom-2 text-7xl opacity-[0.15] select-none pointer-events-none leading-none">🌿</div>
+          <Sparkles className="absolute right-16 top-4 w-8 h-8 text-white opacity-[0.12] pointer-events-none" />
         </div>
 
         {/* Order success */}
@@ -400,30 +493,59 @@ function BoutiqueContent() {
           </div>
         )}
 
+        {/* Search + Sort */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/60" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Rechercher un produit…"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition"
+            />
+          </div>
+          <div className="relative shrink-0">
+            <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted/60 pointer-events-none" />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "default" | "asc" | "desc")}
+              title="Trier les produits"
+              className="pl-8 pr-3 py-2.5 bg-surface border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition appearance-none cursor-pointer"
+            >
+              <option value="default">Trier</option>
+              <option value="asc">Prix ↑</option>
+              <option value="desc">Prix ↓</option>
+            </select>
+          </div>
+        </div>
+
         {/* Categories */}
         {categories.length > 0 && (
-          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
             <button
+              type="button"
               onClick={() => setCategory("")}
               className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                 category === ""
-                  ? "bg-violet-500/20 text-violet-600 border border-violet-200"
-                  : "bg-surface text-muted border border-border hover:border-border"
+                  ? "bg-violet-500/20 text-violet-600 border border-violet-300"
+                  : "bg-surface text-muted border border-border hover:border-violet-200 hover:text-violet-600"
               }`}
             >
               Tous
             </button>
             {categories.map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setCategory(cat)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap capitalize ${
                   category === cat
-                    ? "bg-violet-500/20 text-violet-600 border border-violet-200"
-                    : "bg-surface text-muted border border-border hover:border-border"
+                    ? "bg-violet-500/20 text-violet-600 border border-violet-300"
+                    : "bg-surface text-muted border border-border hover:border-violet-200 hover:text-violet-600"
                 }`}
               >
-                {cat}
+                {getCategoryIcon(cat)} {cat}
               </button>
             ))}
           </div>
@@ -435,63 +557,100 @@ function BoutiqueContent() {
             Chargement des produits...
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12">
-            <Package className="w-16 h-16 text-muted/60 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Aucun produit</h2>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto mb-4">
+              {search ? (
+                <Search className="w-7 h-7 text-muted/50" />
+              ) : (
+                <Package className="w-7 h-7 text-muted/50" />
+              )}
+            </div>
+            <h2 className="text-base font-semibold mb-1">
+              {search ? "Aucun résultat" : "Aucun produit"}
+            </h2>
             <p className="text-muted text-sm">
-              La boutique sera bientôt approvisionnée.
+              {search
+                ? `Aucun produit ne correspond à « ${search} »`
+                : "La boutique sera bientôt approvisionnée."}
             </p>
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="mt-4 text-xs text-violet-600 hover:underline"
+              >
+                Effacer la recherche
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {filtered.map((product) => (
               <div
                 key={product.id}
-                className="bg-white/90 border border-border rounded-2xl overflow-hidden hover:border-violet-400/30 transition group"
+                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md hover:border-violet-200 transition-all duration-200 group flex flex-col"
               >
-                <div className="h-48 bg-surface-2 flex items-center justify-center">
+                {/* Image */}
+                <div className="relative h-52 bg-gray-50 overflow-hidden shrink-0">
                   {product.image_url ? (
                     <Image
                       src={product.image_url}
                       alt={product.name}
-                      width={640}
-                      height={384}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <Package className="w-12 h-12 text-muted/60" />
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Package className="w-12 h-12 text-gray-300" />
+                    </div>
                   )}
-                </div>
-                <div className="p-5">
-                  <h3 className="font-semibold text-sm mb-1 group-hover:text-violet-600 transition truncate">
-                    {product.name}
-                  </h3>
+                  {/* Out of stock overlay */}
+                  {product.stock === 0 && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <span className="bg-white/90 text-gray-700 text-[11px] font-bold px-3 py-1.5 rounded-full tracking-wide">
+                        Rupture de stock
+                      </span>
+                    </div>
+                  )}
+                  {/* Category badge */}
                   {product.category && (
-                    <span className="text-xs text-muted capitalize">
-                      {product.category}
+                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-600 text-[10px] font-semibold px-2.5 py-1 rounded-full capitalize shadow-sm">
+                      {getCategoryIcon(product.category)} {product.category}
                     </span>
                   )}
-                  <p className="text-muted text-xs mt-2 line-clamp-2 leading-relaxed">
+                  {/* Low stock badge */}
+                  {product.stock > 0 && product.stock <= 5 && (
+                    <span className="absolute top-3 right-3 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      Plus que {product.stock} !
+                    </span>
+                  )}
+                </div>
+                {/* Info */}
+                <div className="p-4 flex flex-col flex-1">
+                  <h3 className="font-semibold text-sm text-gray-900 mb-1.5 line-clamp-2 group-hover:text-violet-700 transition-colors leading-snug">
+                    {product.name}
+                  </h3>
+                  <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed flex-1">
                     {product.description}
                   </p>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-lg font-bold text-violet-600">
-                      {Math.round(product.price)} FCFA
-                    </span>
+                    <div>
+                      <span className="text-lg font-bold text-violet-600">
+                        {Math.round(product.price).toLocaleString("fr-FR")}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-1">FCFA</span>
+                    </div>
                     <button
+                      type="button"
                       onClick={() => addToCart(product)}
                       disabled={product.stock === 0}
-                      className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-medium px-3 py-2 rounded-lg transition"
+                      className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Ajouter
                     </button>
                   </div>
-                  {product.stock === 0 && (
-                    <p className="text-red-400 text-xs mt-2">
-                      Rupture de stock
-                    </p>
-                  )}
                 </div>
               </div>
             ))}
@@ -606,6 +765,45 @@ function BoutiqueContent() {
                   </Link>
                 ) : checkoutStep === "cart" ? (
                   <div className="space-y-3">
+                    {/* Adresse de livraison */}
+                    <div>
+                      <div className="flex items-center gap-1 mb-1.5">
+                        <MapPin className="w-3 h-3 text-gray-400" />
+                        <span className="text-xs font-medium text-gray-500">Adresse de livraison</span>
+                      </div>
+                      {addresses.length === 0 ? (
+                        <Link
+                          href="/settings/addresses"
+                          className="text-xs text-violet-600 hover:underline"
+                        >
+                          + Ajouter une adresse de livraison
+                        </Link>
+                      ) : (
+                        <div className="space-y-1.5">
+                          {addresses.map((addr) => (
+                            <button
+                              key={addr.id}
+                              type="button"
+                              onClick={() => setSelectedAddressId(addr.id)}
+                              className={`w-full text-left text-xs rounded-xl border px-3 py-2 transition ${
+                                selectedAddressId === addr.id
+                                  ? "border-violet-400 bg-violet-50 text-violet-900"
+                                  : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300"
+                              }`}
+                            >
+                              <div className="font-medium">{addr.label || addr.full_name}</div>
+                              <div className="text-gray-400 mt-0.5">{addr.address}, {addr.city}</div>
+                            </button>
+                          ))}
+                          <Link
+                            href="/settings/addresses"
+                            className="text-xs text-violet-600 hover:underline block"
+                          >
+                            + Gérer mes adresses
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <label className="text-xs font-medium text-gray-500 mb-1.5 block">
                         Numéro Orange Money

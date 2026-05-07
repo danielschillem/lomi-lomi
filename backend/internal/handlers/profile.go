@@ -109,6 +109,7 @@ func (h *ProfileHandler) UpdateProfile(c *fiber.Ctx) error {
 
 func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
+	recycledMode := false
 
 	var currentUser models.User
 	if err := database.DB.First(&currentUser, userID).Error; err != nil {
@@ -149,11 +150,11 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 			now := time.Now()
 			if prefs.MaxAge > 0 {
 				minBirth := now.AddDate(-prefs.MaxAge-1, 0, 0)
-				q = q.Where("birth_date >= ?", minBirth)
+				q = q.Where("(birth_date IS NULL OR birth_date >= ?)", minBirth)
 			}
 			if prefs.MinAge > 0 {
 				maxBirth := now.AddDate(-prefs.MinAge, 0, 0)
-				q = q.Where("birth_date <= ?", maxBirth)
+				q = q.Where("(birth_date IS NULL OR birth_date <= ?)", maxBirth)
 			}
 		}
 		return q
@@ -170,6 +171,7 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 		baseExclude = append(baseExclude, userID)
 		baseExclude = append(baseExclude, likedIDs...)
 		buildQuery(baseExclude).Limit(20).Find(&users)
+		recycledMode = len(users) > 0
 	}
 
 	// Batch-load preferences for all discovered users (avoid N+1)
@@ -222,6 +224,12 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 		}
 
 		results = append(results, dp)
+	}
+
+	if recycledMode {
+		c.Set("X-Discover-Recycled", "true")
+	} else {
+		c.Set("X-Discover-Recycled", "false")
 	}
 
 	return c.JSON(results)
@@ -412,7 +420,7 @@ func (h *ProfileHandler) SearchProfiles(c *fiber.Ctx) error {
 	var users []models.User
 	database.DB.
 		Where("id NOT IN ?", excludeIDs).
-		Where("username LIKE ? OR city LIKE ?", search, search).
+		Where("username ILIKE ? OR city ILIKE ?", search, search).
 		Limit(20).
 		Find(&users)
 

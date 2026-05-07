@@ -143,7 +143,22 @@ export function updatePreferences(data: Record<string, unknown>) {
 
 /* ---- Discover ---- */
 export function discover() {
-  return request<Record<string, unknown>[]>("/discover");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  return fetch(`${API}/discover`, { headers }).then(async (res) => {
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Erreur ${res.status}`);
+    }
+    const profiles = (await res.json()) as Record<string, unknown>[];
+    const recycled = res.headers.get("X-Discover-Recycled") === "true";
+    return { profiles, recycled };
+  });
 }
 
 export function nearbyUsers(radius: number = 10) {
@@ -189,6 +204,11 @@ export function sendMessage(data: {
   receiver_id: number;
   content: string;
   image_url?: string;
+  audio_url?: string;
+  call_type?: "audio" | "video";
+  call_room?: string;
+  latitude?: number;
+  longitude?: number;
 }) {
   return request<Record<string, unknown>>("/messages", {
     method: "POST",
@@ -225,6 +245,18 @@ export function uploadMessageImage(file: File) {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: formData,
   }).then((r) => r.json() as Promise<{ image_url: string }>);
+}
+
+export function uploadMessageAudio(file: File) {
+  const formData = new FormData();
+  formData.append("audio", file);
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  return fetch(`${API}/messages/upload-audio`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  }).then((r) => r.json() as Promise<{ audio_url: string }>);
 }
 
 export function getOrCreateConversation(userId: number) {
@@ -341,6 +373,7 @@ export function getProduct(id: number) {
 
 export function createOrder(data: {
   items: { product_id: number; quantity: number }[];
+  delivery_address_id?: number;
 }) {
   return request<Record<string, unknown>>("/shop/orders", {
     method: "POST",

@@ -19,10 +19,13 @@ import {
   CheckCheck,
   MapPin,
   Navigation,
+  Phone,
+  Video,
   Car,
   X,
   Loader2,
   Image as ImageIcon,
+  Mic,
   Search,
   Trash2,
   Pencil,
@@ -43,6 +46,7 @@ import {
   editMessage,
   searchMessages,
   uploadMessageImage,
+  uploadMessageAudio,
   initiateConnectionPayment,
   confirmConnectionPayment,
   checkConnectionPaid,
@@ -56,6 +60,11 @@ interface Message {
   sender_id: number;
   content: string;
   image_url?: string;
+  audio_url?: string;
+  call_type?: "audio" | "video";
+  call_room?: string;
+  latitude?: number;
+  longitude?: number;
   created_at: string;
   is_read: boolean;
   is_edited?: boolean;
@@ -144,7 +153,9 @@ export default function ChatPage() {
 
   // Image upload state
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingAudio, setUploadingAudio] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
 
   // Connection payment state
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -331,6 +342,72 @@ export default function ChatPage() {
     }
   }
 
+  async function handleAudioUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !receiverId) return;
+    setUploadingAudio(true);
+    try {
+      const { audio_url } = await uploadMessageAudio(file);
+      const res = (await sendMessage({
+        receiver_id: receiverId,
+        content: "",
+        audio_url,
+      })) as unknown as Message;
+      setMessages((prev) => [...prev, res]);
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch {
+      // ignore
+    } finally {
+      setUploadingAudio(false);
+      if (audioInputRef.current) audioInputRef.current.value = "";
+    }
+  }
+
+  async function startCall(type: "audio" | "video") {
+    if (!receiverId) return;
+    const room = `texto-${conversationId}-${Date.now()}`;
+    try {
+      const res = (await sendMessage({
+        receiver_id: receiverId,
+        content:
+          type === "video"
+            ? "Invitation appel vidéo"
+            : "Invitation appel audio",
+        call_type: type,
+        call_room: room,
+      })) as unknown as Message;
+      setMessages((prev) => [...prev, res]);
+      const url =
+        type === "video"
+          ? `https://meet.jit.si/${room}`
+          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+      window.open(url, "_blank");
+    } catch {
+      // ignore
+    }
+  }
+
+  function shareCurrentLocationInChat() {
+    if (!receiverId) return;
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = (await sendMessage({
+            receiver_id: receiverId,
+            content: "Position partagée",
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          })) as unknown as Message;
+          setMessages((prev) => [...prev, res]);
+        } catch {
+          // ignore
+        }
+      },
+      () => {},
+      { enableHighAccuracy: true },
+    );
+  }
+
   // Listen for WS events via shared provider
   useEffect(() => {
     if (!user) return;
@@ -345,6 +422,12 @@ export default function ChatPage() {
           id: d.id as number,
           sender_id: d.sender_id as number,
           content: d.content as string,
+          image_url: d.image_url as string | undefined,
+          audio_url: d.audio_url as string | undefined,
+          call_type: d.call_type as "audio" | "video" | undefined,
+          call_room: d.call_room as string | undefined,
+          latitude: d.latitude as number | undefined,
+          longitude: d.longitude as number | undefined,
           created_at: d.created_at as string,
           is_read: d.is_read as boolean,
           sender: d.sender as Message["sender"],
@@ -788,6 +871,22 @@ export default function ChatPage() {
           )}
           {/* Action buttons */}
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => startCall("audio")}
+              className="p-2 rounded-lg text-muted hover:text-green-600 hover:bg-gray-100 transition"
+              title="Appel audio"
+            >
+              <Phone className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => startCall("video")}
+              className="p-2 rounded-lg text-muted hover:text-pink-600 hover:bg-gray-100 transition"
+              title="Appel vidéo"
+            >
+              <Video className="w-4 h-4" />
+            </button>
             <button
               onClick={() => {
                 setShowSearch(!showSearch);
@@ -1296,6 +1395,45 @@ export default function ChatPage() {
                             />
                           </a>
                         )}
+                        {msg.audio_url && (
+                          <audio
+                            controls
+                            src={msg.audio_url}
+                            className="mb-2 w-full max-w-xs"
+                          />
+                        )}
+                        {msg.call_type && msg.call_room && (
+                          <button
+                            onClick={() =>
+                              window.open(
+                                msg.call_type === "video"
+                                  ? `https://meet.jit.si/${msg.call_room}`
+                                  : `https://meet.jit.si/${msg.call_room}#config.startWithVideoMuted=true`,
+                                "_blank",
+                              )
+                            }
+                            className="mb-2 inline-flex items-center gap-2 rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs"
+                          >
+                            {msg.call_type === "video" ? (
+                              <Video className="h-3.5 w-3.5" />
+                            ) : (
+                              <Phone className="h-3.5 w-3.5" />
+                            )}
+                            Rejoindre l&apos;appel
+                          </button>
+                        )}
+                        {typeof msg.latitude === "number" &&
+                          typeof msg.longitude === "number" && (
+                            <button
+                              onClick={() =>
+                                openInMaps(msg.latitude as number, msg.longitude as number)
+                              }
+                              className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/20 px-3 py-1.5 text-xs"
+                            >
+                              <MapPin className="h-3.5 w-3.5" />
+                              Ouvrir la position
+                            </button>
+                          )}
                         {msg.content && <p>{msg.content}</p>}
                       </>
                     )}
@@ -1361,6 +1499,14 @@ export default function ChatPage() {
             onChange={handleImageUpload}
             title="Envoyer une image"
           />
+          <input
+            type="file"
+            ref={audioInputRef}
+            accept="audio/*"
+            className="hidden"
+            onChange={handleAudioUpload}
+            title="Envoyer une note vocale"
+          />
           <button
             type="button"
             onClick={() => imageInputRef.current?.click()}
@@ -1373,6 +1519,27 @@ export default function ChatPage() {
             ) : (
               <ImageIcon className="w-4 h-4" />
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => audioInputRef.current?.click()}
+            disabled={uploadingAudio}
+            title="Envoyer une note vocale"
+            className="w-10 h-10 rounded-full text-muted hover:text-violet-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
+          >
+            {uploadingAudio ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Mic className="w-4 h-4" />
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={shareCurrentLocationInChat}
+            title="Partager la position"
+            className="w-10 h-10 rounded-full text-muted hover:text-blue-600 hover:bg-surface-2 flex items-center justify-center transition"
+          >
+            <MapPin className="w-4 h-4" />
           </button>
           <input
             type="text"

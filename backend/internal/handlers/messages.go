@@ -141,6 +141,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		ReceiverID uint     `json:"receiver_id"`
 		Content    string   `json:"content"`
 		ImageURL   string   `json:"image_url"`
+		AudioURL   string   `json:"audio_url"`
+		CallType   string   `json:"call_type,omitempty"`
+		CallRoom   string   `json:"call_room,omitempty"`
 		Latitude   *float64 `json:"latitude,omitempty"`
 		Longitude  *float64 `json:"longitude,omitempty"`
 		ViewOnce   bool     `json:"view_once,omitempty"`
@@ -153,9 +156,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		})
 	}
 
-	if req.Content == "" && req.ImageURL == "" {
+	if req.Content == "" && req.ImageURL == "" && req.AudioURL == "" && req.CallType == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Contenu ou image requis",
+			"error": "Contenu, image, audio ou appel requis",
 		})
 	}
 	if req.ReceiverID == 0 {
@@ -217,6 +220,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 		SenderID:       userID,
 		Content:        req.Content,
 		ImageURL:       req.ImageURL,
+		AudioURL:       req.AudioURL,
+		CallType:       req.CallType,
+		CallRoom:       req.CallRoom,
 		Latitude:       req.Latitude,
 		Longitude:      req.Longitude,
 		ViewOnce:       req.ViewOnce,
@@ -243,6 +249,9 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 				"sender_id":       msg.SenderID,
 				"content":         msg.Content,
 				"image_url":       msg.ImageURL,
+				"audio_url":       msg.AudioURL,
+				"call_type":       msg.CallType,
+				"call_room":       msg.CallRoom,
 				"latitude":        msg.Latitude,
 				"longitude":       msg.Longitude,
 				"view_once":       msg.ViewOnce,
@@ -257,6 +266,14 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	pushBody := msg.Content
 	if pushBody == "" && msg.ImageURL != "" {
 		pushBody = "Image"
+	} else if pushBody == "" && msg.AudioURL != "" {
+		pushBody = "Note vocale"
+	} else if pushBody == "" && msg.CallType != "" {
+		if msg.CallType == "video" {
+			pushBody = "Invitation appel vidéo"
+		} else {
+			pushBody = "Invitation appel audio"
+		}
 	}
 	SendPushToUser(req.ReceiverID, msg.Sender.Username, pushBody, map[string]interface{}{
 		"type":            "message",
@@ -515,4 +532,48 @@ func (h *MessageHandler) UploadMessageImage(c *fiber.Ctx) error {
 	imageURL := baseURL + "/uploads/" + filename
 
 	return c.JSON(fiber.Map{"image_url": imageURL})
+}
+
+// UploadMessageAudio uploads an audio clip for use in a chat message.
+func (h *MessageHandler) UploadMessageAudio(c *fiber.Ctx) error {
+	_ = c.Locals("userID").(uint)
+
+	file, err := c.FormFile("audio")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Audio requis"})
+	}
+
+	// Max 20MB
+	if file.Size > 20*1024*1024 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Audio trop volumineux (max 20 Mo)"})
+	}
+
+	ext := strings.ToLower(filepath.Ext(file.Filename))
+	allowed := map[string]bool{".mp3": true, ".m4a": true, ".aac": true, ".ogg": true, ".wav": true, ".webm": true}
+	if !allowed[ext] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Format non supporté (mp3, m4a, aac, ogg, wav, webm)"})
+	}
+
+	b := make([]byte, 16)
+	rand.Read(b)
+	filename := fmt.Sprintf("aud_%s%s", hex.EncodeToString(b), ext)
+
+	uploadDir := "uploads"
+	if h.Config != nil {
+		uploadDir = h.Config.UploadDir
+	}
+	os.MkdirAll(uploadDir, 0755)
+	savePath := filepath.Join(uploadDir, filename)
+
+	if err := c.SaveFile(file, savePath); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Erreur lors de l'upload"})
+	}
+
+	baseURL := ""
+	if h.Config != nil {
+		baseURL = h.Config.BaseURL
+	}
+	audioURL := baseURL + "/uploads/" + filename
+
+	return c.JSON(fiber.Map{"audio_url": audioURL})
 }

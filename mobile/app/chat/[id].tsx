@@ -11,8 +11,10 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Linking,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -35,6 +37,11 @@ interface Message {
   id: number;
   content: string;
   image_url?: string;
+  audio_url?: string;
+  call_type?: "audio" | "video";
+  call_room?: string;
+  latitude?: number;
+  longitude?: number;
   sender_id: number;
   created_at: string;
   is_read?: boolean;
@@ -111,6 +118,11 @@ export default function ChatScreen() {
           id: Number(data.id || Date.now()),
           content: String(data.content || ""),
           image_url: data.image_url ? String(data.image_url) : undefined,
+          audio_url: data.audio_url ? String(data.audio_url) : undefined,
+          call_type: data.call_type ? (String(data.call_type) as "audio" | "video") : undefined,
+          call_room: data.call_room ? String(data.call_room) : undefined,
+          latitude: typeof data.latitude === "number" ? (data.latitude as number) : undefined,
+          longitude: typeof data.longitude === "number" ? (data.longitude as number) : undefined,
           sender_id: Number(data.sender_id || 0),
           created_at: String(data.created_at || new Date().toISOString()),
           is_read: Boolean(data.is_read),
@@ -280,6 +292,59 @@ export default function ChatScreen() {
     setSending(false);
   };
 
+  const shareLocation = async () => {
+    if (!isValidReceiverId || sending) return;
+    const perm = await Location.requestForegroundPermissionsAsync();
+    if (perm.status !== "granted") {
+      Alert.alert("Position", "Autorise la localisation pour partager ta position.");
+      return;
+    }
+    const loc = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.Balanced,
+    });
+    try {
+      const res = await sendMessage({
+        receiver_id: otherUserId,
+        content: "Position partagée",
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+      if (res) {
+        const sent = res as unknown as Message;
+        setMessages((prev) => [sent, ...prev]);
+      }
+    } catch {
+      Alert.alert("Position", "Impossible de partager la position.");
+    }
+  };
+
+  const startCall = async (type: "audio" | "video") => {
+    if (!isValidReceiverId || sending) return;
+    const room = `texto-${conversationId}-${Date.now()}`;
+    try {
+      const res = await sendMessage({
+        receiver_id: otherUserId,
+        content:
+          type === "video"
+            ? "Invitation appel vidéo"
+            : "Invitation appel audio",
+        call_type: type,
+        call_room: room,
+      });
+      if (res) {
+        const sent = res as unknown as Message;
+        setMessages((prev) => [sent, ...prev]);
+      }
+      const url =
+        type === "video"
+          ? `https://meet.jit.si/${room}`
+          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+      await Linking.openURL(url);
+    } catch {
+      Alert.alert("Appel", "Impossible de démarrer l'appel.");
+    }
+  };
+
   const onTypingChange = (value: string) => {
     setText(value);
     if (!isValidReceiverId || !value.trim()) return;
@@ -359,6 +424,20 @@ export default function ChatScreen() {
       <Stack.Screen options={{ title: name || "Chat", headerBackTitle: "Retour" }} />
 
       <View style={styles.searchRow}>
+        <TouchableOpacity
+          style={[styles.iconBtn, { backgroundColor: colors.cardSecondary }]}
+          onPress={() => startCall("audio")}
+          disabled={sending || !isValidReceiverId}
+        >
+          <Ionicons name="call-outline" size={18} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.iconBtn, { backgroundColor: colors.cardSecondary }]}
+          onPress={() => startCall("video")}
+          disabled={sending || !isValidReceiverId}
+        >
+          <Ionicons name="videocam-outline" size={18} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+        </TouchableOpacity>
         <TextInput
           style={[styles.searchInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={searchText}
@@ -425,6 +504,45 @@ export default function ChatScreen() {
               {!!item.image_url && (
                 <Image source={{ uri: item.image_url }} style={styles.msgImage} />
               )}
+              {!!item.audio_url && (
+                <TouchableOpacity
+                  style={[styles.inlineAction, { backgroundColor: isMe ? "rgba(255,255,255,0.22)" : colors.border }]}
+                  onPress={() => Linking.openURL(item.audio_url as string)}
+                >
+                  <Ionicons name="play-circle-outline" size={16} color={isMe ? "#fff" : colors.text} />
+                  <Text style={{ color: isMe ? "#fff" : colors.text, fontSize: 12 }}>Lire la note vocale</Text>
+                </TouchableOpacity>
+              )}
+              {!!item.call_type && !!item.call_room && (
+                <TouchableOpacity
+                  style={[styles.inlineAction, { backgroundColor: isMe ? "rgba(255,255,255,0.22)" : colors.border }]}
+                  onPress={() =>
+                    Linking.openURL(
+                      item.call_type === "video"
+                        ? `https://meet.jit.si/${item.call_room}`
+                        : `https://meet.jit.si/${item.call_room}#config.startWithVideoMuted=true`,
+                    )
+                  }
+                >
+                  <Ionicons
+                    name={item.call_type === "video" ? "videocam-outline" : "call-outline"}
+                    size={16}
+                    color={isMe ? "#fff" : colors.text}
+                  />
+                  <Text style={{ color: isMe ? "#fff" : colors.text, fontSize: 12 }}>
+                    Rejoindre l&apos;appel
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {typeof item.latitude === "number" && typeof item.longitude === "number" && (
+                <TouchableOpacity
+                  style={[styles.inlineAction, { backgroundColor: isMe ? "rgba(255,255,255,0.22)" : colors.border }]}
+                  onPress={() => Linking.openURL(`https://www.google.com/maps?q=${item.latitude},${item.longitude}`)}
+                >
+                  <Ionicons name="location-outline" size={16} color={isMe ? "#fff" : colors.text} />
+                  <Text style={{ color: isMe ? "#fff" : colors.text, fontSize: 12 }}>Voir la position</Text>
+                </TouchableOpacity>
+              )}
               {item.is_edited && (
                 <Text style={[styles.edited, { color: isMe ? "rgba(255,255,255,0.5)" : colors.textMuted }]}>
                   modifié
@@ -489,6 +607,13 @@ export default function ChatScreen() {
         >
           <Ionicons name="image" size={20} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
+          onPress={shareLocation}
+          disabled={sending || !isValidReceiverId}
+        >
+          <Ionicons name="location-outline" size={20} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
+        </TouchableOpacity>
         <TextInput
           style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText, marginRight: 8 }]}
           value={text}
@@ -544,6 +669,16 @@ const styles = StyleSheet.create({
   bubbleOther: { alignSelf: "flex-start", borderBottomLeftRadius: 4 },
   msgText: { fontSize: 15, lineHeight: 20 },
   msgImage: { width: 190, height: 190, borderRadius: 12, marginTop: 8 },
+  inlineAction: {
+    marginTop: 8,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    alignSelf: "flex-start",
+  },
   msgTime: { fontSize: 11, marginTop: 4, alignSelf: "flex-end" },
   edited: { fontSize: 10, marginTop: 2 },
   deliveryState: { fontSize: 10, marginTop: 2, alignSelf: "flex-end" },

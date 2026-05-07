@@ -1,8 +1,4 @@
-# Reverse proxy unique : un seul vhost qui sert IP et tout futur domaine.
-# Quand un domaine sera disponible, remplacer ":80" par "your-domain.com"
-# pour activer HTTPS automatique via Let's Encrypt.
-
-:80 {
+texto.life {
 	# API backend
 	handle /api/* {
 		reverse_proxy backend:8888
@@ -22,4 +18,9 @@
 	handle {
 		reverse_proxy frontend:3000
 	}
+}
+
+# Redirection www → apex
+www.texto.life {
+	redir https://texto.life{uri} permanent
 }

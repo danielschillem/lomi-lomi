@@ -77,6 +77,7 @@ export default function DiscoverPage() {
   const [searchResults, setSearchResults] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [recycledMode, setRecycledMode] = useState(false);
 
   // Radar
   const [showRadar, setShowRadar] = useState(false);
@@ -126,7 +127,8 @@ export default function DiscoverPage() {
     setLoading(true);
     try {
       const res = await discover();
-      setProfiles(res as unknown as Profile[]);
+      setProfiles(res.profiles as unknown as Profile[]);
+      setRecycledMode(Boolean(res.recycled));
       setCurrentIndex(0);
       setLastPassed(null);
     } catch {
@@ -284,7 +286,8 @@ export default function DiscoverPage() {
       await rewind();
       // Reload profiles
       const data = await discover();
-      setProfiles(data as unknown as Profile[]);
+      setProfiles(data.profiles as unknown as Profile[]);
+      setRecycledMode(Boolean(data.recycled));
       setCurrentIndex(0);
     } catch {
       // Premium required - redirect
@@ -491,6 +494,12 @@ export default function DiscoverPage() {
             </button>
           </div>
         </div>
+        {recycledMode && !done && (
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
+            <RefreshCw className="h-3.5 w-3.5" />
+            Profils déjà vus
+          </div>
+        )}
 
         {/* Filters panel */}
         {whoLikedTab && (
