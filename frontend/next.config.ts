@@ -13,6 +13,18 @@ const nextConfig: NextConfig = {
         protocol: "http",
         hostname: "134.209.229.141",
       },
+      {
+        protocol: "https",
+        hostname: "texto.life",
+      },
+      {
+        protocol: "https",
+        hostname: "www.texto.life",
+      },
+      {
+        protocol: "https",
+        hostname: "134.209.229.141",
+      },
     ],
   },
   async headers() {
