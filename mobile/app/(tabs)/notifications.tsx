@@ -346,7 +346,7 @@ export default function NotificationsScreen() {
                 styles.row,
                 { borderBottomColor: colors.border },
                 !item.is_read && { backgroundColor: colors.cardSecondary },
-                checked && { backgroundColor: "rgba(124,58,237,0.1)" },
+                checked && { backgroundColor: "rgba(37,99,235,0.1)" },
               ]}
               onPress={() => openNotification(item)}
               onLongPress={() => toggleSelection(item.id)}

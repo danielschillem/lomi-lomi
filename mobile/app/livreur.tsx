@@ -46,7 +46,7 @@ const STATUS_BG: Record<DeliveryStatus, string> = {
 const STATUS_FG: Record<DeliveryStatus, string> = {
   pending: "#fbbf24",
   accepted: "#60a5fa",
-  picking_up: "#a78bfa",
+  picking_up: "#60a5fa",
   picked_up: "#818cf8",
   delivering: "#fb923c",
   delivered: "#22c55e",
@@ -159,7 +159,7 @@ function ActiveCard({ d, onStatusUpdate, isSendingLocation, cardBg, textColor, m
 
       {isSendingLocation ? (
         <View style={styles.gpsRow}>
-          <Ionicons name="navigate" size={14} color="#a78bfa" />
+          <Ionicons name="navigate" size={14} color="#60a5fa" />
           <Text style={styles.gpsText}>Partage GPS actif</Text>
         </View>
       ) : null}
@@ -276,7 +276,7 @@ export default function LivreurScreen() {
           <Text style={[styles.headerTitle, { color: colors.text }]}>Espace livreur</Text>
           {sendingLocationFor ? (
             <View style={styles.gpsHeaderRow}>
-              <Ionicons name="navigate" size={11} color="#a78bfa" />
+              <Ionicons name="navigate" size={11} color="#60a5fa" />
               <Text style={styles.gpsHeaderText}>GPS actif · Mission #{sendingLocationFor}</Text>
             </View>
           ) : null}
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
   refreshBtn: { padding: 6 },
   headerTitle: { fontWeight: "700", fontSize: 16, textAlign: "center" },
   gpsHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 2 },
-  gpsHeaderText: { color: "#a78bfa", fontSize: 11 },
+  gpsHeaderText: { color: "#60a5fa", fontSize: 11 },
   tabs: { flexDirection: "row", paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, gap: 8 },
   tab: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   tabText: { fontSize: 13, fontWeight: "600" },
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   noteBox: { backgroundColor: "rgba(128,128,128,0.08)", padding: 10, borderRadius: 8, marginVertical: 8 },
   noteText: { fontSize: 12, fontStyle: "italic" },
   gpsRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingTop: 6 },
-  gpsText: { color: "#a78bfa", fontSize: 11 },
+  gpsText: { color: "#60a5fa", fontSize: 11 },
   actionBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 12, borderRadius: 10, gap: 8, marginTop: 12 },
   actionBtnDisabled: { opacity: 0.6 },
   actionBtnText: { color: "#fff", fontSize: 14, fontWeight: "600" },

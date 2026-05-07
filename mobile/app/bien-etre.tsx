@@ -167,7 +167,7 @@ export default function BienEtreScreen() {
                     </View>
                   ) : null}
                   {provider.mobile_service ? (
-                    <View style={[styles.imgBadge, { left: 10, backgroundColor: "rgba(124,58,237,0.95)" }]}>
+                    <View style={[styles.imgBadge, { left: 10, backgroundColor: "rgba(37,99,235,0.95)" }]}>
                       <Ionicons name="location" size={11} color="#fff" />
                       <Text style={styles.imgBadgeText}>À domicile</Text>
                     </View>

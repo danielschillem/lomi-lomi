@@ -387,7 +387,7 @@ export default function DiscoverScreen() {
           style={[styles.actionBtn, styles.likeBtn]}
           onPress={swipeRight}
         >
-          <Ionicons name="heart" size={32} color="#7c3aed" />
+          <Ionicons name="heart" size={32} color="#2563eb" />
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -416,12 +416,12 @@ const styles = StyleSheet.create({
   bio: { fontSize: 14, marginTop: 6 },
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
   tag: {
-    backgroundColor: "rgba(124,58,237,0.15)",
+    backgroundColor: "rgba(37,99,235,0.15)",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
-  tagText: { color: "#a78bfa", fontSize: 12, fontWeight: "500" },
+  tagText: { color: "#60a5fa", fontSize: 12, fontWeight: "500" },
   stamp: {
     position: "absolute",
     top: 50,
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   },
   likeStamp: {
     left: 20,
-    borderColor: "#7c3aed",
+    borderColor: "#2563eb",
     transform: [{ rotate: "-15deg" }],
   },
   nopeStamp: {
@@ -455,12 +455,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   nopeBtn: { borderColor: "#ef4444", backgroundColor: "rgba(239,68,68,0.1)" },
-  likeBtn: { borderColor: "#7c3aed", backgroundColor: "rgba(124,58,237,0.1)" },
+  likeBtn: { borderColor: "#2563eb", backgroundColor: "rgba(37,99,235,0.1)" },
   matchPopup: {
     position: "absolute",
     top: 60,
     zIndex: 100,
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#2563eb",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 20,
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   matchText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   reloadBtn: {
     marginTop: 24,
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#2563eb",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   reloadText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   updatesBanner: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#2563eb",
     borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 8,

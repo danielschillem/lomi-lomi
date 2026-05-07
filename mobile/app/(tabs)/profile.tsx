@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: "#7c3aed",
+    borderColor: "#2563eb",
   },
   name: { fontSize: 24, fontWeight: "bold", marginTop: 12 },
   role: { fontSize: 14, marginTop: 2 },

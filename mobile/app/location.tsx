@@ -153,7 +153,7 @@ export default function LocationScreen() {
             return (
               <TouchableOpacity
                 key={d}
-                style={[styles.durationChip, { borderColor: colors.border }, active && { borderColor: colors.accent, backgroundColor: "rgba(124,58,237,0.2)" }]}
+                style={[styles.durationChip, { borderColor: colors.border }, active && { borderColor: colors.accent, backgroundColor: "rgba(37,99,235,0.2)" }]}
                 onPress={() => setDuration(d)}
               >
                 <Text style={[{ color: colors.textMuted, fontSize: 12 }, active && { color: colors.accentLight, fontWeight: "600" }]}>{d} min</Text>

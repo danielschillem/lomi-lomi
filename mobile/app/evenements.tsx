@@ -185,7 +185,7 @@ export default function EvenementsScreen() {
 
                     <View style={styles.actions}>
                       <TouchableOpacity
-                        style={[styles.btn, userStatus === "going" ? { backgroundColor: colors.accent } : { backgroundColor: "rgba(124,58,237,0.15)" }]}
+                        style={[styles.btn, userStatus === "going" ? { backgroundColor: colors.accent } : { backgroundColor: "rgba(37,99,235,0.15)" }]}
                         onPress={() => handleAttend(event.id, "going")}
                       >
                         <Text style={[styles.btnText, userStatus === "going" && { color: "#fff" }]}>
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   cardBody: { padding: 14 },
   titleRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 6 },
   title: { fontWeight: "700", fontSize: 16, flex: 1 },
-  tag: { backgroundColor: "rgba(124,58,237,0.2)", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
+  tag: { backgroundColor: "rgba(37,99,235,0.2)", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 },
   tagText: { color: "#c4b5fd", fontSize: 10, fontWeight: "600", textTransform: "uppercase" },
   description: { fontSize: 13, marginBottom: 10 },
   metaRow: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 2 },

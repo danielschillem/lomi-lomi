@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
   time: { fontSize: 12 },
   lastMsg: { fontSize: 14, flex: 1, marginRight: 8 },
   badge: {
-    backgroundColor: "#7c3aed",
+    backgroundColor: "#2563eb",
     borderRadius: 12,
     minWidth: 24,
     height: 24,

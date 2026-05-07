@@ -665,7 +665,7 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   messagesList: { paddingHorizontal: 12, paddingVertical: 8 },
   bubble: { maxWidth: "80%", padding: 12, borderRadius: 16, marginVertical: 2 },
-  bubbleMe: { backgroundColor: "#7c3aed", alignSelf: "flex-end", borderBottomRightRadius: 4 },
+  bubbleMe: { backgroundColor: "#2563eb", alignSelf: "flex-end", borderBottomRightRadius: 4 },
   bubbleOther: { alignSelf: "flex-start", borderBottomLeftRadius: 4 },
   msgText: { fontSize: 15, lineHeight: 20 },
   msgImage: { width: 190, height: 190, borderRadius: 12, marginTop: 8 },

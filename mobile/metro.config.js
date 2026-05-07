@@ -17,4 +17,7 @@ if (blockList instanceof RegExp) {
   config.resolver.blockList = extraExclusions;
 }
 
+// Limit transform workers to avoid OOM on low-RAM machines during local builds
+config.maxWorkers = 2;
+
 module.exports = config;

@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   radarCircle: {
     position: "absolute",
     borderWidth: 1,
-    borderColor: "rgba(124,58,237,0.2)",
+    borderColor: "rgba(37,99,235,0.2)",
     borderRadius: 9999,
   },
   circle1: {
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     height: RADAR_SIZE,
     left: 0,
     top: 0,
-    borderColor: "rgba(124,58,237,0.15)",
+    borderColor: "rgba(37,99,235,0.15)",
   },
   crossH: {
     position: "absolute",
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "rgba(124,58,237,0.12)",
+    backgroundColor: "rgba(37,99,235,0.12)",
   },
   crossV: {
     position: "absolute",
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1,
-    backgroundColor: "rgba(124,58,237,0.12)",
+    backgroundColor: "rgba(37,99,235,0.12)",
   },
   sweep: {
     position: "absolute",
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     left: RADAR_CENTER,
     top: 0,
     borderBottomLeftRadius: RADAR_SIZE / 2,
-    backgroundColor: "rgba(124,58,237,0.3)",
+    backgroundColor: "rgba(37,99,235,0.3)",
     transformOrigin: "bottom left",
   },
   centerDot: {
@@ -376,13 +376,13 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "rgba(124,58,237,0.4)",
+    backgroundColor: "rgba(37,99,235,0.4)",
     justifyContent: "center",
     alignItems: "center",
   },
-  centerDotInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#7c3aed" },
+  centerDotInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#2563eb" },
   userDot: { position: "absolute", width: 32, height: 32 },
-  userAvatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 2, borderColor: "#7c3aed" },
+  userAvatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 2, borderColor: "#2563eb" },
   userAvatarPlaceholder: {
     width: 32,
     height: 32,
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0f0f1a",
   },
-  distLabel: { position: "absolute", color: "rgba(124,58,237,0.5)", fontSize: 10 },
+  distLabel: { position: "absolute", color: "rgba(37,99,235,0.5)", fontSize: 10 },
   userRow: {
     flexDirection: "row",
     alignItems: "center",

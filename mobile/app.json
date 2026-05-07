@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Texto",
+    "name": "Lomi Lomi",
     "slug": "texto",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#7c3aed"
+      "backgroundColor": "#0B1220"
     },
     "ios": {
       "supportsTablet": false,
@@ -20,7 +20,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#7c3aed"
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
+        "backgroundColor": "#0B1220"
       },
       "package": "com.lomilomi.app"
     },
@@ -42,7 +43,7 @@
       [
         "expo-notifications",
         {
-          "color": "#7c3aed"
+          "color": "#14B8A6"
         }
       ],
       "expo-asset",
@@ -57,8 +58,8 @@
       ]
     ],
     "extra": {
-      "apiUrl": "http://134.209.229.141/api/v1",
-      "wsUrl": "ws://134.209.229.141/ws"
+      "apiUrl": "https://texto.life/api/v1",
+      "wsUrl": "wss://texto.life/ws"
     }
   }
 }

@@ -138,7 +138,7 @@ export default function PremiumScreen() {
             return (
               <TouchableOpacity
                 key={plan.id}
-                style={[styles.planCard, { backgroundColor: colors.cardSecondary, borderColor: colors.border }, active && { borderColor: colors.accent, backgroundColor: "rgba(124,58,237,0.08)" }]}
+                style={[styles.planCard, { backgroundColor: colors.cardSecondary, borderColor: colors.border }, active && { borderColor: colors.accent, backgroundColor: "rgba(37,99,235,0.08)" }]}
                 onPress={() => setSelectedId(plan.id)}
               >
                 {plan.id === "yearly" ? (
