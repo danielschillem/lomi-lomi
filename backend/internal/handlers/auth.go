@@ -47,6 +47,9 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		})
 	}
 
+	req.Username = strings.TrimSpace(req.Username)
+	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
+
 	if req.Username == "" || req.Email == "" || req.Password == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Tous les champs sont requis",
@@ -80,13 +83,22 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		})
 	}
 
-	user := models.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: string(hashedPassword),
+	// Keep phone NULL for email registrations (not empty string) to avoid
+	// unique-index collisions on users.phone.
+	createData := map[string]any{
+		"username": req.Username,
+		"email":    req.Email,
+		"password": string(hashedPassword),
+		"phone":    nil,
+	}
+	if err := database.DB.Model(&models.User{}).Create(createData).Error; err != nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "Un compte avec cet email ou pseudo existe déjà",
+		})
 	}
 
-	if err := database.DB.Create(&user).Error; err != nil {
+	var user models.User
+	if err := database.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Impossible de créer le compte",
 		})
@@ -437,7 +449,7 @@ func (h *AuthHandler) RegisterPhone(c *fiber.Ctx) error {
 		IsVerified: true, // Phone-verified users are auto-verified
 	}
 	if err := database.DB.Create(&user).Error; err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer le compte"})
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"error": "Ce pseudo ou numéro est déjà utilisé"})
 	}
 
 	// Create default preferences
