@@ -19,6 +19,7 @@ import {
   deleteNotification,
   deleteNotifications,
 } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 import ScreenState from "@/app/components/ScreenState";
 
 interface AppNotification {
@@ -34,6 +35,7 @@ interface AppNotification {
 
 export default function NotificationsScreen() {
   const PAGE_SIZE = 20;
+  const { colors } = useTheme();
   const [notifs, setNotifs] = useState<AppNotification[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
@@ -59,15 +61,9 @@ export default function NotificationsScreen() {
     }
   }, [PAGE_SIZE]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load]),
-  );
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
@@ -96,31 +92,18 @@ export default function NotificationsScreen() {
 
   const navigateFromNotification = (item: AppNotification) => {
     const data = parseData(item);
-
     if (item.type === "message" && data.conversation_id) {
-      router.push({
-        pathname: "/chat/[id]",
-        params: { id: String(data.conversation_id) },
-      });
+      router.push({ pathname: "/chat/[id]", params: { id: String(data.conversation_id) } });
       return;
     }
-
     if ((item.type === "match" || item.type === "superlike") && (data.match_user_id || data.user_id)) {
-      router.push({
-        pathname: "/user/[id]",
-        params: { id: String(data.match_user_id || data.user_id) },
-      });
+      router.push({ pathname: "/user/[id]", params: { id: String(data.match_user_id || data.user_id) } });
       return;
     }
-
     if ((item.type === "order" || item.type === "payment" || item.type === "delivery") && data.order_id) {
-      router.push({
-        pathname: "/order/[id]",
-        params: { id: String(data.order_id) },
-      });
+      router.push({ pathname: "/order/[id]", params: { id: String(data.order_id) } });
       return;
     }
-
     if (item.type === "match") router.push("/(tabs)/matches");
     if (item.type === "message") router.push("/(tabs)/messages");
     if (item.type === "order" || item.type === "payment") router.push("/orders");
@@ -128,13 +111,9 @@ export default function NotificationsScreen() {
 
   const markIds = async (ids: number[], isRead: boolean) => {
     if (ids.length === 0 || actionLoading) return;
-
     const previous = notifs;
     setActionLoading(true);
-    setNotifs((prev) =>
-      prev.map((n) => (ids.includes(n.id) ? { ...n, is_read: isRead } : n)),
-    );
-
+    setNotifs((prev) => prev.map((n) => (ids.includes(n.id) ? { ...n, is_read: isRead } : n)));
     try {
       if (ids.length === 1) {
         await updateNotificationRead(ids[0], isRead);
@@ -151,14 +130,8 @@ export default function NotificationsScreen() {
   };
 
   const openNotification = async (item: AppNotification) => {
-    if (selectionMode || selectedIds.size > 0) {
-      toggleSelection(item.id);
-      return;
-    }
-
-    if (!item.is_read) {
-      await markIds([item.id], true);
-    }
+    if (selectionMode || selectedIds.size > 0) { toggleSelection(item.id); return; }
+    if (!item.is_read) await markIds([item.id], true);
     navigateFromNotification(item);
   };
 
@@ -166,11 +139,8 @@ export default function NotificationsScreen() {
     setSelectionMode(true);
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -178,19 +148,15 @@ export default function NotificationsScreen() {
   const selectAllVisible = () => {
     setSelectionMode(true);
     const visibleIds = notifs.slice(0, visibleCount).map((n) => n.id);
-    setSelectedIds((prev) =>
-      prev.size === visibleIds.length ? new Set() : new Set(visibleIds),
-    );
+    setSelectedIds((prev) => prev.size === visibleIds.length ? new Set() : new Set(visibleIds));
   };
 
   const handleMarkAllRead = async () => {
     const unreadIds = notifs.filter((n) => !n.is_read).map((n) => n.id);
     if (unreadIds.length === 0 || actionLoading) return;
-
     const previous = notifs;
     setActionLoading(true);
     setNotifs((prev) => prev.map((n) => ({ ...n, is_read: true })));
-
     try {
       await markNotificationsRead();
     } catch (err) {
@@ -224,7 +190,6 @@ export default function NotificationsScreen() {
   const handleBulkDelete = () => {
     const ids = Array.from(selectedIds);
     if (ids.length === 0 || actionLoading) return;
-
     Alert.alert("Supprimer", `Supprimer ${ids.length} notification(s) ?`, [
       { text: "Annuler", style: "cancel" },
       {
@@ -250,21 +215,13 @@ export default function NotificationsScreen() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case "match":
-        return "heart" as const;
-      case "like":
-      case "superlike":
-        return "heart-outline" as const;
-      case "message":
-        return "chatbubble" as const;
-      case "order":
-        return "bag" as const;
-      case "payment":
-        return "card" as const;
-      case "delivery":
-        return "bicycle" as const;
-      default:
-        return "notifications" as const;
+      case "match": return "heart" as const;
+      case "like": case "superlike": return "heart-outline" as const;
+      case "message": return "chatbubble" as const;
+      case "order": return "bag" as const;
+      case "payment": return "card" as const;
+      case "delivery": return "bicycle" as const;
+      default: return "notifications" as const;
     }
   };
 
@@ -292,10 +249,7 @@ export default function NotificationsScreen() {
         title="Erreur de chargement"
         subtitle={error}
         buttonLabel="Réessayer"
-        onPressButton={() => {
-          setLoading(true);
-          load();
-        }}
+        onPressButton={() => { setLoading(true); load(); }}
       />
     );
   }
@@ -306,35 +260,32 @@ export default function NotificationsScreen() {
   const isSelecting = selectionMode || selectedCount > 0;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <View style={styles.headerText}>
-          <Text style={styles.title}>Notifications</Text>
-          <Text style={styles.subtitle}>
-            {isSelecting
-              ? `${selectedCount} sélectionnée(s)`
-              : `${unreadCount} non lue(s)`}
+          <Text style={[styles.title, { color: colors.text }]}>Notifications</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+            {isSelecting ? `${selectedCount} sélectionnée(s)` : `${unreadCount} non lue(s)`}
           </Text>
         </View>
-
         {isSelecting ? (
           <View style={styles.headerActions}>
-            <TouchableOpacity style={styles.headerIconButton} onPress={selectAllVisible}>
-              <Ionicons name="checkbox-outline" size={20} color="#fff" />
+            <TouchableOpacity style={[styles.headerIconButton, { backgroundColor: colors.cardSecondary }]} onPress={selectAllVisible}>
+              <Ionicons name="checkbox-outline" size={20} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.headerIconButton, selectedCount === 0 && styles.disabledButton]}
+              style={[styles.headerIconButton, { backgroundColor: colors.cardSecondary }, selectedCount === 0 && styles.disabledButton]}
               disabled={selectedCount === 0 || actionLoading}
               onPress={() => markIds(selected, true)}
             >
-              <Ionicons name="mail-open" size={20} color="#fff" />
+              <Ionicons name="mail-open" size={20} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.headerIconButton, selectedCount === 0 && styles.disabledButton]}
+              style={[styles.headerIconButton, { backgroundColor: colors.cardSecondary }, selectedCount === 0 && styles.disabledButton]}
               disabled={selectedCount === 0 || actionLoading}
               onPress={() => markIds(selected, false)}
             >
-              <Ionicons name="mail-unread" size={20} color="#fff" />
+              <Ionicons name="mail-unread" size={20} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.headerIconButton, styles.dangerButton, selectedCount === 0 && styles.disabledButton]}
@@ -343,14 +294,14 @@ export default function NotificationsScreen() {
             >
               <Ionicons name="trash" size={20} color="#fff" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerIconButton} onPress={clearSelection}>
-              <Ionicons name="close" size={20} color="#fff" />
+            <TouchableOpacity style={[styles.headerIconButton, { backgroundColor: colors.cardSecondary }]} onPress={clearSelection}>
+              <Ionicons name="close" size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.headerActions}>
             <TouchableOpacity
-              style={[styles.headerButton, unreadCount === 0 && styles.disabledButton]}
+              style={[styles.headerButton, { backgroundColor: colors.accent }, unreadCount === 0 && styles.disabledButton]}
               disabled={unreadCount === 0 || actionLoading}
               onPress={handleMarkAllRead}
             >
@@ -358,11 +309,11 @@ export default function NotificationsScreen() {
               <Text style={styles.headerButtonText}>Tout lu</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.headerIconButton, notifs.length === 0 && styles.disabledButton]}
+              style={[styles.headerIconButton, { backgroundColor: colors.cardSecondary }, notifs.length === 0 && styles.disabledButton]}
               disabled={notifs.length === 0}
               onPress={() => setSelectionMode(true)}
             >
-              <Ionicons name="checkbox" size={20} color="#fff" />
+              <Ionicons name="checkbox" size={20} color={colors.text} />
             </TouchableOpacity>
           </View>
         )}
@@ -376,18 +327,14 @@ export default function NotificationsScreen() {
           <ScreenState mode="empty" title="Aucune notification" subtitle="Tu es à jour pour le moment." />
         }
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#7c3aed"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
         ListFooterComponent={
           visibleCount < notifs.length ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color="#7c3aed" />
+              <ActivityIndicator size="small" color={colors.accent} />
             </View>
           ) : null
         }
@@ -397,8 +344,9 @@ export default function NotificationsScreen() {
             <TouchableOpacity
               style={[
                 styles.row,
-                !item.is_read && styles.unread,
-                checked && styles.selected,
+                { borderBottomColor: colors.border },
+                !item.is_read && { backgroundColor: colors.cardSecondary },
+                checked && { backgroundColor: "rgba(124,58,237,0.1)" },
               ]}
               onPress={() => openNotification(item)}
               onLongPress={() => toggleSelection(item.id)}
@@ -409,46 +357,35 @@ export default function NotificationsScreen() {
                   <Ionicons
                     name={checked ? "checkbox" : "square-outline"}
                     size={22}
-                    color={checked ? "#7c3aed" : "#777"}
+                    color={checked ? colors.accent : colors.textMuted}
                   />
                 </View>
               ) : null}
-
-              <View style={styles.iconWrap}>
-                <Ionicons name={getIcon(item.type)} size={24} color="#7c3aed" />
+              <View style={[styles.iconWrap, { backgroundColor: colors.cardSecondary }]}>
+                <Ionicons name={getIcon(item.type)} size={24} color={colors.accent} />
               </View>
-
               <View style={styles.textWrap}>
-                {item.title ? <Text style={styles.itemTitle}>{item.title}</Text> : null}
-                <Text style={styles.content}>{notificationText(item)}</Text>
-                <Text style={styles.time}>{timeAgo(item.created_at)}</Text>
+                {item.title ? (
+                  <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
+                ) : null}
+                <Text style={[styles.content, { color: colors.textSecondary }]}>{notificationText(item)}</Text>
+                <Text style={[styles.time, { color: colors.textMuted }]}>{timeAgo(item.created_at)}</Text>
               </View>
-
               {!isSelecting ? (
                 <View style={styles.rowActions}>
                   <TouchableOpacity
-                    style={styles.rowActionButton}
+                    style={[styles.rowActionButton, { backgroundColor: colors.cardSecondary }]}
                     disabled={actionLoading}
-                    onPress={(event) => {
-                      event.stopPropagation();
-                      markIds([item.id], !item.is_read);
-                    }}
+                    onPress={(event) => { event.stopPropagation(); markIds([item.id], !item.is_read); }}
                   >
-                    <Ionicons
-                      name={item.is_read ? "mail-unread" : "mail-open"}
-                      size={18}
-                      color="#d8c7ff"
-                    />
+                    <Ionicons name={item.is_read ? "mail-unread" : "mail-open"} size={18} color={colors.accentLight} />
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.rowActionButton}
+                    style={[styles.rowActionButton, { backgroundColor: colors.cardSecondary }]}
                     disabled={actionLoading}
-                    onPress={(event) => {
-                      event.stopPropagation();
-                      handleDelete(item.id);
-                    }}
+                    onPress={(event) => { event.stopPropagation(); handleDelete(item.id); }}
                   >
-                    <Ionicons name="trash-outline" size={18} color="#f87171" />
+                    <Ionicons name="trash-outline" size={18} color={colors.error} />
                   </TouchableOpacity>
                 </View>
               ) : null}
@@ -461,7 +398,6 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -469,17 +405,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
   },
   headerText: { flex: 1, minWidth: 0 },
-  title: { color: "#fff", fontSize: 22, fontWeight: "800" },
-  subtitle: { color: "#888", fontSize: 12, marginTop: 3 },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginLeft: 12,
-  },
+  title: { fontSize: 22, fontWeight: "800" },
+  subtitle: { fontSize: 12, marginTop: 3 },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 8, marginLeft: 12 },
   headerButton: {
     height: 36,
     flexDirection: "row",
@@ -487,7 +417,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
-    backgroundColor: "#7c3aed",
   },
   headerButtonText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   headerIconButton: {
@@ -496,7 +425,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#242424",
   },
   dangerButton: { backgroundColor: "#7f1d1d" },
   disabledButton: { opacity: 0.42 },
@@ -508,40 +436,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
   },
-  unread: { backgroundColor: "#151524" },
-  selected: { backgroundColor: "#231b33" },
-  selectionWrap: {
-    width: 28,
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
+  selectionWrap: { width: 28, alignItems: "flex-start", justifyContent: "center" },
   iconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
   textWrap: { flex: 1, minWidth: 0 },
-  itemTitle: { color: "#fff", fontSize: 14, fontWeight: "700", marginBottom: 2 },
-  content: { color: "#ddd", fontSize: 14, lineHeight: 20 },
-  time: { color: "#666", fontSize: 12, marginTop: 4 },
-  rowActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginLeft: 10,
-  },
+  itemTitle: { fontSize: 14, fontWeight: "700", marginBottom: 2 },
+  content: { fontSize: 14, lineHeight: 20 },
+  time: { fontSize: 12, marginTop: 4 },
+  rowActions: { flexDirection: "row", alignItems: "center", gap: 8, marginLeft: 10 },
   rowActionButton: {
     width: 34,
     height: 34,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#181818",
   },
 });

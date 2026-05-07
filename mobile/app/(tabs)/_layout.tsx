@@ -1,6 +1,7 @@
-﻿import { Tabs, Redirect } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { ActivityIndicator, View, Text } from "react-native";
 import { useEffect, useState } from "react";
 import { getConversations, getUnreadCount } from "@/lib/api";
@@ -51,6 +52,7 @@ function BadgeIcon({
 
 export default function TabsLayout() {
   const { user, loading } = useAuth();
+  const { colors } = useTheme();
   const [unread, setUnread] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
@@ -86,10 +88,10 @@ export default function TabsLayout() {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#0a0a0a",
+          backgroundColor: colors.background,
         }}
       >
-        <ActivityIndicator size="large" color="#7c3aed" />
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
@@ -100,16 +102,16 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "#0a0a0a",
-          borderTopColor: "#1a1a1a",
+          backgroundColor: colors.tabBarBg,
+          borderTopColor: colors.tabBarBorder,
           height: 85,
           paddingBottom: 28,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: "#7c3aed",
-        tabBarInactiveTintColor: "#666",
-        headerStyle: { backgroundColor: "#0a0a0a" },
-        headerTintColor: "#fff",
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textMuted,
+        headerStyle: { backgroundColor: colors.headerBg },
+        headerTintColor: colors.headerText,
       }}
     >
       <Tabs.Screen

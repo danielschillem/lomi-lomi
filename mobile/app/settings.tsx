@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -8,10 +8,12 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import {
   changePassword,
   deleteAccount,
@@ -22,6 +24,7 @@ import { useEffect } from "react";
 
 export default function SettingsScreen() {
   const { logout } = useAuth();
+  const { colors, theme, toggleTheme } = useTheme();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -121,8 +124,31 @@ export default function SettingsScreen() {
     );
   };
 
+  const styles = makeStyles(colors);
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      {/* Appearance */}
+      <Text style={styles.sectionTitle}>Apparence</Text>
+      <View style={styles.card}>
+        <View style={styles.prefRow}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+            <Ionicons
+              name={theme === "dark" ? "moon" : "sunny"}
+              size={20}
+              color={colors.accent}
+            />
+            <Text style={styles.prefLabel}>Thème sombre</Text>
+          </View>
+          <Switch
+            value={theme === "dark"}
+            onValueChange={toggleTheme}
+            trackColor={{ false: colors.border, true: colors.accent }}
+            thumbColor={colors.card}
+          />
+        </View>
+      </View>
+
       {/* Preferences */}
       <Text style={styles.sectionTitle}>Préférences de découverte</Text>
       <View style={styles.card}>
@@ -161,7 +187,7 @@ export default function SettingsScreen() {
           <Ionicons
             name={showOnline ? "toggle" : "toggle-outline"}
             size={32}
-            color={showOnline ? "#7c3aed" : "#666"}
+            color={showOnline ? colors.accent : colors.textMuted}
           />
         </TouchableOpacity>
         <TouchableOpacity
@@ -181,7 +207,7 @@ export default function SettingsScreen() {
           value={currentPassword}
           onChangeText={setCurrentPassword}
           placeholder="Mot de passe actuel"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
           secureTextEntry
         />
         <TextInput
@@ -189,7 +215,7 @@ export default function SettingsScreen() {
           value={newPassword}
           onChangeText={setNewPassword}
           placeholder="Nouveau mot de passe"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
           secureTextEntry
         />
         <TouchableOpacity
@@ -212,106 +238,110 @@ export default function SettingsScreen() {
           style={styles.linkRow}
           onPress={() => router.push("/faq")}
         >
-          <Ionicons name="help-circle-outline" size={20} color="#a78bfa" />
+          <Ionicons name="help-circle-outline" size={20} color={colors.accentLight} />
           <Text style={styles.linkLabel}>Questions fréquentes</Text>
-          <Ionicons name="chevron-forward" size={18} color="#444" />
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.linkRow}
           onPress={() => router.push("/cgu")}
         >
-          <Ionicons name="document-text-outline" size={20} color="#a78bfa" />
+          <Ionicons name="document-text-outline" size={20} color={colors.accentLight} />
           <Text style={styles.linkLabel}>
             Conditions Générales d&apos;Utilisation
           </Text>
-          <Ionicons name="chevron-forward" size={18} color="#444" />
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.linkRow}
           onPress={() => router.push("/confidentialite")}
         >
-          <Ionicons name="shield-checkmark-outline" size={20} color="#a78bfa" />
+          <Ionicons name="shield-checkmark-outline" size={20} color={colors.accentLight} />
           <Text style={styles.linkLabel}>Politique de confidentialité</Text>
-          <Ionicons name="chevron-forward" size={18} color="#444" />
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
 
       {/* Danger zone */}
       <Text style={styles.sectionTitle}>Zone de danger</Text>
       <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
-        <Ionicons name="trash" size={20} color="#ef4444" />
+        <Ionicons name="trash" size={20} color={colors.error} />
         <Text style={styles.deleteText}>Supprimer mon compte</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  content: { padding: 20, paddingBottom: 60 },
-  sectionTitle: {
-    color: "#999",
-    fontSize: 13,
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 12,
-    marginTop: 24,
-  },
-  card: {
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 16,
-    gap: 12,
-  },
-  input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 15,
-  },
-  prefRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 4,
-  },
-  prefLabel: { color: "#ccc", fontSize: 15 },
-  prefInput: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
-    borderRadius: 8,
-    padding: 8,
-    width: 70,
-    textAlign: "center",
-    fontSize: 15,
-  },
-  saveBtn: {
-    backgroundColor: "#7c3aed",
-    paddingVertical: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 4,
-  },
-  saveBtnText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  deleteBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 16,
-    borderWidth: 1,
-    borderColor: "#ef4444",
-    borderRadius: 12,
-    marginTop: 8,
-  },
-  deleteText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
-  linkRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 10,
-  },
-  linkLabel: { flex: 1, color: "#e5e7eb", fontSize: 14 },
-});
+function makeStyles(colors: ReturnType<typeof import("@/lib/theme-context").useTheme>["colors"]) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 60 },
+    sectionTitle: {
+      color: colors.textMuted,
+      fontSize: 13,
+      fontWeight: "600",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+      marginBottom: 12,
+      marginTop: 24,
+    },
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 12,
+      padding: 16,
+      gap: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    input: {
+      backgroundColor: colors.inputBg,
+      color: colors.inputText,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 15,
+    },
+    prefRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingVertical: 4,
+    },
+    prefLabel: { color: colors.text, fontSize: 15 },
+    prefInput: {
+      backgroundColor: colors.inputBg,
+      color: colors.inputText,
+      borderRadius: 8,
+      padding: 8,
+      width: 70,
+      textAlign: "center",
+      fontSize: 15,
+    },
+    saveBtn: {
+      backgroundColor: colors.accent,
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      marginTop: 4,
+    },
+    saveBtnText: { color: "#fff", fontSize: 15, fontWeight: "600" },
+    deleteBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      paddingVertical: 16,
+      borderWidth: 1,
+      borderColor: colors.error,
+      borderRadius: 12,
+      marginTop: 8,
+    },
+    deleteText: { color: colors.error, fontSize: 16, fontWeight: "600" },
+    linkRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 10,
+    },
+    linkLabel: { flex: 1, color: colors.text, fontSize: 14 },
+  });
+}

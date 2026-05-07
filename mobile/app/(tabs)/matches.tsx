@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { getMatches, unmatch, getOrCreateConversation } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 import ScreenState from "@/app/components/ScreenState";
 
 interface Match {
@@ -29,6 +30,7 @@ interface Match {
 
 export default function MatchesScreen() {
   const PAGE_SIZE = 20;
+  const { colors } = useTheme();
   const [matches, setMatches] = useState<Match[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
@@ -140,7 +142,7 @@ export default function MatchesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={matches.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
@@ -155,7 +157,7 @@ export default function MatchesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#7c3aed"
+            tintColor={colors.accent}
           />
         }
         onEndReached={loadMore}
@@ -163,13 +165,13 @@ export default function MatchesScreen() {
         ListFooterComponent={
           visibleCount < matches.length ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color="#7c3aed" />
+              <ActivityIndicator size="small" color={colors.accent} />
             </View>
           ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.row}
+            style={[styles.row, { borderBottomColor: colors.border }]}
             onPress={() =>
               router.push({
                 pathname: "/user/[id]",
@@ -185,19 +187,25 @@ export default function MatchesScreen() {
                     item.matched_user.avatar_url ||
                     "https://via.placeholder.com/56/1a1a1a/666?text=?",
                 }}
-                style={styles.avatar}
+                style={[styles.avatar, { backgroundColor: colors.cardSecondary }]}
               />
-              {item.matched_user.is_online && <View style={styles.onlineDot} />}
+              {item.matched_user.is_online && (
+                <View style={[styles.onlineDot, { borderColor: colors.background }]} />
+              )}
             </View>
             <View style={styles.textWrap}>
-              <Text style={styles.name}>{item.matched_user.username}</Text>
-              <Text style={styles.time}>Match {timeAgo(item.created_at)}</Text>
+              <Text style={[styles.name, { color: colors.text }]}>
+                {item.matched_user.username}
+              </Text>
+              <Text style={[styles.time, { color: colors.textMuted }]}>
+                Match {timeAgo(item.created_at)}
+              </Text>
             </View>
             <TouchableOpacity
-              style={styles.chatBtn}
+              style={[styles.chatBtn, { backgroundColor: colors.cardSecondary }]}
               onPress={() => handleChat(item)}
             >
-              <Ionicons name="chatbubble" size={20} color="#7c3aed" />
+              <Ionicons name="chatbubble" size={20} color={colors.accent} />
             </TouchableOpacity>
           </TouchableOpacity>
         )}
@@ -207,22 +215,15 @@ export default function MatchesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
   },
   avatarWrap: { position: "relative" },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#1a1a1a",
-  },
+  avatar: { width: 56, height: 56, borderRadius: 28 },
   onlineDot: {
     position: "absolute",
     bottom: 2,
@@ -232,16 +233,14 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: "#22c55e",
     borderWidth: 2,
-    borderColor: "#0a0a0a",
   },
   textWrap: { flex: 1, marginLeft: 12 },
-  name: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  time: { color: "#666", fontSize: 13, marginTop: 2 },
+  name: { fontSize: 16, fontWeight: "600" },
+  time: { fontSize: 13, marginTop: 2 },
   chatBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
   },

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,10 +10,10 @@ import {
   RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { getConversations } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import {
   ConversationListItem,
   getConversationLastMessageContent,
@@ -26,6 +26,7 @@ import ScreenState from "@/app/components/ScreenState";
 export default function MessagesScreen() {
   const PAGE_SIZE = 20;
   const { user } = useAuth();
+  const { colors } = useTheme();
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
@@ -104,7 +105,7 @@ export default function MessagesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={conversations.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
@@ -119,7 +120,7 @@ export default function MessagesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#7c3aed"
+            tintColor={colors.accent}
           />
         }
         onEndReached={loadMore}
@@ -127,7 +128,7 @@ export default function MessagesScreen() {
         ListFooterComponent={
           visibleCount < conversations.length ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color="#7c3aed" />
+              <ActivityIndicator size="small" color={colors.accent} />
             </View>
           ) : null
         }
@@ -142,7 +143,11 @@ export default function MessagesScreen() {
 
           return (
             <TouchableOpacity
-              style={[styles.row, !canOpenChat && styles.rowDisabled]}
+              style={[
+                styles.row,
+                { borderBottomColor: colors.border },
+                !canOpenChat && styles.rowDisabled,
+              ]}
               disabled={!canOpenChat}
               onPress={() =>
                 router.push({
@@ -162,21 +167,25 @@ export default function MessagesScreen() {
                       otherUser.avatar_url ||
                       "https://via.placeholder.com/48/1a1a1a/666?text=?",
                   }}
-                  style={styles.avatar}
+                  style={[styles.avatar, { backgroundColor: colors.cardSecondary }]}
                 />
-                {otherUser.is_online && <View style={styles.onlineDot} />}
+                {otherUser.is_online && (
+                  <View style={[styles.onlineDot, { borderColor: colors.background }]} />
+                )}
               </View>
               <View style={styles.textWrap}>
                 <View style={styles.topRow}>
-                  <Text style={styles.name}>{otherUser.username}</Text>
+                  <Text style={[styles.name, { color: colors.text }]}>
+                    {otherUser.username}
+                  </Text>
                   {!!messageTime && (
-                    <Text style={styles.time}>
+                    <Text style={[styles.time, { color: colors.textMuted }]}>
                       {messageTime}
                     </Text>
                   )}
                 </View>
                 <View style={styles.bottomRow}>
-                  <Text style={styles.lastMsg} numberOfLines={1}>
+                  <Text style={[styles.lastMsg, { color: colors.textSecondary }]} numberOfLines={1}>
                     {lastMessage || "Nouveau match ! Dis bonjour "}
                   </Text>
                   {(item.unread_count || 0) > 0 && (
@@ -195,27 +204,16 @@ export default function MessagesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  footer: {
-    paddingVertical: 14,
-  },
+  footer: { paddingVertical: 14 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
   },
-  rowDisabled: {
-    opacity: 0.7,
-  },
+  rowDisabled: { opacity: 0.7 },
   avatarWrap: { position: "relative" },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#1a1a1a",
-  },
+  avatar: { width: 56, height: 56, borderRadius: 28 },
   onlineDot: {
     position: "absolute",
     bottom: 2,
@@ -225,7 +223,6 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: "#22c55e",
     borderWidth: 2,
-    borderColor: "#0a0a0a",
   },
   textWrap: { flex: 1, marginLeft: 12 },
   topRow: {
@@ -239,9 +236,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
-  name: { fontSize: 16, fontWeight: "600", color: "#fff" },
-  time: { fontSize: 12, color: "#666" },
-  lastMsg: { fontSize: 14, color: "#999", flex: 1, marginRight: 8 },
+  name: { fontSize: 16, fontWeight: "600" },
+  time: { fontSize: 12 },
+  lastMsg: { fontSize: 14, flex: 1, marginRight: 8 },
   badge: {
     backgroundColor: "#7c3aed",
     borderRadius: 12,

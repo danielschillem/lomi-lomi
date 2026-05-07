@@ -1,21 +1,23 @@
-﻿import { Stack } from "expo-router";
+import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { WSProvider } from "@/lib/ws-context";
+import { ThemeProvider, useTheme } from "@/lib/theme-context";
 import { usePushNotifications } from "@/lib/push-notifications";
 
 function InnerLayout() {
   const { user } = useAuth();
+  const { colors } = useTheme();
   usePushNotifications(!!user);
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={colors.statusBar} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: "#0a0a0a" },
-          headerTintColor: "#fff",
-          contentStyle: { backgroundColor: "#0a0a0a" },
+          headerStyle: { backgroundColor: colors.headerBg },
+          headerTintColor: colors.headerText,
+          contentStyle: { backgroundColor: colors.background },
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -61,10 +63,12 @@ function InnerLayout() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <WSProvider>
-        <InnerLayout />
-      </WSProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <WSProvider>
+          <InnerLayout />
+        </WSProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

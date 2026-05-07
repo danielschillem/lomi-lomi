@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { isValidOtp, isValidPhone, normalizePhone } from "@/lib/validation";
+import { useTheme } from "@/lib/theme-context";
 
 interface OMPaymentModalProps {
   visible: boolean;
@@ -40,6 +41,7 @@ export default function OMPaymentModal({
   initiatePayment,
   confirmPayment,
 }: OMPaymentModalProps) {
+  const { colors } = useTheme();
   const [step, setStep] = useState<"phone" | "ussd" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [ussdCode, setUssdCode] = useState("");
@@ -106,41 +108,37 @@ export default function OMPaymentModal({
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
-        <View style={styles.container}>
-          {/* Header */}
+        <View style={[styles.container, { backgroundColor: colors.card }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>{title}</Text>
-            <TouchableOpacity onPress={resetAndClose} style={styles.closeBtn}>
-              <Ionicons name="close" size={20} color="#666" />
+            <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+            <TouchableOpacity onPress={resetAndClose} style={[styles.closeBtn, { backgroundColor: colors.cardSecondary }]}>
+              <Ionicons name="close" size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
-          {/* Description */}
-          <Text style={styles.desc}>{description}</Text>
+          <Text style={[styles.desc, { color: colors.textMuted }]}>{description}</Text>
           <View style={styles.amountBox}>
             <Text style={styles.amountText}>{amount} FCFA</Text>
           </View>
 
-          {/* Error */}
-          {error ? <Text style={styles.error}>{error}</Text> : null}
+          {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
 
-          {/* Step: Phone */}
           {step === "phone" && (
             <View style={styles.stepContainer}>
-              <Text style={styles.label}>Numéro Orange Money</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>Numéro Orange Money</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
                 value={phone}
                 onChangeText={(v) => {
                   setPhone(v);
                   if (error) setError("");
                 }}
                 placeholder="07XXXXXX"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 keyboardType="phone-pad"
               />
               <TouchableOpacity
-                style={[styles.btn, styles.btnOrange]}
+                style={[styles.btn, { backgroundColor: colors.orange }]}
                 onPress={handleInitiate}
                 disabled={loading}
               >
@@ -153,18 +151,15 @@ export default function OMPaymentModal({
             </View>
           )}
 
-          {/* Step: USSD */}
           {step === "ussd" && (
             <View style={styles.stepContainer}>
               <View style={styles.ussdBox}>
                 <Text style={styles.ussdLabel}>Composez ce code USSD :</Text>
                 <Text style={styles.ussdCode}>{ussdCode}</Text>
-                <Text style={styles.ussdHint}>
-                  Vous recevrez un OTP par SMS
-                </Text>
+                <Text style={styles.ussdHint}>Vous recevrez un OTP par SMS</Text>
               </View>
               <TouchableOpacity
-                style={[styles.btn, styles.btnViolet]}
+                style={[styles.btn, { backgroundColor: colors.accent }]}
                 onPress={() => setStep("otp")}
               >
                 <Text style={styles.btnText}>J&apos;ai reçu mon code OTP</Text>
@@ -172,24 +167,23 @@ export default function OMPaymentModal({
             </View>
           )}
 
-          {/* Step: OTP */}
           {step === "otp" && (
             <View style={styles.stepContainer}>
-              <Text style={styles.label}>Code OTP reçu par SMS</Text>
+              <Text style={[styles.label, { color: colors.textSecondary }]}>Code OTP reçu par SMS</Text>
               <TextInput
-                style={[styles.input, styles.otpInput]}
+                style={[styles.input, styles.otpInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
                 value={otp}
                 onChangeText={(v) => {
                   setOtp(v);
                   if (error) setError("");
                 }}
                 placeholder="Code OTP"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 keyboardType="number-pad"
                 maxLength={10}
               />
               <TouchableOpacity
-                style={[styles.btn, styles.btnGreen]}
+                style={[styles.btn, { backgroundColor: "#16a34a" }]}
                 onPress={handleConfirm}
                 disabled={loading || !otp.trim()}
               >
@@ -200,7 +194,7 @@ export default function OMPaymentModal({
                 )}
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setStep("ussd")}>
-                <Text style={styles.backLink}>← Revoir le code USSD</Text>
+                <Text style={[styles.backLink, { color: colors.textMuted }]}>← Revoir le code USSD</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -220,7 +214,6 @@ const styles = StyleSheet.create({
   },
   container: {
     width: "100%",
-    backgroundColor: "#111",
     borderRadius: 20,
     padding: 20,
   },
@@ -230,16 +223,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  title: { color: "#fff", fontSize: 17, fontWeight: "700" },
+  title: { fontSize: 17, fontWeight: "700" },
   closeBtn: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#222",
     justifyContent: "center",
     alignItems: "center",
   },
-  desc: { color: "#999", fontSize: 13, marginBottom: 12 },
+  desc: { fontSize: 13, marginBottom: 12 },
   amountBox: {
     backgroundColor: "#1a1200",
     borderWidth: 1,
@@ -250,14 +242,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   amountText: { color: "#f97316", fontSize: 22, fontWeight: "800" },
-  error: { color: "#ef4444", fontSize: 12, marginBottom: 8 },
+  error: { fontSize: 12, marginBottom: 8 },
   stepContainer: { marginTop: 4 },
-  label: { color: "#aaa", fontSize: 12, fontWeight: "500", marginBottom: 6 },
+  label: { fontSize: 12, fontWeight: "500", marginBottom: 6 },
   input: {
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     padding: 14,
-    color: "#fff",
     fontSize: 15,
     marginBottom: 12,
   },
@@ -268,9 +258,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
-  btnOrange: { backgroundColor: "#f97316" },
-  btnViolet: { backgroundColor: "#7c3aed" },
-  btnGreen: { backgroundColor: "#16a34a" },
   btnText: { color: "#fff", fontSize: 15, fontWeight: "700" },
   ussdBox: {
     backgroundColor: "#1a1200",
@@ -281,18 +268,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  ussdLabel: {
-    color: "#f97316",
-    fontSize: 12,
-    fontWeight: "500",
-    marginBottom: 6,
-  },
-  ussdCode: {
-    color: "#f97316",
-    fontSize: 20,
-    fontWeight: "800",
-    fontFamily: "monospace",
-  },
+  ussdLabel: { color: "#f97316", fontSize: 12, fontWeight: "500", marginBottom: 6 },
+  ussdCode: { color: "#f97316", fontSize: 20, fontWeight: "800", fontFamily: "monospace" },
   ussdHint: { color: "#f97316", fontSize: 11, marginTop: 6, opacity: 0.7 },
-  backLink: { color: "#666", fontSize: 12, textAlign: "center", marginTop: 4 },
+  backLink: { fontSize: 12, textAlign: "center", marginTop: 4 },
 });

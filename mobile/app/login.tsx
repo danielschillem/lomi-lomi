@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { sendOTP, verifyOTP, setToken } from "@/lib/api";
 import {
   COUNTRIES,
@@ -26,6 +27,7 @@ type Mode = "phone" | "otp" | "email";
 
 export default function LoginScreen() {
   const { login, loginWithToken } = useAuth();
+  const { colors } = useTheme();
 
   const [mode, setMode] = useState<Mode>("phone");
 
@@ -108,22 +110,24 @@ export default function LoginScreen() {
     setLoading(false);
   };
 
+  const s = makeStyles(colors);
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={s.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
-        contentContainerStyle={styles.inner}
+        contentContainerStyle={s.inner}
         keyboardShouldPersistTaps="handled"
       >
         <Image
           source={require("@/assets/logo.png")}
-          style={styles.logo}
+          style={s.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>Lomi Lomi</Text>
-        <Text style={styles.subtitle}>
+        <Text style={s.title}>Lomi Lomi</Text>
+        <Text style={s.subtitle}>
           {mode === "email"
             ? "Connexion par email"
             : mode === "otp"
@@ -131,24 +135,24 @@ export default function LoginScreen() {
               : "Connecte-toi avec ton numéro"}
         </Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={s.error}>{error}</Text> : null}
 
         {/* - PHONE MODE - */}
         {mode === "phone" && (
           <>
-            <View style={styles.phoneRow}>
+            <View style={s.phoneRow}>
               <TouchableOpacity
-                style={styles.countryBtn}
+                style={s.countryBtn}
                 onPress={() => setCountryModal(true)}
               >
-                <Text style={styles.countryText}>
+                <Text style={s.countryText}>
                   {country.flag} {country.dial}
                 </Text>
               </TouchableOpacity>
               <TextInput
-                style={[styles.input, { flex: 1 }]}
+                style={[s.input, { flex: 1 }]}
                 placeholder="Numéro de téléphone"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 value={phone}
                 onChangeText={setPhone}
                 keyboardType="phone-pad"
@@ -156,14 +160,14 @@ export default function LoginScreen() {
             </View>
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleSendOTP}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Recevoir un code</Text>
+                <Text style={s.buttonText}>Recevoir un code</Text>
               )}
             </TouchableOpacity>
 
@@ -173,8 +177,8 @@ export default function LoginScreen() {
                 setMode("email");
               }}
             >
-              <Text style={styles.link}>
-                Ou <Text style={styles.linkBold}>se connecter par email</Text>
+              <Text style={s.link}>
+                Ou <Text style={s.linkBold}>se connecter par email</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -183,17 +187,18 @@ export default function LoginScreen() {
         {/* - OTP MODE - */}
         {mode === "otp" && (
           <>
-            <Text style={styles.otpInfo}>
-              Code envoyé au <Text style={{ color: "#fff" }}>{fullPhone}</Text>
+            <Text style={s.otpInfo}>
+              Code envoyé au{" "}
+              <Text style={{ color: colors.text }}>{fullPhone}</Text>
             </Text>
             {devCode && (
-              <Text style={styles.devCode}> Code dev : {devCode}</Text>
+              <Text style={s.devCode}> Code dev : {devCode}</Text>
             )}
 
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Code OTP"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={otp}
               onChangeText={setOtp}
               keyboardType="number-pad"
@@ -202,14 +207,14 @@ export default function LoginScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleVerifyOTP}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Vérifier</Text>
+                <Text style={s.buttonText}>Vérifier</Text>
               )}
             </TouchableOpacity>
 
@@ -220,8 +225,8 @@ export default function LoginScreen() {
                 setMode("phone");
               }}
             >
-              <Text style={styles.link}>
-                <Text style={styles.linkBold}>← Changer de numéro</Text>
+              <Text style={s.link}>
+                <Text style={s.linkBold}>← Changer de numéro</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -231,40 +236,40 @@ export default function LoginScreen() {
         {mode === "email" && (
           <>
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Email"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
             />
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Mot de passe"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleEmailLogin}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Se connecter</Text>
+                <Text style={s.buttonText}>Se connecter</Text>
               )}
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => router.push("/forgot-password")}
             >
-              <Text style={styles.link}>
-                <Text style={styles.linkBold}>Mot de passe oublié ?</Text>
+              <Text style={s.link}>
+                <Text style={s.linkBold}>Mot de passe oublié ?</Text>
               </Text>
             </TouchableOpacity>
 
@@ -274,8 +279,8 @@ export default function LoginScreen() {
                 setMode("phone");
               }}
             >
-              <Text style={styles.link}>
-                <Text style={styles.linkBold}>← Connexion par téléphone</Text>
+              <Text style={s.link}>
+                <Text style={s.linkBold}>← Connexion par téléphone</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -283,40 +288,40 @@ export default function LoginScreen() {
 
         <View style={{ height: 16 }} />
         <TouchableOpacity onPress={() => router.push("/register")}>
-          <Text style={styles.link}>
+          <Text style={s.link}>
             Pas encore de compte ?{" "}
-            <Text style={styles.linkBold}>Créer un compte</Text>
+            <Text style={s.linkBold}>Créer un compte</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Country picker modal */}
       <Modal visible={countryModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choisir un pays</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <Text style={s.modalTitle}>Choisir un pays</Text>
             <FlatList
               data={COUNTRIES}
               keyExtractor={(c) => c.code}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.countryItem}
+                  style={s.countryItem}
                   onPress={() => {
                     setCountry(item);
                     setCountryModal(false);
                   }}
                 >
-                  <Text style={styles.countryItemText}>
+                  <Text style={s.countryItemText}>
                     {item.flag} {item.name} ({item.dial})
                   </Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity
-              style={styles.modalClose}
+              style={s.modalClose}
               onPress={() => setCountryModal(false)}
             >
-              <Text style={styles.modalCloseText}>Fermer</Text>
+              <Text style={s.modalCloseText}>Fermer</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -325,114 +330,116 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  inner: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 40,
-  },
-  logo: { width: 100, height: 100, alignSelf: "center", marginBottom: 8 },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#999",
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  error: {
-    color: "#ef4444",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  phoneRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 12,
-  },
-  countryBtn: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    justifyContent: "center",
-  },
-  countryText: { color: "#fff", fontSize: 16 },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: "#7c3aed",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  link: { color: "#999", textAlign: "center", fontSize: 14, marginBottom: 8 },
-  linkBold: { color: "#7c3aed", fontWeight: "600" },
-  otpInfo: {
-    color: "#999",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  devCode: {
-    color: "#facc15",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#1a1a1a",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "70%",
-    paddingTop: 20,
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  countryItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  countryItemText: { color: "#fff", fontSize: 16 },
-  modalClose: {
-    padding: 16,
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  modalCloseText: { color: "#7c3aed", fontSize: 16, fontWeight: "600" },
-});
+function makeStyles(colors: ReturnType<typeof import("@/lib/theme-context").useTheme>["colors"]) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    inner: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: 32,
+      paddingVertical: 40,
+    },
+    logo: { width: 100, height: 100, alignSelf: "center", marginBottom: 8 },
+    title: {
+      fontSize: 32,
+      fontWeight: "bold",
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 4,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 32,
+    },
+    error: {
+      color: colors.error,
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+    },
+    phoneRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 12,
+    },
+    countryBtn: {
+      backgroundColor: colors.inputBg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      justifyContent: "center",
+    },
+    countryText: { color: colors.text, fontSize: 16 },
+    input: {
+      backgroundColor: colors.inputBg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
+      color: colors.inputText,
+      marginBottom: 12,
+    },
+    button: {
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      padding: 16,
+      alignItems: "center",
+      marginTop: 8,
+      marginBottom: 24,
+    },
+    buttonDisabled: { opacity: 0.6 },
+    buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+    link: { color: colors.textSecondary, textAlign: "center", fontSize: 14, marginBottom: 8 },
+    linkBold: { color: colors.accent, fontWeight: "600" },
+    otpInfo: {
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+    },
+    devCode: {
+      color: "#facc15",
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "flex-end",
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      maxHeight: "70%",
+      paddingTop: 20,
+    },
+    modalTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginBottom: 12,
+    },
+    countryItem: {
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    countryItemText: { color: colors.text, fontSize: 16 },
+    modalClose: {
+      padding: 16,
+      alignItems: "center",
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    modalCloseText: { color: colors.accent, fontSize: 16, fontWeight: "600" },
+  });
+}

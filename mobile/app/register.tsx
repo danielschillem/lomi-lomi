@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { sendOTP, verifyOTP, registerPhone, setToken } from "@/lib/api";
 import {
   COUNTRIES,
@@ -30,6 +31,7 @@ export default function RegisterScreen() {
     phone_verified?: string;
   }>();
   const { register, loginWithToken } = useAuth();
+  const { colors } = useTheme();
 
   const alreadyVerified = params.phone_verified === "true" && !!params.phone;
 
@@ -86,11 +88,9 @@ export default function RegisterScreen() {
     try {
       const res = await verifyOTP(fullPhone, otp);
       if (res.action === "login" && res.token && res.user) {
-        // Déjà inscrit → login direct
         await loginWithToken(res.token, res.user);
         router.replace("/(tabs)/discover");
       } else {
-        // Nouveau → étape profil
         setVerifiedPhone(fullPhone);
         setStep("profile");
       }
@@ -155,22 +155,24 @@ export default function RegisterScreen() {
     setLoading(false);
   };
 
+  const s = makeStyles(colors);
+
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={s.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
-        contentContainerStyle={styles.inner}
+        contentContainerStyle={s.inner}
         keyboardShouldPersistTaps="handled"
       >
         <Image
           source={require("@/assets/logo.png")}
-          style={styles.logo}
+          style={s.logo}
           resizeMode="contain"
         />
-        <Text style={styles.title}>Créer un compte</Text>
-        <Text style={styles.subtitle}>
+        <Text style={s.title}>Créer un compte</Text>
+        <Text style={s.subtitle}>
           {step === "otp"
             ? "Saisis le code reçu"
             : step === "profile"
@@ -180,24 +182,24 @@ export default function RegisterScreen() {
                 : "Rejoins Lomi Lomi"}
         </Text>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={s.error}>{error}</Text> : null}
 
         {/* - PHONE STEP - */}
         {step === "phone" && (
           <>
-            <View style={styles.phoneRow}>
+            <View style={s.phoneRow}>
               <TouchableOpacity
-                style={styles.countryBtn}
+                style={s.countryBtn}
                 onPress={() => setCountryModal(true)}
               >
-                <Text style={styles.countryText}>
+                <Text style={s.countryText}>
                   {country.flag} {country.dial}
                 </Text>
               </TouchableOpacity>
               <TextInput
-                style={[styles.input, { flex: 1 }]}
+                style={[s.input, { flex: 1 }]}
                 placeholder="Numéro de téléphone"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 value={phoneNum}
                 onChangeText={setPhoneNum}
                 keyboardType="phone-pad"
@@ -205,14 +207,14 @@ export default function RegisterScreen() {
             </View>
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleSendOTP}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Recevoir un code</Text>
+                <Text style={s.buttonText}>Recevoir un code</Text>
               )}
             </TouchableOpacity>
 
@@ -222,8 +224,8 @@ export default function RegisterScreen() {
                 setStep("email");
               }}
             >
-              <Text style={styles.link}>
-                Ou <Text style={styles.linkBold}>s'inscrire par email</Text>
+              <Text style={s.link}>
+                Ou <Text style={s.linkBold}>s&apos;inscrire par email</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -232,17 +234,18 @@ export default function RegisterScreen() {
         {/* - OTP STEP - */}
         {step === "otp" && (
           <>
-            <Text style={styles.otpInfo}>
-              Code envoyé au <Text style={{ color: "#fff" }}>{fullPhone}</Text>
+            <Text style={s.otpInfo}>
+              Code envoyé au{" "}
+              <Text style={{ color: colors.text }}>{fullPhone}</Text>
             </Text>
             {devCode && (
-              <Text style={styles.devCode}> Code dev : {devCode}</Text>
+              <Text style={s.devCode}> Code dev : {devCode}</Text>
             )}
 
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Code OTP"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={otp}
               onChangeText={setOtp}
               keyboardType="number-pad"
@@ -251,14 +254,14 @@ export default function RegisterScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleVerifyOTP}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Vérifier</Text>
+                <Text style={s.buttonText}>Vérifier</Text>
               )}
             </TouchableOpacity>
 
@@ -269,8 +272,8 @@ export default function RegisterScreen() {
                 setStep("phone");
               }}
             >
-              <Text style={styles.link}>
-                <Text style={styles.linkBold}>← Changer de numéro</Text>
+              <Text style={s.link}>
+                <Text style={s.linkBold}>← Changer de numéro</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -279,37 +282,37 @@ export default function RegisterScreen() {
         {/* - PROFILE STEP (after OTP verified) - */}
         {step === "profile" && (
           <>
-            <View style={styles.verifiedBadge}>
-              <Text style={styles.verifiedText}> {verifiedPhone} vérifié</Text>
+            <View style={s.verifiedBadge}>
+              <Text style={s.verifiedText}> {verifiedPhone} vérifié</Text>
             </View>
 
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Nom d'utilisateur"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
               autoFocus
             />
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Mot de passe"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handlePhoneRegister}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Créer mon compte</Text>
+                <Text style={s.buttonText}>Créer mon compte</Text>
               )}
             </TouchableOpacity>
           </>
@@ -319,40 +322,40 @@ export default function RegisterScreen() {
         {step === "email" && (
           <>
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Nom d'utilisateur"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
             />
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Email"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
             />
             <TextInput
-              style={styles.input}
+              style={s.input}
               placeholder="Mot de passe"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[s.button, loading && s.buttonDisabled]}
               onPress={handleEmailRegister}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>S'inscrire</Text>
+                <Text style={s.buttonText}>S&apos;inscrire</Text>
               )}
             </TouchableOpacity>
 
@@ -362,8 +365,8 @@ export default function RegisterScreen() {
                 setStep("phone");
               }}
             >
-              <Text style={styles.link}>
-                <Text style={styles.linkBold}>← Inscription par téléphone</Text>
+              <Text style={s.link}>
+                <Text style={s.linkBold}>← Inscription par téléphone</Text>
               </Text>
             </TouchableOpacity>
           </>
@@ -371,39 +374,39 @@ export default function RegisterScreen() {
 
         <View style={{ height: 16 }} />
         <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.link}>
-            Déjà un compte ? <Text style={styles.linkBold}>Se connecter</Text>
+          <Text style={s.link}>
+            Déjà un compte ? <Text style={s.linkBold}>Se connecter</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Country picker modal */}
       <Modal visible={countryModal} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Choisir un pays</Text>
+        <View style={s.modalOverlay}>
+          <View style={s.modalContent}>
+            <Text style={s.modalTitle}>Choisir un pays</Text>
             <FlatList
               data={COUNTRIES}
               keyExtractor={(c) => c.code}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.countryItem}
+                  style={s.countryItem}
                   onPress={() => {
                     setCountry(item);
                     setCountryModal(false);
                   }}
                 >
-                  <Text style={styles.countryItemText}>
+                  <Text style={s.countryItemText}>
                     {item.flag} {item.name} ({item.dial})
                   </Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity
-              style={styles.modalClose}
+              style={s.modalClose}
               onPress={() => setCountryModal(false)}
             >
-              <Text style={styles.modalCloseText}>Fermer</Text>
+              <Text style={s.modalCloseText}>Fermer</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -412,122 +415,124 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  inner: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 40,
-  },
-  logo: { width: 100, height: 100, alignSelf: "center", marginBottom: 8 },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#999",
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  error: {
-    color: "#ef4444",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  phoneRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 12,
-  },
-  countryBtn: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    justifyContent: "center",
-  },
-  countryText: { color: "#fff", fontSize: 16 },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 12,
-  },
-  button: {
-    backgroundColor: "#7c3aed",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-  link: { color: "#999", textAlign: "center", fontSize: 14, marginBottom: 8 },
-  linkBold: { color: "#7c3aed", fontWeight: "600" },
-  otpInfo: {
-    color: "#999",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-  },
-  devCode: {
-    color: "#facc15",
-    textAlign: "center",
-    marginBottom: 16,
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  verifiedBadge: {
-    backgroundColor: "#166534",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 16,
-    alignItems: "center",
-  },
-  verifiedText: { color: "#4ade80", fontSize: 14, fontWeight: "600" },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
-  },
-  modalContent: {
-    backgroundColor: "#1a1a1a",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: "70%",
-    paddingTop: 20,
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  countryItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  countryItemText: { color: "#fff", fontSize: 16 },
-  modalClose: {
-    padding: 16,
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#333",
-  },
-  modalCloseText: { color: "#7c3aed", fontSize: 16, fontWeight: "600" },
-});
+function makeStyles(colors: ReturnType<typeof import("@/lib/theme-context").useTheme>["colors"]) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    inner: {
+      flexGrow: 1,
+      justifyContent: "center",
+      paddingHorizontal: 32,
+      paddingVertical: 40,
+    },
+    logo: { width: 100, height: 100, alignSelf: "center", marginBottom: 8 },
+    title: {
+      fontSize: 32,
+      fontWeight: "bold",
+      color: colors.text,
+      textAlign: "center",
+      marginBottom: 4,
+    },
+    subtitle: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 32,
+    },
+    error: {
+      color: colors.error,
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+    },
+    phoneRow: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 12,
+    },
+    countryBtn: {
+      backgroundColor: colors.inputBg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      justifyContent: "center",
+    },
+    countryText: { color: colors.text, fontSize: 16 },
+    input: {
+      backgroundColor: colors.inputBg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      padding: 16,
+      fontSize: 16,
+      color: colors.inputText,
+      marginBottom: 12,
+    },
+    button: {
+      backgroundColor: colors.accent,
+      borderRadius: 12,
+      padding: 16,
+      alignItems: "center",
+      marginTop: 8,
+      marginBottom: 24,
+    },
+    buttonDisabled: { opacity: 0.6 },
+    buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+    link: { color: colors.textSecondary, textAlign: "center", fontSize: 14, marginBottom: 8 },
+    linkBold: { color: colors.accent, fontWeight: "600" },
+    otpInfo: {
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+    },
+    devCode: {
+      color: "#facc15",
+      textAlign: "center",
+      marginBottom: 16,
+      fontSize: 14,
+      fontWeight: "600",
+    },
+    verifiedBadge: {
+      backgroundColor: "#166534",
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 16,
+      alignItems: "center",
+    },
+    verifiedText: { color: "#4ade80", fontSize: 14, fontWeight: "600" },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      justifyContent: "flex-end",
+    },
+    modalContent: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      maxHeight: "70%",
+      paddingTop: 20,
+    },
+    modalTitle: {
+      color: colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "center",
+      marginBottom: 12,
+    },
+    countryItem: {
+      paddingVertical: 14,
+      paddingHorizontal: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.border,
+    },
+    countryItemText: { color: colors.text, fontSize: 16 },
+    modalClose: {
+      padding: 16,
+      alignItems: "center",
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    modalCloseText: { color: colors.accent, fontSize: 16, fontWeight: "600" },
+  });
+}

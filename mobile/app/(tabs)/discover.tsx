@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -16,6 +16,7 @@ import { discover, likeUser, passUser, updateLocation } from "@/lib/api";
 import * as Location from "expo-location";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useWS } from "@/lib/ws-context";
+import { useTheme } from "@/lib/theme-context";
 import ScreenState from "@/app/components/ScreenState";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -34,6 +35,7 @@ interface Profile {
 }
 
 export default function DiscoverScreen() {
+  const { colors } = useTheme();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,6 @@ export default function DiscoverScreen() {
   }, []);
 
   useEffect(() => {
-    // Update GPS location silently before loading profiles
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
@@ -74,7 +75,7 @@ export default function DiscoverScreen() {
           });
         }
       } catch {
-        /* GPS optional - continue without it */
+        /* GPS optional */
       }
     })();
     loadProfiles();
@@ -226,13 +227,18 @@ export default function DiscoverScreen() {
     }
     return (
       <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.center}
+        style={{ flex: 1, backgroundColor: colors.background }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          backgroundColor: colors.background,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#7c3aed"
+            tintColor={colors.accent}
           />
         }
       >
@@ -244,8 +250,10 @@ export default function DiscoverScreen() {
             </Text>
           </TouchableOpacity>
         )}
-        <Ionicons name="heart-dislike" size={64} color="#333" />
-        <Text style={styles.emptyText}>Plus de profils pour le moment</Text>
+        <Ionicons name="heart-dislike" size={64} color={colors.border} />
+        <Text style={{ color: colors.textMuted, fontSize: 16, marginTop: 16 }}>
+          Plus de profils pour le moment
+        </Text>
         <TouchableOpacity
           style={styles.reloadBtn}
           onPress={() => {
@@ -262,13 +270,18 @@ export default function DiscoverScreen() {
 
   return (
     <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.container}
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: colors.background,
+        alignItems: "center",
+        paddingBottom: 24,
+      }}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor="#7c3aed"
+          tintColor={colors.accent}
         />
       }
     >
@@ -280,8 +293,9 @@ export default function DiscoverScreen() {
           </Text>
         </TouchableOpacity>
       )}
-      {error ? <Text style={styles.errorBanner}>{error}</Text> : null}
-      {/* Match popup */}
+      {error ? (
+        <Text style={styles.errorBanner}>{error}</Text>
+      ) : null}
       {matchPopup && (
         <View style={styles.matchPopup}>
           <Text style={styles.matchText}> Match avec {matchPopup} !</Text>
@@ -294,6 +308,7 @@ export default function DiscoverScreen() {
         style={[
           styles.card,
           {
+            backgroundColor: colors.card,
             transform: [
               { translateX: position.x },
               { translateY: position.y },
@@ -302,7 +317,6 @@ export default function DiscoverScreen() {
           },
         ]}
       >
-        {/* LIKE / NOPE overlays */}
         <Animated.View
           style={[styles.stamp, styles.likeStamp, { opacity: likeOpacity }]}
         >
@@ -320,29 +334,29 @@ export default function DiscoverScreen() {
               current.avatar_url ||
               "https://via.placeholder.com/400x500/1a1a1a/666?text=No+Photo",
           }}
-          style={styles.image}
+          style={[styles.image, { backgroundColor: colors.cardSecondary }]}
         />
         <View style={styles.info}>
-          <Text style={styles.name}>
+          <Text style={[styles.name, { color: colors.text }]}>
             {current.username}
             {current.age ? `, ${current.age}` : ""}
           </Text>
           <View style={styles.metaRow}>
             {current.city ? (
-              <Text style={styles.city}>
-                <Ionicons name="location-outline" size={14} color="#999" />{" "}
+              <Text style={[styles.city, { color: colors.textSecondary }]}>
+                <Ionicons name="location-outline" size={14} color={colors.textMuted} />{" "}
                 {current.city}
               </Text>
             ) : null}
             {current.distance != null && current.distance >= 0 ? (
-              <Text style={styles.distance}>
-                <Ionicons name="navigate-outline" size={13} color="#7c3aed" />{" "}
+              <Text style={[styles.distance, { color: colors.accent }]}>
+                <Ionicons name="navigate-outline" size={13} color={colors.accent} />{" "}
                 {current.distance} km
               </Text>
             ) : null}
           </View>
           {current.bio ? (
-            <Text style={styles.bio} numberOfLines={2}>
+            <Text style={[styles.bio, { color: colors.textSecondary }]} numberOfLines={2}>
               {current.bio}
             </Text>
           ) : null}
@@ -381,39 +395,25 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: "#0a0a0a" },
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#0a0a0a",
-    alignItems: "center",
-    paddingBottom: 24,
-  },
-  center: {
-    flexGrow: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   card: {
     width: SCREEN_WIDTH - 32,
     height: "70%",
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#1a1a1a",
     marginTop: 16,
   },
-  image: { width: "100%", height: "75%", backgroundColor: "#1a1a1a" },
+  image: { width: "100%", height: "75%" },
   info: { padding: 16 },
-  name: { fontSize: 24, fontWeight: "bold", color: "#fff" },
+  name: { fontSize: 24, fontWeight: "bold" },
   metaRow: {
     flexDirection: "row",
     gap: 12,
     marginTop: 4,
     alignItems: "center",
   },
-  city: { fontSize: 14, color: "#999" },
-  distance: { fontSize: 13, color: "#7c3aed", fontWeight: "600" },
-  bio: { fontSize: 14, color: "#ccc", marginTop: 6 },
+  city: { fontSize: 14 },
+  distance: { fontSize: 13, fontWeight: "600" },
+  bio: { fontSize: 14, marginTop: 6 },
   tagsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 8 },
   tag: {
     backgroundColor: "rgba(124,58,237,0.15)",
@@ -466,7 +466,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   matchText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
   reloadBtn: {
     marginTop: 24,
     backgroundColor: "#7c3aed",

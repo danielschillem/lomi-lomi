@@ -83,6 +83,20 @@ Propriétaire - © 2026 Lomi Lomi. Tous droits réservés.
 
 DEVBACKEND
 
+## Redeploy rapide (Windows)
+
+Après un `git push`, lance une seule commande depuis la racine du repo :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\redeploy.ps1
+```
+
+Options utiles :
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\redeploy.ps1 -Server 134.209.229.141 -User root -AppDir /opt/lomilomi -Branch main
+```
+
 ## Version
 
 v1.5.0 — 20 avril 2026

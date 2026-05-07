@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,13 +12,8 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
-import {
-  getPhotos,
-  uploadPhoto,
-  deletePhoto,
-  uploadAvatar,
-  getProfile,
-} from "@/lib/api";
+import { getPhotos, uploadPhoto, deletePhoto, uploadAvatar } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 interface Photo {
   id: number;
@@ -26,14 +21,13 @@ interface Photo {
 }
 
 export default function PhotosScreen() {
+  const { colors } = useTheme();
   const { user } = useAuth();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    loadPhotos();
-  }, []);
+  useEffect(() => { loadPhotos(); }, []);
 
   const loadPhotos = async () => {
     try {
@@ -54,9 +48,7 @@ export default function PhotosScreen() {
       aspect: isAvatar ? [1, 1] : [4, 3],
       quality: 0.8,
     });
-
     if (result.canceled) return;
-
     setUploading(true);
     try {
       const uri = result.assets[0].uri;
@@ -84,9 +76,7 @@ export default function PhotosScreen() {
           try {
             await deletePhoto(photoId);
             setPhotos((prev) => prev.filter((p) => p.id !== photoId));
-          } catch {
-            /* empty */
-          }
+          } catch { /* empty */ }
         },
       },
     ]);
@@ -94,17 +84,17 @@ export default function PhotosScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={styles.btnRow}>
         <TouchableOpacity
-          style={styles.uploadBtn}
+          style={[styles.uploadBtn, { backgroundColor: colors.accent }]}
           onPress={() => pickAndUpload(true)}
           disabled={uploading}
         >
@@ -112,7 +102,7 @@ export default function PhotosScreen() {
           <Text style={styles.uploadText}>Changer l'avatar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.uploadBtn}
+          style={[styles.uploadBtn, { backgroundColor: colors.accent }]}
           onPress={() => pickAndUpload(false)}
           disabled={uploading}
         >
@@ -121,13 +111,7 @@ export default function PhotosScreen() {
         </TouchableOpacity>
       </View>
 
-      {uploading && (
-        <ActivityIndicator
-          size="small"
-          color="#7c3aed"
-          style={{ marginVertical: 12 }}
-        />
-      )}
+      {uploading && <ActivityIndicator size="small" color={colors.accent} style={{ marginVertical: 12 }} />}
 
       <FlatList
         data={photos}
@@ -135,17 +119,14 @@ export default function PhotosScreen() {
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.grid}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.photoWrap}
-            onLongPress={() => handleDelete(item.id)}
-          >
-            <Image source={{ uri: item.url }} style={styles.photo} />
+          <TouchableOpacity style={styles.photoWrap} onLongPress={() => handleDelete(item.id)}>
+            <Image source={{ uri: item.url }} style={[styles.photo, { backgroundColor: colors.cardSecondary }]} />
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Ionicons name="images-outline" size={48} color="#333" />
-            <Text style={styles.emptyText}>Aucune photo</Text>
+            <Ionicons name="images-outline" size={48} color={colors.border} />
+            <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 8 }}>Aucune photo</Text>
           </View>
         }
       />
@@ -154,24 +135,12 @@ export default function PhotosScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  btnRow: {
-    flexDirection: "row",
-    gap: 8,
-    padding: 16,
-  },
+  btnRow: { flexDirection: "row", gap: 8, padding: 16 },
   uploadBtn: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
     paddingVertical: 12,
     borderRadius: 10,
     gap: 6,
@@ -179,12 +148,6 @@ const styles = StyleSheet.create({
   uploadText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   grid: { padding: 4 },
   photoWrap: { flex: 1 / 3, aspectRatio: 1, padding: 2 },
-  photo: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 4,
-    backgroundColor: "#1a1a1a",
-  },
+  photo: { width: "100%", height: "100%", borderRadius: 4 },
   empty: { alignItems: "center", paddingTop: 60 },
-  emptyText: { color: "#666", fontSize: 14, marginTop: 8 },
 });

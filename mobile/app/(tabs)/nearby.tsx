@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { router } from "expo-router";
 import * as Location from "expo-location";
 import { updateLocation, nearbyUsers } from "@/lib/api";
 import { useWS } from "@/lib/ws-context";
+import { useTheme } from "@/lib/theme-context";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const RADAR_SIZE = SCREEN_WIDTH - 64;
@@ -30,6 +31,7 @@ interface NearbyUser {
 }
 
 export default function NearbyScreen() {
+  const { colors } = useTheme();
   const [users, setUsers] = useState<NearbyUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [radius, setRadius] = useState(10);
@@ -41,7 +43,6 @@ export default function NearbyScreen() {
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(0.3)).current;
 
-  // Radar sweep animation
   useEffect(() => {
     const spin = Animated.loop(
       Animated.timing(spinAnim, {
@@ -55,24 +56,13 @@ export default function NearbyScreen() {
 
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.6,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.3,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulseAnim, { toValue: 0.6, duration: 1500, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.3, duration: 1500, useNativeDriver: true }),
       ]),
     );
     pulse.start();
 
-    return () => {
-      spin.stop();
-      pulse.stop();
-    };
+    return () => { spin.stop(); pulse.stop(); };
   }, [spinAnim, pulseAnim]);
 
   const loadNearby = useCallback(async () => {
@@ -93,34 +83,18 @@ export default function NearbyScreen() {
           setLoading(false);
           return;
         }
-
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-
-        await updateLocation({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
-        });
-
+        const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+        await updateLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
         watchRef.current = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Balanced,
-            timeInterval: 8000,
-            distanceInterval: 20,
-          },
+          { accuracy: Location.Accuracy.Balanced, timeInterval: 8000, distanceInterval: 20 },
           async (position) => {
             const now = Date.now();
             if (now - lastPushRef.current < 7000) return;
             lastPushRef.current = now;
-            await updateLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            }).catch(() => {});
+            await updateLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }).catch(() => {});
             await loadNearby();
           },
         );
-
         setHasLocation(true);
         await loadNearby();
       } catch {
@@ -128,30 +102,18 @@ export default function NearbyScreen() {
       }
       setLoading(false);
     })();
-
-    return () => {
-      if (watchRef.current) {
-        watchRef.current.remove();
-        watchRef.current = null;
-      }
-    };
+    return () => { if (watchRef.current) { watchRef.current.remove(); watchRef.current = null; } };
   }, [loadNearby]);
 
-  // Refresh every 12s
   useEffect(() => {
     if (!hasLocation) return;
     const interval = setInterval(loadNearby, 12000);
     return () => clearInterval(interval);
   }, [hasLocation, loadNearby]);
 
-  // Refresh immediately when someone updates location/profile via WS
   useEffect(() => {
     if (!hasLocation) return;
-    const unsub = onMessage((msg) => {
-      if (msg.type === "profile_updated") {
-        loadNearby();
-      }
-    });
+    const unsub = onMessage((msg) => { if (msg.type === "profile_updated") loadNearby(); });
     return unsub;
   }, [hasLocation, onMessage, loadNearby]);
 
@@ -160,9 +122,7 @@ export default function NearbyScreen() {
     try {
       const res = await nearbyUsers(newRadius);
       setUsers(res.users || []);
-    } catch {
-      /* empty */
-    }
+    } catch { /* empty */ }
   };
 
   const spinRotate = spinAnim.interpolate({
@@ -170,9 +130,8 @@ export default function NearbyScreen() {
     outputRange: ["0deg", "360deg"],
   });
 
-  // Position a user on the radar based on distance and angle
   const getUserPosition = (user: NearbyUser) => {
-    const maxR = RADAR_CENTER - 24; // padding for avatar
+    const maxR = RADAR_CENTER - 24;
     const ratio = Math.min(user.distance / radius, 1);
     const r = ratio * maxR;
     const angleRad = (user.angle - 90) * (Math.PI / 180);
@@ -183,30 +142,29 @@ export default function NearbyScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
-        <Text style={styles.loadingText}>Recherche de position GPS...</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center", padding: 32 }}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 16 }}>
+          Recherche de position GPS...
+        </Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="location-outline" size={64} color="#666" />
-        <Text style={styles.errorText}>{error}</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center", padding: 32 }}>
+        <Ionicons name="location-outline" size={64} color={colors.textMuted} />
+        <Text style={{ color: colors.textSecondary, fontSize: 16, marginTop: 16, textAlign: "center" }}>{error}</Text>
         <TouchableOpacity
-          style={styles.retryBtn}
+          style={[styles.retryBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setError(null);
             setLoading(true);
             Location.requestForegroundPermissionsAsync().then(({ status }) => {
               if (status === "granted") {
                 Location.getCurrentPositionAsync({}).then((loc) => {
-                  updateLocation({
-                    latitude: loc.coords.latitude,
-                    longitude: loc.coords.longitude,
-                  }).then(() => {
+                  updateLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude }).then(() => {
                     setHasLocation(true);
                     loadNearby().then(() => setLoading(false));
                   });
@@ -225,56 +183,38 @@ export default function NearbyScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background, alignItems: "center" }}>
       {/* Radius selector */}
       <View style={styles.radiusRow}>
         {[5, 10, 25, 50].map((r) => (
           <TouchableOpacity
             key={r}
-            style={[styles.radiusBtn, radius === r && styles.radiusBtnActive]}
+            style={[
+              styles.radiusBtn,
+              { backgroundColor: colors.cardSecondary },
+              radius === r && { backgroundColor: colors.accent },
+            ]}
             onPress={() => changeRadius(r)}
           >
-            <Text
-              style={[
-                styles.radiusBtnText,
-                radius === r && styles.radiusBtnTextActive,
-              ]}
-            >
+            <Text style={[styles.radiusBtnText, { color: colors.textMuted }, radius === r && { color: "#fff" }]}>
               {r} km
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Radar */}
+      {/* Radar — intentionally kept dark for visual effect */}
       <View style={styles.radarContainer}>
-        {/* Concentric circles */}
         <View style={[styles.radarCircle, styles.circle1]} />
         <View style={[styles.radarCircle, styles.circle2]} />
         <View style={[styles.radarCircle, styles.circle3]} />
         <View style={[styles.radarCircle, styles.circle4]} />
-
-        {/* Cross lines */}
         <View style={styles.crossH} />
         <View style={styles.crossV} />
-
-        {/* Sweep */}
-        <Animated.View
-          style={[
-            styles.sweep,
-            {
-              transform: [{ rotate: spinRotate }],
-              opacity: pulseAnim,
-            },
-          ]}
-        />
-
-        {/* Center dot (me) */}
+        <Animated.View style={[styles.sweep, { transform: [{ rotate: spinRotate }], opacity: pulseAnim }]} />
         <View style={styles.centerDot}>
           <View style={styles.centerDotInner} />
         </View>
-
-        {/* Users */}
         {users.map((user) => {
           const pos = getUserPosition(user);
           return (
@@ -284,10 +224,7 @@ export default function NearbyScreen() {
               onPress={() => router.push(`/user/${user.id}`)}
             >
               {user.avatar_url ? (
-                <Image
-                  source={{ uri: user.avatar_url }}
-                  style={styles.userAvatar}
-                />
+                <Image source={{ uri: user.avatar_url }} style={styles.userAvatar} />
               ) : (
                 <View style={styles.userAvatarPlaceholder}>
                   <Ionicons name="person" size={16} color="#999" />
@@ -297,59 +234,43 @@ export default function NearbyScreen() {
             </TouchableOpacity>
           );
         })}
-
-        {/* Distance labels */}
-        <Text style={[styles.distLabel, { top: 4, left: RADAR_CENTER - 20 }]}>
-          {radius} km
-        </Text>
-        <Text
-          style={[
-            styles.distLabel,
-            { top: RADAR_CENTER / 2 - 6, left: RADAR_CENTER - 15 },
-          ]}
-        >
+        <Text style={[styles.distLabel, { top: 4, left: RADAR_CENTER - 20 }]}>{radius} km</Text>
+        <Text style={[styles.distLabel, { top: RADAR_CENTER / 2 - 6, left: RADAR_CENTER - 15 }]}>
           {Math.round(radius / 2)} km
         </Text>
       </View>
 
-      {/* Count */}
-      <Text style={styles.countText}>
+      <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 12, marginBottom: 8 }}>
         {users.length === 0
           ? "Aucun utilisateur à proximité"
           : `${users.length} personne${users.length > 1 ? "s" : ""} dans un rayon de ${radius} km`}
       </Text>
 
-      {/* User list */}
       {users.length > 0 && (
-        <View style={styles.userList}>
+        <View style={{ width: "100%", paddingHorizontal: 16 }}>
           {users.slice(0, 5).map((user) => (
             <TouchableOpacity
               key={user.id}
-              style={styles.userRow}
+              style={[styles.userRow, { borderBottomColor: colors.border }]}
               onPress={() => router.push(`/user/${user.id}`)}
             >
               {user.avatar_url ? (
-                <Image
-                  source={{ uri: user.avatar_url }}
-                  style={styles.userListAvatar}
-                />
+                <Image source={{ uri: user.avatar_url }} style={[styles.userListAvatar, { backgroundColor: colors.cardSecondary }]} />
               ) : (
-                <View
-                  style={[styles.userListAvatar, styles.userAvatarPlaceholder]}
-                >
-                  <Ionicons name="person" size={18} color="#999" />
+                <View style={[styles.userListAvatar, styles.userAvatarPlaceholder]}>
+                  <Ionicons name="person" size={18} color={colors.textMuted} />
                 </View>
               )}
               <View style={{ flex: 1 }}>
-                <Text style={styles.userName}>{user.username}</Text>
-                <Text style={styles.userDist}>{user.distance} km</Text>
+                <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>{user.username}</Text>
+                <Text style={{ color: colors.textMuted, fontSize: 12, marginTop: 2 }}>{user.distance} km</Text>
               </View>
               {user.is_online && (
                 <View style={styles.onlineBadge}>
                   <Text style={styles.onlineBadgeText}>En ligne</Text>
                 </View>
               )}
-              <Ionicons name="chevron-forward" size={18} color="#666" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
@@ -359,31 +280,13 @@ export default function NearbyScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a", alignItems: "center" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 32,
-  },
-  loadingText: { color: "#999", fontSize: 14, marginTop: 16 },
-  errorText: {
-    color: "#999",
-    fontSize: 16,
-    marginTop: 16,
-    textAlign: "center",
-  },
   retryBtn: {
     marginTop: 24,
-    backgroundColor: "#7c3aed",
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
   },
   retryText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-
-  // Radius selector
   radiusRow: {
     flexDirection: "row",
     gap: 8,
@@ -395,14 +298,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: "#1a1a1a",
     alignItems: "center",
   },
-  radiusBtnActive: { backgroundColor: "#7c3aed" },
-  radiusBtnText: { color: "#999", fontSize: 13, fontWeight: "600" },
-  radiusBtnTextActive: { color: "#fff" },
-
-  // Radar
+  radiusBtnText: { fontSize: 13, fontWeight: "600" },
   radarContainer: {
     width: RADAR_SIZE,
     height: RADAR_SIZE,
@@ -445,7 +343,6 @@ const styles = StyleSheet.create({
     top: 0,
     borderColor: "rgba(124,58,237,0.15)",
   },
-
   crossH: {
     position: "absolute",
     top: RADAR_CENTER,
@@ -462,7 +359,6 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: "rgba(124,58,237,0.12)",
   },
-
   sweep: {
     position: "absolute",
     width: RADAR_SIZE / 2,
@@ -473,7 +369,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(124,58,237,0.3)",
     transformOrigin: "bottom left",
   },
-
   centerDot: {
     position: "absolute",
     left: RADAR_CENTER - 8,
@@ -485,26 +380,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  centerDotInner: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#7c3aed",
-  },
-
-  // User dots on radar
-  userDot: {
-    position: "absolute",
-    width: 32,
-    height: 32,
-  },
-  userAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: "#7c3aed",
-  },
+  centerDotInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#7c3aed" },
+  userDot: { position: "absolute", width: 32, height: 32 },
+  userAvatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 2, borderColor: "#7c3aed" },
   userAvatarPlaceholder: {
     width: 32,
     height: 32,
@@ -526,40 +404,15 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0f0f1a",
   },
-
-  distLabel: {
-    position: "absolute",
-    color: "rgba(124,58,237,0.5)",
-    fontSize: 10,
-  },
-
-  countText: {
-    color: "#999",
-    fontSize: 14,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-
-  // User list
-  userList: {
-    width: "100%",
-    paddingHorizontal: 16,
-  },
+  distLabel: { position: "absolute", color: "rgba(124,58,237,0.5)", fontSize: 10 },
   userRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
     gap: 12,
   },
-  userListAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  userName: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  userDist: { color: "#999", fontSize: 12, marginTop: 2 },
+  userListAvatar: { width: 40, height: 40, borderRadius: 20 },
   onlineBadge: {
     backgroundColor: "rgba(34,197,94,0.15)",
     paddingHorizontal: 8,

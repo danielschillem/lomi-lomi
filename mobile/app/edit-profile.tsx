@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,8 +12,10 @@ import {
 import { router, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getProfile, updateProfile } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function EditProfileScreen() {
+  const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [username, setUsername] = useState("");
@@ -61,34 +63,34 @@ export default function EditProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background, padding: 20 }}>
       <Stack.Screen options={{ title: "Modifier le profil" }} />
 
       <View style={styles.field}>
-        <Text style={styles.label}>Nom d'utilisateur</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Nom d'utilisateur</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={username}
           onChangeText={setUsername}
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Bio</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
         <TextInput
-          style={[styles.input, styles.multiline]}
+          style={[styles.input, styles.multiline, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={bio}
           onChangeText={setBio}
           placeholder="Parle de toi..."
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
           multiline
           numberOfLines={4}
           maxLength={500}
@@ -96,42 +98,37 @@ export default function EditProfileScreen() {
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Ville</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Ville</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={city}
           onChangeText={setCity}
           placeholder="Ta ville"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Date de naissance (YYYY-MM-DD)</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Date de naissance (YYYY-MM-DD)</Text>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={birthDate}
           onChangeText={setBirthDate}
           placeholder="1995-06-15"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
         />
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Genre</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Genre</Text>
         <View style={styles.optionRow}>
           {["homme", "femme", "autre"].map((g) => (
             <TouchableOpacity
               key={g}
-              style={[styles.option, gender === g && styles.optionActive]}
+              style={[styles.option, { backgroundColor: colors.cardSecondary }, gender === g && { backgroundColor: colors.accent }]}
               onPress={() => setGender(g)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  gender === g && styles.optionTextActive,
-                ]}
-              >
+              <Text style={[styles.optionText, { color: colors.textMuted }, gender === g && { color: "#fff" }]}>
                 {g.charAt(0).toUpperCase() + g.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -140,20 +137,15 @@ export default function EditProfileScreen() {
       </View>
 
       <View style={styles.field}>
-        <Text style={styles.label}>Je cherche</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Je cherche</Text>
         <View style={styles.optionRow}>
           {["homme", "femme", "tous"].map((l) => (
             <TouchableOpacity
               key={l}
-              style={[styles.option, lookingFor === l && styles.optionActive]}
+              style={[styles.option, { backgroundColor: colors.cardSecondary }, lookingFor === l && { backgroundColor: colors.accent }]}
               onPress={() => setLookingFor(l)}
             >
-              <Text
-                style={[
-                  styles.optionText,
-                  lookingFor === l && styles.optionTextActive,
-                ]}
-              >
+              <Text style={[styles.optionText, { color: colors.textMuted }, lookingFor === l && { color: "#fff" }]}>
                 {l.charAt(0).toUpperCase() + l.slice(1)}
               </Text>
             </TouchableOpacity>
@@ -162,7 +154,7 @@ export default function EditProfileScreen() {
       </View>
 
       <TouchableOpacity
-        style={[styles.saveBtn, saving && { opacity: 0.5 }]}
+        style={[styles.saveBtn, { backgroundColor: colors.accent }, saving && { opacity: 0.5 }]}
         onPress={handleSave}
         disabled={saving}
       >
@@ -180,16 +172,8 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a", padding: 20 },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   field: { marginBottom: 20 },
   label: {
-    color: "#999",
     fontSize: 13,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -197,8 +181,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
@@ -209,17 +191,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: "#1a1a1a",
     alignItems: "center",
   },
-  optionActive: { backgroundColor: "#7c3aed" },
-  optionText: { color: "#999", fontSize: 14, fontWeight: "500" },
-  optionTextActive: { color: "#fff" },
+  optionText: { fontSize: 14, fontWeight: "500" },
   saveBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
     paddingVertical: 16,
     borderRadius: 12,
     gap: 8,

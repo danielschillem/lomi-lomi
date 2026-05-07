@@ -54,8 +54,16 @@ export default function Navbar() {
     }
   }, [pathname]);
 
-  // Hide navbar on login/register or when not authenticated
-  if (!user || pathname === "/login" || pathname === "/register") return null;
+  // Hide navbar on auth pages, when not authenticated, and on chat detail
+  // pages so the message composer stays fully visible.
+  if (
+    !user ||
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname.startsWith("/messages/")
+  ) {
+    return null;
+  }
 
   const isManager = user.role === "admin" || user.role === "owner";
 

@@ -23,6 +23,7 @@ import {
   savePrompts,
   completeOnboarding,
 } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 const PROMPT_QUESTIONS = [
   "Mon endroit favori à Ouagadougou / Bobo-Dioulasso",
@@ -70,29 +71,22 @@ interface PromptEntry {
 }
 
 export default function OnboardingScreen() {
+  const { colors } = useTheme();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Step 0 - Photo
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-
-  // Step 1 - Bio
   const [bio, setBio] = useState("");
   const [city, setCity] = useState("");
   const [birthdate, setBirthdate] = useState("");
-
-  // Step 2 - Preferences
   const [gender, setGender] = useState("homme");
   const [interestedIn, setInterestedIn] = useState("femme");
   const [lookingFor, setLookingFor] = useState("relation_serieuse");
-
-  // Step 3 - Prompts
   const [prompts, setPrompts] = useState<PromptEntry[]>([
     { question: PROMPT_QUESTIONS[0], answer: "" },
     { question: PROMPT_QUESTIONS[4], answer: "" },
   ]);
 
-  // Modals for picker selection
   const [pickerOpen, setPickerOpen] = useState<
     | "city"
     | "gender"
@@ -199,28 +193,28 @@ export default function OnboardingScreen() {
         onRequestClose={() => setPickerOpen(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <Text style={styles.modalTitle}>{title}</Text>
+          <View style={[styles.modalSheet, { backgroundColor: colors.card }]}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{title}</Text>
             <FlatList
               data={options}
               keyExtractor={(o) => o.value}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.optionRow}
+                  style={[styles.optionRow, { borderBottomColor: colors.border }]}
                   onPress={() => {
                     onSelect(item.value);
                     setPickerOpen(null);
                   }}
                 >
-                  <Text style={styles.optionText}>{item.label}</Text>
+                  <Text style={[styles.optionText, { color: colors.text }]}>{item.label}</Text>
                 </TouchableOpacity>
               )}
             />
             <TouchableOpacity
-              style={styles.modalClose}
+              style={[styles.modalClose, { borderTopColor: colors.border }]}
               onPress={() => setPickerOpen(null)}
             >
-              <Text style={styles.modalCloseText}>Fermer</Text>
+              <Text style={{ color: colors.accentLight, fontSize: 15, fontWeight: "600" }}>Fermer</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -230,16 +224,15 @@ export default function OnboardingScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.brand}>Lomi Lomi</Text>
+        <Text style={[styles.brand, { color: colors.accentLight }]}>Lomi Lomi</Text>
 
-        {/* Progress steps */}
         <View style={styles.steps}>
           {STEPS.map((label, i) => {
             const done = i < step;
@@ -249,30 +242,20 @@ export default function OnboardingScreen() {
                 <View
                   style={[
                     styles.stepDot,
-                    done && styles.stepDotDone,
-                    active && styles.stepDotActive,
+                    { backgroundColor: colors.cardSecondary },
+                    done && { backgroundColor: "#22c55e" },
+                    active && { backgroundColor: colors.accent },
                   ]}
                 >
                   {done ? (
                     <Ionicons name="checkmark" size={14} color="#fff" />
                   ) : (
-                    <Text
-                      style={[
-                        styles.stepDotText,
-                        active && styles.stepDotTextActive,
-                      ]}
-                    >
+                    <Text style={[styles.stepDotText, { color: colors.textMuted }, active && { color: "#fff" }]}>
                       {i + 1}
                     </Text>
                   )}
                 </View>
-                <Text
-                  style={[
-                    styles.stepLabel,
-                    active && styles.stepLabelActive,
-                    done && styles.stepLabelDone,
-                  ]}
-                >
+                <Text style={[styles.stepLabel, { color: colors.textMuted }, active && { color: colors.text, fontWeight: "600" }, done && { color: colors.textSecondary }]}>
                   {label}
                 </Text>
               </View>
@@ -280,65 +263,57 @@ export default function OnboardingScreen() {
           })}
         </View>
 
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
           {step === 0 && (
             <View style={styles.center}>
-              <Text style={styles.title}>Ajoutez votre photo</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, { color: colors.text }]}>Ajoutez votre photo</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
                 Une belle photo augmente vos chances de 5x !
               </Text>
-              <TouchableOpacity
-                style={styles.avatarBtn}
-                onPress={handlePickAvatar}
-              >
+              <TouchableOpacity style={styles.avatarBtn} onPress={handlePickAvatar}>
                 {avatarUri ? (
                   <Image source={{ uri: avatarUri }} style={styles.avatar} />
                 ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Ionicons name="camera" size={36} color="#a78bfa" />
+                  <View style={[styles.avatarPlaceholder, { backgroundColor: colors.cardSecondary }]}>
+                    <Ionicons name="camera" size={36} color={colors.accentLight} />
                   </View>
                 )}
               </TouchableOpacity>
-              <Text style={styles.hint}>Touchez pour choisir une photo</Text>
+              <Text style={[styles.hint, { color: colors.textMuted }]}>Touchez pour choisir une photo</Text>
             </View>
           )}
 
           {step === 1 && (
             <View>
-              <Text style={styles.title}>Présentez-vous</Text>
-              <Text style={styles.label}>Bio</Text>
+              <Text style={[styles.title, { color: colors.text }]}>Présentez-vous</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Bio</Text>
               <TextInput
-                style={[styles.input, styles.textarea]}
+                style={[styles.input, styles.textarea, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
                 value={bio}
                 onChangeText={setBio}
                 placeholder="Parlez de vous en quelques mots…"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 multiline
                 maxLength={500}
                 numberOfLines={4}
               />
-              <Text style={styles.label}>Ville</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Ville</Text>
               <TouchableOpacity
-                style={styles.selectInput}
+                style={[styles.selectInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
                 onPress={() => setPickerOpen("city")}
               >
-                <Text
-                  style={[
-                    styles.selectInputText,
-                    !city && styles.selectInputPlaceholder,
-                  ]}
-                >
+                <Text style={[styles.selectInputText, { color: city ? colors.inputText : colors.placeholder }]}>
                   {city || "Choisir…"}
                 </Text>
-                <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+                <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
               </TouchableOpacity>
-              <Text style={styles.label}>Date de naissance (AAAA-MM-JJ)</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Date de naissance (AAAA-MM-JJ)</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
                 value={birthdate}
                 onChangeText={setBirthdate}
                 placeholder="1995-01-15"
-                placeholderTextColor="#666"
+                placeholderTextColor={colors.placeholder}
                 autoCapitalize="none"
                 autoCorrect={false}
               />
@@ -347,67 +322,65 @@ export default function OnboardingScreen() {
 
           {step === 2 && (
             <View>
-              <Text style={styles.title}>Vos préférences</Text>
-              <Text style={styles.label}>Je suis</Text>
+              <Text style={[styles.title, { color: colors.text }]}>Vos préférences</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Je suis</Text>
               <TouchableOpacity
-                style={styles.selectInput}
+                style={[styles.selectInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
                 onPress={() => setPickerOpen("gender")}
               >
-                <Text style={styles.selectInputText}>
+                <Text style={[styles.selectInputText, { color: colors.inputText }]}>
                   {GENDERS.find((g) => g.value === gender)?.label}
                 </Text>
-                <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+                <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
               </TouchableOpacity>
 
-              <Text style={styles.label}>Je cherche</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Je cherche</Text>
               <TouchableOpacity
-                style={styles.selectInput}
+                style={[styles.selectInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
                 onPress={() => setPickerOpen("interestedIn")}
               >
-                <Text style={styles.selectInputText}>
+                <Text style={[styles.selectInputText, { color: colors.inputText }]}>
                   {INTERESTED_IN.find((g) => g.value === interestedIn)?.label}
                 </Text>
-                <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+                <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
               </TouchableOpacity>
 
-              <Text style={styles.label}>Type de relation</Text>
+              <Text style={[styles.label, { color: colors.textMuted }]}>Type de relation</Text>
               <TouchableOpacity
-                style={styles.selectInput}
+                style={[styles.selectInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
                 onPress={() => setPickerOpen("lookingFor")}
               >
-                <Text style={styles.selectInputText}>
+                <Text style={[styles.selectInputText, { color: colors.inputText }]}>
                   {RELATION_TYPES.find((r) => r.value === lookingFor)?.label}
                 </Text>
-                <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+                <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
               </TouchableOpacity>
             </View>
           )}
 
           {step === 3 && (
             <View>
-              <Text style={styles.title}>Vos prompts</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, { color: colors.text }]}>Vos prompts</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
                 Répondez à ces questions pour vous démarquer.
               </Text>
               {prompts.map((p, i) => (
                 <View key={i} style={{ marginBottom: 12 }}>
                   <TouchableOpacity
-                    style={styles.selectInput}
-                    onPress={() =>
-                      setPickerOpen({ kind: "promptQuestion", index: i })
-                    }
+                    style={[styles.selectInput, { backgroundColor: colors.inputBg, borderColor: colors.border }]}
+                    onPress={() => setPickerOpen({ kind: "promptQuestion", index: i })}
                   >
-                    <Text style={styles.selectInputText} numberOfLines={1}>
+                    <Text style={[styles.selectInputText, { color: colors.inputText }]} numberOfLines={1}>
                       {p.question}
                     </Text>
-                    <Ionicons name="chevron-down" size={18} color="#9ca3af" />
+                    <Ionicons name="chevron-down" size={18} color={colors.textMuted} />
                   </TouchableOpacity>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
                     value={p.answer}
                     onChangeText={(t) => updatePromptAnswer(i, t)}
                     placeholder="Votre réponse…"
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.placeholder}
                     maxLength={200}
                   />
                 </View>
@@ -418,37 +391,30 @@ export default function OnboardingScreen() {
                     setPrompts([
                       ...prompts,
                       {
-                        question:
-                          PROMPT_QUESTIONS[prompts.length + 1] ||
-                          PROMPT_QUESTIONS[0],
+                        question: PROMPT_QUESTIONS[prompts.length + 1] || PROMPT_QUESTIONS[0],
                         answer: "",
                       },
                     ])
                   }
                 >
-                  <Text style={styles.addPromptText}>+ Ajouter un prompt</Text>
+                  <Text style={{ color: colors.accentLight, fontSize: 14, marginTop: 4 }}>+ Ajouter un prompt</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
           )}
 
-          {/* Buttons */}
           <View style={styles.actions}>
             {step > 0 ? (
               <TouchableOpacity
-                style={[styles.button, styles.buttonGhost]}
+                style={[styles.button, { backgroundColor: colors.cardSecondary }]}
                 onPress={() => setStep(step - 1)}
                 disabled={loading}
               >
-                <Text style={styles.buttonGhostText}>Retour</Text>
+                <Text style={[styles.buttonGhostText, { color: colors.text }]}>Retour</Text>
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity
-              style={[
-                styles.button,
-                styles.buttonPrimary,
-                loading && styles.buttonDisabled,
-              ]}
+              style={[styles.button, { backgroundColor: colors.accent }, loading && styles.buttonDisabled]}
               onPress={handleNext}
               disabled={loading}
             >
@@ -463,7 +429,7 @@ export default function OnboardingScreen() {
           </View>
 
           <TouchableOpacity onPress={handleSkip} style={styles.skipBtn}>
-            <Text style={styles.skipText}>
+            <Text style={{ color: colors.textMuted, fontSize: 13 }}>
               {step === 3 ? "Terminer plus tard" : "Passer cette étape"}
             </Text>
           </TouchableOpacity>
@@ -476,59 +442,39 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   scroll: { padding: 24, paddingTop: 60, paddingBottom: 40 },
   brand: {
-    color: "#a78bfa",
     fontSize: 14,
     fontWeight: "700",
     textAlign: "center",
     marginBottom: 24,
     letterSpacing: 1.5,
   },
-  steps: {
-    flexDirection: "row",
-    marginBottom: 24,
-    gap: 6,
-  },
+  steps: { flexDirection: "row", marginBottom: 24, gap: 6 },
   stepItem: { flex: 1, alignItems: "center", gap: 4 },
   stepDot: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "#1f1f23",
     alignItems: "center",
     justifyContent: "center",
   },
-  stepDotActive: { backgroundColor: "#7c3aed" },
-  stepDotDone: { backgroundColor: "#22c55e" },
-  stepDotText: { color: "#666", fontSize: 13, fontWeight: "700" },
-  stepDotTextActive: { color: "#fff" },
-  stepLabel: { color: "#555", fontSize: 11 },
-  stepLabelActive: { color: "#fff", fontWeight: "600" },
-  stepLabelDone: { color: "#9ca3af" },
+  stepDotText: { fontSize: 13, fontWeight: "700" },
+  stepLabel: { fontSize: 11 },
   card: {
-    backgroundColor: "#111114",
     borderWidth: 1,
-    borderColor: "#1f1f23",
     borderRadius: 16,
     padding: 20,
   },
   center: { alignItems: "center" },
   title: {
-    color: "#fff",
     fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
     textAlign: "center",
   },
-  subtitle: {
-    color: "#9ca3af",
-    fontSize: 13,
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  hint: { color: "#666", fontSize: 12, marginTop: 8 },
+  subtitle: { fontSize: 13, textAlign: "center", marginBottom: 16 },
+  hint: { fontSize: 12, marginTop: 8 },
   avatarBtn: { marginVertical: 16 },
   avatar: {
     width: 128,
@@ -541,33 +487,22 @@ const styles = StyleSheet.create({
     width: 128,
     height: 128,
     borderRadius: 64,
-    backgroundColor: "#1f1239",
     borderWidth: 2,
     borderColor: "#7c3aed",
     borderStyle: "dashed",
     alignItems: "center",
     justifyContent: "center",
   },
-  label: {
-    color: "#9ca3af",
-    fontSize: 13,
-    marginBottom: 6,
-    marginTop: 8,
-  },
+  label: { fontSize: 13, marginBottom: 6, marginTop: 8 },
   input: {
-    backgroundColor: "#1a1a1a",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
     borderRadius: 12,
     padding: 14,
     fontSize: 15,
-    color: "#fff",
   },
   textarea: { minHeight: 80, textAlignVertical: "top" },
   selectInput: {
-    backgroundColor: "#1a1a1a",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 14,
@@ -576,9 +511,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  selectInputText: { color: "#fff", fontSize: 15, flex: 1, marginRight: 8 },
-  selectInputPlaceholder: { color: "#666" },
-  addPromptText: { color: "#a78bfa", fontSize: 14, marginTop: 4 },
+  selectInputText: { fontSize: 15, flex: 1, marginRight: 8 },
   actions: { flexDirection: "row", gap: 10, marginTop: 24 },
   button: {
     flex: 1,
@@ -587,27 +520,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  buttonPrimary: { backgroundColor: "#7c3aed" },
   buttonPrimaryText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  buttonGhost: { backgroundColor: "#1f1f23" },
-  buttonGhostText: { color: "#e5e7eb", fontSize: 15, fontWeight: "500" },
+  buttonGhostText: { fontSize: 15, fontWeight: "500" },
   buttonDisabled: { opacity: 0.6 },
   skipBtn: { marginTop: 12, alignItems: "center", paddingVertical: 8 },
-  skipText: { color: "#6b7280", fontSize: 13 },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
   modalSheet: {
-    backgroundColor: "#1a1a1a",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "70%",
     paddingTop: 16,
   },
   modalTitle: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "700",
     textAlign: "center",
@@ -617,14 +545,11 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#333",
   },
-  optionText: { color: "#fff", fontSize: 15 },
+  optionText: { fontSize: 15 },
   modalClose: {
     padding: 16,
     alignItems: "center",
     borderTopWidth: 1,
-    borderTopColor: "#333",
   },
-  modalCloseText: { color: "#a78bfa", fontSize: 15, fontWeight: "600" },
 });

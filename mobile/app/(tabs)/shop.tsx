@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,12 +14,8 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  getProducts,
-  createOrder,
-  getOMUssdCode,
-  confirmOMPayment,
-} from "@/lib/api";
+import { getProducts, createOrder, getOMUssdCode, confirmOMPayment } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 interface Product {
   id: number;
@@ -37,6 +33,7 @@ interface CartItem {
 }
 
 export default function ShopScreen() {
+  const { colors } = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,10 +41,7 @@ export default function ShopScreen() {
   const [showCart, setShowCart] = useState(false);
   const [payPhone, setPayPhone] = useState("");
   const [ordering, setOrdering] = useState(false);
-  // OM 3-step checkout
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "ussd" | "otp">(
-    "cart",
-  );
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "ussd" | "otp">("cart");
   const [ussdCode, setUssdCode] = useState("");
   const [currentOrderId, setCurrentOrderId] = useState<number | null>(null);
   const [otp, setOtp] = useState("");
@@ -64,23 +58,14 @@ export default function ShopScreen() {
     setRefreshing(false);
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    load();
-  };
+  const onRefresh = () => { setRefreshing(true); load(); };
 
   const addToCart = (product: Product) => {
     setCart((prev) => {
       const existing = prev.find((c) => c.product.id === product.id);
-      if (existing) {
-        return prev.map((c) =>
-          c.product.id === product.id ? { ...c, quantity: c.quantity + 1 } : c,
-        );
-      }
+      if (existing) return prev.map((c) => c.product.id === product.id ? { ...c, quantity: c.quantity + 1 } : c);
       return [...prev, { product, quantity: 1 }];
     });
   };
@@ -88,19 +73,12 @@ export default function ShopScreen() {
   const removeFromCart = (productId: number) => {
     setCart((prev) => {
       const existing = prev.find((c) => c.product.id === productId);
-      if (existing && existing.quantity > 1) {
-        return prev.map((c) =>
-          c.product.id === productId ? { ...c, quantity: c.quantity - 1 } : c,
-        );
-      }
+      if (existing && existing.quantity > 1) return prev.map((c) => c.product.id === productId ? { ...c, quantity: c.quantity - 1 } : c);
       return prev.filter((c) => c.product.id !== productId);
     });
   };
 
-  const totalPrice = cart.reduce(
-    (sum, c) => sum + c.product.price * c.quantity,
-    0,
-  );
+  const totalPrice = cart.reduce((sum, c) => sum + c.product.price * c.quantity, 0);
   const totalItems = cart.reduce((sum, c) => sum + c.quantity, 0);
 
   const handleCheckout = async () => {
@@ -108,20 +86,12 @@ export default function ShopScreen() {
     const cleanPhone = payPhone.replace(/\s/g, "");
     const digits = cleanPhone.replace(/\+/g, "");
     if (!cleanPhone || digits.length < 8 || digits.length > 15) {
-      Alert.alert(
-        "Erreur",
-        "Entrez un numéro Orange Money valide (ex: 07XXXXXX)",
-      );
+      Alert.alert("Erreur", "Entrez un numéro Orange Money valide (ex: 07XXXXXX)");
       return;
     }
     setOrdering(true);
     try {
-      const orderRes = await createOrder({
-        items: cart.map((c) => ({
-          product_id: c.product.id,
-          quantity: c.quantity,
-        })),
-      });
+      const orderRes = await createOrder({ items: cart.map((c) => ({ product_id: c.product.id, quantity: c.quantity })) });
       const order = orderRes as { id: number };
       setCurrentOrderId(order.id);
       const ussdRes = await getOMUssdCode(order.id);
@@ -139,17 +109,10 @@ export default function ShopScreen() {
     setConfirming(true);
     try {
       const cleanPhone = payPhone.replace(/\s/g, "");
-      const res = await confirmOMPayment(
-        currentOrderId,
-        cleanPhone,
-        otp.trim(),
-      );
+      const res = await confirmOMPayment(currentOrderId, cleanPhone, otp.trim());
       const pay = res as { status?: string; message?: string; error?: string };
       if (pay.status === "paid") {
-        Alert.alert(
-          "Succès",
-          "Paiement confirmé ! Commande en cours de traitement.",
-        );
+        Alert.alert("Succès", "Paiement confirmé ! Commande en cours de traitement.");
         setCart([]);
         setShowCart(false);
         setPayPhone("");
@@ -158,10 +121,7 @@ export default function ShopScreen() {
         setCurrentOrderId(null);
         router.push("/orders");
       } else {
-        Alert.alert(
-          "Échec",
-          pay.message || pay.error || "Paiement échoué. Vérifiez le code OTP.",
-        );
+        Alert.alert("Échec", pay.message || pay.error || "Paiement échoué. Vérifiez le code OTP.");
       }
     } catch (e: unknown) {
       Alert.alert("Erreur", (e as Error).message);
@@ -176,76 +136,57 @@ export default function ShopScreen() {
     setCurrentOrderId(null);
   };
 
-  const formatPrice = (price: number) => {
-    return price.toLocaleString("fr-FR") + " FCFA";
-  };
+  const formatPrice = (price: number) => price.toLocaleString("fr-FR") + " FCFA";
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={products}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
-        contentContainerStyle={styles.grid}
+        contentContainerStyle={{ padding: 8 }}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#7c3aed"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              router.push({
-                pathname: "/product/[id]",
-                params: { id: item.id },
-              })
-            }
+            style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => router.push({ pathname: "/product/[id]", params: { id: item.id } })}
           >
             <Image
-              source={{
-                uri:
-                  item.image_url ||
-                  "https://via.placeholder.com/150/1a1a1a/666?text=Produit",
-              }}
-              style={styles.image}
+              source={{ uri: item.image_url || "https://via.placeholder.com/150/1a1a1a/666?text=Produit" }}
+              style={[styles.image, { backgroundColor: colors.cardSecondary }]}
             />
-            <Text style={styles.productName} numberOfLines={1}>
+            <Text style={[styles.productName, { color: colors.text }]} numberOfLines={1}>
               {item.name}
             </Text>
-            <Text style={styles.price}>{formatPrice(item.price)}</Text>
+            <Text style={[styles.price, { color: colors.accent }]}>{formatPrice(item.price)}</Text>
             {item.stock > 0 ? (
-              <TouchableOpacity
-                style={styles.addBtn}
-                onPress={() => addToCart(item)}
-              >
+              <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.accent }]} onPress={() => addToCart(item)}>
                 <Ionicons name="add" size={18} color="#fff" />
                 <Text style={styles.addText}>Ajouter</Text>
               </TouchableOpacity>
             ) : (
-              <Text style={styles.outOfStock}>Rupture</Text>
+              <Text style={[styles.outOfStock, { color: colors.error }]}>Rupture</Text>
             )}
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <View style={styles.center}>
-            <Ionicons name="bag-outline" size={64} color="#333" />
-            <Text style={styles.emptyText}>Aucun produit disponible</Text>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 40 }}>
+            <Ionicons name="bag-outline" size={64} color={colors.border} />
+            <Text style={{ color: colors.textMuted, fontSize: 16, marginTop: 16 }}>Aucun produit disponible</Text>
           </View>
         }
       />
 
-      {/* Cart FAB */}
       {totalItems > 0 && (
         <TouchableOpacity style={styles.fab} onPress={() => setShowCart(true)}>
           <Ionicons name="cart" size={24} color="#fff" />
@@ -255,25 +196,15 @@ export default function ShopScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Cart Modal */}
       <Modal visible={showCart} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                {checkoutStep === "cart"
-                  ? "Panier"
-                  : checkoutStep === "ussd"
-                    ? "Code USSD"
-                    : "Confirmation"}
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {checkoutStep === "cart" ? "Panier" : checkoutStep === "ussd" ? "Code USSD" : "Confirmation"}
               </Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setShowCart(false);
-                  resetCheckout();
-                }}
-              >
-                <Ionicons name="close" size={24} color="#fff" />
+              <TouchableOpacity onPress={() => { setShowCart(false); resetCheckout(); }}>
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -283,56 +214,39 @@ export default function ShopScreen() {
                   data={cart}
                   keyExtractor={(item) => item.product.id.toString()}
                   renderItem={({ item }) => (
-                    <View style={styles.cartRow}>
+                    <View style={[styles.cartRow, { borderBottomColor: colors.border }]}>
                       <View style={{ flex: 1 }}>
-                        <Text style={styles.cartName}>{item.product.name}</Text>
-                        <Text style={styles.cartPrice}>
+                        <Text style={[styles.cartName, { color: colors.text }]}>{item.product.name}</Text>
+                        <Text style={[styles.cartPrice, { color: colors.textSecondary }]}>
                           {formatPrice(item.product.price)} × {item.quantity}
                         </Text>
                       </View>
                       <View style={styles.qtyRow}>
-                        <TouchableOpacity
-                          onPress={() => removeFromCart(item.product.id)}
-                        >
-                          <Ionicons
-                            name="remove-circle"
-                            size={28}
-                            color="#ef4444"
-                          />
+                        <TouchableOpacity onPress={() => removeFromCart(item.product.id)}>
+                          <Ionicons name="remove-circle" size={28} color={colors.error} />
                         </TouchableOpacity>
-                        <Text style={styles.qtyText}>{item.quantity}</Text>
-                        <TouchableOpacity
-                          onPress={() => addToCart(item.product)}
-                        >
-                          <Ionicons
-                            name="add-circle"
-                            size={28}
-                            color="#7c3aed"
-                          />
+                        <Text style={[styles.qtyText, { color: colors.text }]}>{item.quantity}</Text>
+                        <TouchableOpacity onPress={() => addToCart(item.product)}>
+                          <Ionicons name="add-circle" size={28} color={colors.accent} />
                         </TouchableOpacity>
                       </View>
                     </View>
                   )}
                 />
-
-                <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Total</Text>
-                  <Text style={styles.totalPrice}>
-                    {formatPrice(totalPrice)}
-                  </Text>
+                <View style={[styles.totalRow, { borderTopColor: colors.border }]}>
+                  <Text style={[styles.totalLabel, { color: colors.text }]}>Total</Text>
+                  <Text style={[styles.totalPrice, { color: colors.accent }]}>{formatPrice(totalPrice)}</Text>
                 </View>
-
                 <TextInput
-                  style={styles.phoneInput}
+                  style={[styles.phoneInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
                   value={payPhone}
                   onChangeText={setPayPhone}
                   placeholder="07XXXXXX"
-                  placeholderTextColor="#666"
+                  placeholderTextColor={colors.placeholder}
                   keyboardType="phone-pad"
                 />
-
                 <TouchableOpacity
-                  style={[styles.checkoutBtn, ordering && { opacity: 0.5 }]}
+                  style={[styles.checkoutBtn, { backgroundColor: colors.orange }, ordering && { opacity: 0.5 }]}
                   onPress={handleCheckout}
                   disabled={ordering}
                 >
@@ -341,9 +255,7 @@ export default function ShopScreen() {
                   ) : (
                     <>
                       <Ionicons name="phone-portrait" size={20} color="#fff" />
-                      <Text style={styles.checkoutText}>
-                        Commander {formatPrice(totalPrice)}
-                      </Text>
+                      <Text style={styles.checkoutText}>Commander {formatPrice(totalPrice)}</Text>
                     </>
                   )}
                 </TouchableOpacity>
@@ -352,91 +264,44 @@ export default function ShopScreen() {
 
             {checkoutStep === "ussd" && (
               <View style={{ alignItems: "center", paddingVertical: 20 }}>
-                <Text
-                  style={{
-                    color: "#f97316",
-                    fontSize: 14,
-                    marginBottom: 12,
-                    textAlign: "center",
-                  }}
-                >
+                <Text style={{ color: colors.orange, fontSize: 14, marginBottom: 12, textAlign: "center" }}>
                   Composez ce code USSD sur votre téléphone :
                 </Text>
-                <View
-                  style={{
-                    backgroundColor: "#1a1a1a",
-                    borderRadius: 12,
-                    paddingVertical: 16,
-                    paddingHorizontal: 24,
-                    marginBottom: 12,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#f97316",
-                      fontSize: 24,
-                      fontWeight: "bold",
-                      fontFamily: "monospace",
-                      textAlign: "center",
-                    }}
-                  >
+                <View style={[styles.ussdBox, { backgroundColor: colors.inputBg }]}>
+                  <Text style={{ color: colors.orange, fontSize: 24, fontWeight: "bold", fontFamily: "monospace", textAlign: "center" }}>
                     {ussdCode}
                   </Text>
                 </View>
-                <Text
-                  style={{
-                    color: "#666",
-                    fontSize: 12,
-                    textAlign: "center",
-                    marginBottom: 24,
-                  }}
-                >
+                <Text style={{ color: colors.textSecondary, fontSize: 12, textAlign: "center", marginBottom: 24 }}>
                   Vous recevrez un code OTP par SMS après validation
                 </Text>
                 <TouchableOpacity
-                  style={[
-                    styles.checkoutBtn,
-                    { backgroundColor: "#7c3aed", width: "100%" },
-                  ]}
+                  style={[styles.checkoutBtn, { backgroundColor: colors.accent, width: "100%" }]}
                   onPress={() => setCheckoutStep("otp")}
                 >
                   <Ionicons name="checkmark-circle" size={20} color="#fff" />
-                  <Text style={styles.checkoutText}>
-                    J&apos;ai reçu mon code OTP
-                  </Text>
+                  <Text style={styles.checkoutText}>J&apos;ai reçu mon code OTP</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={resetCheckout}
-                  style={{ marginTop: 16 }}
-                >
-                  <Text style={{ color: "#666", fontSize: 13 }}>Annuler</Text>
+                <TouchableOpacity onPress={resetCheckout} style={{ marginTop: 16 }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 13 }}>Annuler</Text>
                 </TouchableOpacity>
               </View>
             )}
 
             {checkoutStep === "otp" && (
               <View style={{ paddingVertical: 20 }}>
-                <Text style={{ color: "#999", fontSize: 13, marginBottom: 8 }}>
-                  Code OTP reçu par SMS
-                </Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, marginBottom: 8 }}>Code OTP reçu par SMS</Text>
                 <TextInput
-                  style={[
-                    styles.phoneInput,
-                    { textAlign: "center", fontSize: 20, letterSpacing: 4 },
-                  ]}
+                  style={[styles.phoneInput, { backgroundColor: colors.inputBg, color: colors.inputText, textAlign: "center", fontSize: 20, letterSpacing: 4 }]}
                   value={otp}
                   onChangeText={setOtp}
                   placeholder="Code OTP"
-                  placeholderTextColor="#666"
+                  placeholderTextColor={colors.placeholder}
                   keyboardType="number-pad"
                   maxLength={10}
                 />
                 <TouchableOpacity
-                  style={[
-                    styles.checkoutBtn,
-                    { backgroundColor: "#16a34a" },
-                    (confirming || !otp.trim()) && { opacity: 0.5 },
-                  ]}
+                  style={[styles.checkoutBtn, { backgroundColor: "#16a34a" }, (confirming || !otp.trim()) && { opacity: 0.5 }]}
                   onPress={handleConfirmOTP}
                   disabled={confirming || !otp.trim()}
                 >
@@ -445,19 +310,12 @@ export default function ShopScreen() {
                   ) : (
                     <>
                       <Ionicons name="checkmark-done" size={20} color="#fff" />
-                      <Text style={styles.checkoutText}>
-                        Confirmer le paiement
-                      </Text>
+                      <Text style={styles.checkoutText}>Confirmer le paiement</Text>
                     </>
                   )}
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setCheckoutStep("ussd")}
-                  style={{ marginTop: 16, alignItems: "center" }}
-                >
-                  <Text style={{ color: "#666", fontSize: 13 }}>
-                    ← Revoir le code USSD
-                  </Text>
+                <TouchableOpacity onPress={() => setCheckoutStep("ussd")} style={{ marginTop: 16, alignItems: "center" }}>
+                  <Text style={{ color: colors.textMuted, fontSize: 13 }}>← Revoir le code USSD</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -469,56 +327,28 @@ export default function ShopScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 40,
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
-  grid: { padding: 8 },
   card: {
     flex: 1,
     margin: 8,
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     overflow: "hidden",
     maxWidth: "48%",
+    borderWidth: 1,
   },
-  image: { width: "100%", height: 120, backgroundColor: "#222" },
-  productName: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    padding: 8,
-    paddingBottom: 0,
-  },
-  price: {
-    color: "#7c3aed",
-    fontSize: 14,
-    fontWeight: "bold",
-    paddingHorizontal: 8,
-    paddingTop: 4,
-  },
+  image: { width: "100%", height: 120 },
+  productName: { fontSize: 14, fontWeight: "600", padding: 8, paddingBottom: 0 },
+  price: { fontSize: 14, fontWeight: "bold", paddingHorizontal: 8, paddingTop: 4 },
   addBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
     margin: 8,
     paddingVertical: 6,
     borderRadius: 8,
     gap: 4,
   },
   addText: { color: "#fff", fontSize: 12, fontWeight: "600" },
-  outOfStock: {
-    color: "#ef4444",
-    fontSize: 12,
-    textAlign: "center",
-    padding: 8,
-  },
+  outOfStock: { fontSize: 12, textAlign: "center", padding: 8 },
   fab: {
     position: "absolute",
     bottom: 24,
@@ -548,13 +378,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   fabBadgeText: { color: "#fff", fontSize: 11, fontWeight: "bold" },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "flex-end",
-  },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" },
   modalContent: {
-    backgroundColor: "#0a0a0a",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -566,38 +391,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  modalTitle: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+  modalTitle: { fontSize: 20, fontWeight: "bold" },
   cartRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
   },
-  cartName: { color: "#fff", fontSize: 15, fontWeight: "500" },
-  cartPrice: { color: "#999", fontSize: 13, marginTop: 2 },
+  cartName: { fontSize: 15, fontWeight: "500" },
+  cartPrice: { fontSize: 13, marginTop: 2 },
   qtyRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  qtyText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    minWidth: 20,
-    textAlign: "center",
-  },
+  qtyText: { fontSize: 16, fontWeight: "bold", minWidth: 20, textAlign: "center" },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 16,
     borderTopWidth: 1,
-    borderTopColor: "#333",
     marginTop: 8,
   },
-  totalLabel: { color: "#fff", fontSize: 18, fontWeight: "600" },
-  totalPrice: { color: "#7c3aed", fontSize: 20, fontWeight: "bold" },
+  totalLabel: { fontSize: 18, fontWeight: "600" },
+  totalPrice: { fontSize: 20, fontWeight: "bold" },
   phoneInput: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
@@ -607,10 +422,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f97316",
     paddingVertical: 16,
     borderRadius: 12,
     gap: 8,
   },
   checkoutText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  ussdBox: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    marginBottom: 12,
+  },
 });

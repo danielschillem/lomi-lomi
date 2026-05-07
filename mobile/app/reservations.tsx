@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getMyReservations, cancelReservation } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 interface Reservation {
   id: number;
@@ -22,6 +23,7 @@ interface Reservation {
 }
 
 export default function ReservationsScreen() {
+  const { colors } = useTheme();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,9 +31,7 @@ export default function ReservationsScreen() {
   const load = useCallback(async () => {
     try {
       const res = await getMyReservations();
-      setReservations(
-        Array.isArray(res) ? (res as unknown as Reservation[]) : [],
-      );
+      setReservations(Array.isArray(res) ? (res as unknown as Reservation[]) : []);
     } catch {
       setReservations([]);
     }
@@ -39,9 +39,7 @@ export default function ReservationsScreen() {
     setRefreshing(false);
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const handleCancel = (r: Reservation) => {
     Alert.alert("Annuler", `Annuler la réservation au "${r.place_name}" ?`, [
@@ -50,12 +48,7 @@ export default function ReservationsScreen() {
         text: "Annuler",
         style: "destructive",
         onPress: async () => {
-          try {
-            await cancelReservation(r.id);
-            load();
-          } catch {
-            /* empty */
-          }
+          try { await cancelReservation(r.id); load(); } catch { /* empty */ }
         },
       },
     ]);
@@ -63,99 +56,73 @@ export default function ReservationsScreen() {
 
   const statusLabel = (s: string) => {
     switch (s) {
-      case "pending":
-        return "En attente";
-      case "confirmed":
-        return "Confirmée";
-      case "cancelled":
-        return "Annulée";
-      default:
-        return s;
+      case "pending": return "En attente";
+      case "confirmed": return "Confirmée";
+      case "cancelled": return "Annulée";
+      default: return s;
     }
   };
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "confirmed":
-        return "#22c55e";
-      case "pending":
-        return "#f59e0b";
-      case "cancelled":
-        return "#ef4444";
-      default:
-        return "#666";
+      case "confirmed": return "#22c55e";
+      case "pending": return "#f59e0b";
+      case "cancelled": return "#ef4444";
+      default: return colors.textMuted;
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (reservations.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="restaurant-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Aucune réservation</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <Ionicons name="restaurant-outline" size={64} color={colors.border} />
+        <Text style={{ color: colors.textMuted, fontSize: 16, marginTop: 16 }}>Aucune réservation</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={reservations}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              load();
-            }}
-            tintColor="#7c3aed"
+            onRefresh={() => { setRefreshing(true); load(); }}
+            tintColor={colors.accent}
           />
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
             <View style={styles.cardHeader}>
-              <Text style={styles.placeName}>{item.place_name}</Text>
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: statusColor(item.status) + "20" },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: statusColor(item.status) },
-                  ]}
-                >
+              <Text style={[styles.placeName, { color: colors.text }]}>{item.place_name}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) + "20" }]}>
+                <Text style={[styles.statusText, { color: statusColor(item.status) }]}>
                   {statusLabel(item.status)}
                 </Text>
               </View>
             </View>
             <View style={styles.infoRow}>
-              <Ionicons name="calendar" size={14} color="#7c3aed" />
-              <Text style={styles.infoText}>
-                {item.date} à {item.time}
-              </Text>
+              <Ionicons name="calendar" size={14} color={colors.accent} />
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{item.date} à {item.time}</Text>
             </View>
             <View style={styles.infoRow}>
-              <Ionicons name="people" size={14} color="#7c3aed" />
-              <Text style={styles.infoText}>
+              <Ionicons name="people" size={14} color={colors.accent} />
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
                 {item.guests} personne{item.guests > 1 ? "s" : ""}
               </Text>
             </View>
             {(item.status === "pending" || item.status === "confirmed") && (
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => handleCancel(item)}
-              >
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => handleCancel(item)}>
                 <Text style={styles.cancelText}>Annuler</Text>
               </TouchableOpacity>
             )}
@@ -167,36 +134,12 @@ export default function ReservationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
-  card: {
-    margin: 12,
-    marginBottom: 0,
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  placeName: { color: "#fff", fontSize: 16, fontWeight: "600", flex: 1 },
+  card: { margin: 12, marginBottom: 0, borderRadius: 12, padding: 16 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  placeName: { fontSize: 16, fontWeight: "600", flex: 1 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 6,
-  },
-  infoText: { color: "#ccc", fontSize: 14 },
+  infoRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6 },
   cancelBtn: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,

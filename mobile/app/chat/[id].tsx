@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import {
   confirmConnectionPayment,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { useWS } from "@/lib/ws-context";
 import OMPaymentModal from "@/app/components/OMPaymentModal";
 
@@ -49,6 +50,7 @@ export default function ChatScreen() {
     recipientId: string;
   }>();
   const { user } = useAuth();
+  const { colors } = useTheme();
   const { onMessage, send: wsSend } = useWS();
   const [messages, setMessages] = useState<Message[]>([]);
   const [text, setText] = useState("");
@@ -68,8 +70,7 @@ export default function ChatScreen() {
 
   const conversationId = parseInt(id || "0", 10);
   const otherUserId = parseInt(recipientId || "0", 10);
-  const isValidConversationId =
-    Number.isFinite(conversationId) && conversationId > 0;
+  const isValidConversationId = Number.isFinite(conversationId) && conversationId > 0;
   const isValidReceiverId = Number.isFinite(otherUserId) && otherUserId > 0;
 
   useEffect(() => {
@@ -92,12 +93,7 @@ export default function ChatScreen() {
       const existingIndex = prev.findIndex((m) => m.id === incoming.id);
       if (existingIndex >= 0) {
         const next = [...prev];
-        next[existingIndex] = {
-          ...next[existingIndex],
-          ...incoming,
-          pending: false,
-          failed: false,
-        };
+        next[existingIndex] = { ...next[existingIndex], ...incoming, pending: false, failed: false };
         return next;
       }
       return [incoming, ...prev];
@@ -106,14 +102,11 @@ export default function ChatScreen() {
 
   useEffect(() => {
     const unsub = onMessage((msg) => {
-      const data = normalizeEventData(
-        msg as unknown as Record<string, unknown>,
-      );
+      const data = normalizeEventData(msg as unknown as Record<string, unknown>);
 
       if (msg.type === "message") {
         const eventConvID = Number(data.conversation_id || 0);
         if (eventConvID !== conversationId) return;
-
         const incoming: Message = {
           id: Number(data.id || Date.now()),
           content: String(data.content || ""),
@@ -123,28 +116,21 @@ export default function ChatScreen() {
           is_read: Boolean(data.is_read),
           is_edited: Boolean(data.is_edited),
         };
-
         upsertMessage(incoming);
-        if (incoming.sender_id !== user?.id) {
-          markConversationRead(conversationId).catch(() => {});
-        }
+        if (incoming.sender_id !== user?.id) markConversationRead(conversationId).catch(() => {});
       }
 
       if (msg.type === "read_receipt") {
         const eventConvID = Number(data.conversation_id || 0);
         const messageID = Number(data.message_id || 0);
         if (eventConvID !== conversationId || messageID <= 0) return;
-
-        setMessages((prev) =>
-          prev.map((m) => (m.id === messageID ? { ...m, is_read: true } : m)),
-        );
+        setMessages((prev) => prev.map((m) => (m.id === messageID ? { ...m, is_read: true } : m)));
       }
 
       if (msg.type === "message_deleted") {
         const eventConvID = Number(data.conversation_id || 0);
         const messageID = Number(data.message_id || 0);
         if (eventConvID !== conversationId || messageID <= 0) return;
-
         setMessages((prev) => prev.filter((m) => m.id !== messageID));
       }
 
@@ -152,15 +138,10 @@ export default function ChatScreen() {
         const eventConvID = Number(data.conversation_id || 0);
         const messageID = Number(data.message_id || 0);
         if (eventConvID !== conversationId || messageID <= 0) return;
-
         setMessages((prev) =>
           prev.map((m) =>
             m.id === messageID
-              ? {
-                  ...m,
-                  content: String(data.content || m.content),
-                  is_edited: Boolean(data.is_edited),
-                }
+              ? { ...m, content: String(data.content || m.content), is_edited: Boolean(data.is_edited) }
               : m,
           ),
         );
@@ -171,10 +152,7 @@ export default function ChatScreen() {
         if (!fromUser || fromUser !== otherUserId) return;
         setTypingActive(true);
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-        typingTimeoutRef.current = setTimeout(
-          () => setTypingActive(false),
-          2500,
-        );
+        typingTimeoutRef.current = setTimeout(() => setTypingActive(false), 2500);
       }
     });
     return unsub;
@@ -204,9 +182,7 @@ export default function ChatScreen() {
     setSearching(true);
     try {
       const res = await searchMessages(conversationId, q);
-      const rows = Array.isArray(res.messages)
-        ? (res.messages as unknown as Message[])
-        : [];
+      const rows = Array.isArray(res.messages) ? (res.messages as unknown as Message[]) : [];
       setMessages(rows);
       setSearchMode(true);
     } catch {
@@ -229,27 +205,17 @@ export default function ChatScreen() {
       is_read: false,
       is_edited: false,
     };
-
     setMessages((prev) => [optimistic, ...prev]);
     setText("");
     setSending(true);
     try {
-      const res = await sendMessage({
-        receiver_id: otherUserId,
-        content,
-      });
+      const res = await sendMessage({ receiver_id: otherUserId, content });
       if (res) {
         const sent = res as unknown as Message;
         setMessages((prev) =>
           prev.map((m) =>
             m.id === tempId
-              ? {
-                  ...m,
-                  id: sent.id || Date.now(),
-                  created_at: sent.created_at || m.created_at,
-                  pending: false,
-                  failed: false,
-                }
+              ? { ...m, id: sent.id || Date.now(), created_at: sent.created_at || m.created_at, pending: false, failed: false }
               : m,
           ),
         );
@@ -261,11 +227,7 @@ export default function ChatScreen() {
         setText(content);
         setMessages((prev) => prev.filter((m) => m.id !== tempId));
       } else {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempId ? { ...m, pending: false, failed: true } : m,
-          ),
-        );
+        setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, pending: false, failed: true } : m));
       }
     }
     setSending(false);
@@ -273,24 +235,17 @@ export default function ChatScreen() {
 
   const handleSendImage = async () => {
     if (sending || !isValidReceiverId) return;
-
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== "granted") {
-      Alert.alert(
-        "Photo",
-        "Autorise l'acces a la galerie pour envoyer une image.",
-      );
+      Alert.alert("Photo", "Autorise l'accès à la galerie pour envoyer une image.");
       return;
     }
-
     const picked = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.8,
       allowsEditing: false,
     });
-
     if (picked.canceled || !picked.assets?.length) return;
-
     const uri = picked.assets[0].uri;
     const tempId = -Date.now();
     const optimistic: Message = {
@@ -303,58 +258,34 @@ export default function ChatScreen() {
       failed: false,
       is_read: false,
     };
-
     setMessages((prev) => [optimistic, ...prev]);
     setSending(true);
-
     try {
       const up = await uploadMessageImage(uri);
       const imageUrl = up.image_url;
-      const res = await sendMessage({
-        receiver_id: otherUserId,
-        content: text.trim() || " ",
-        image_url: imageUrl,
-      });
-
+      const res = await sendMessage({ receiver_id: otherUserId, content: text.trim() || " ", image_url: imageUrl });
       const sent = res as unknown as Message;
       setMessages((prev) =>
         prev.map((m) =>
           m.id === tempId
-            ? {
-                ...m,
-                id: sent.id || Date.now(),
-                content: sent.content || m.content,
-                image_url: imageUrl,
-                created_at: sent.created_at || m.created_at,
-                pending: false,
-                failed: false,
-              }
+            ? { ...m, id: sent.id || Date.now(), content: sent.content || m.content, image_url: imageUrl, created_at: sent.created_at || m.created_at, pending: false, failed: false }
             : m,
         ),
       );
       setText("");
     } catch {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === tempId ? { ...m, pending: false, failed: true } : m,
-        ),
-      );
+      setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, pending: false, failed: true } : m));
       Alert.alert("Photo", "Impossible d'envoyer cette image.");
     }
-
     setSending(false);
   };
 
   const onTypingChange = (value: string) => {
     setText(value);
-    if (!isValidReceiverId) return;
-    if (!value.trim()) return;
-
+    if (!isValidReceiverId || !value.trim()) return;
     if (!typingSendRef.current) {
       wsSend({ type: "typing", data: { to_user_id: otherUserId } });
-      typingSendRef.current = setTimeout(() => {
-        typingSendRef.current = null;
-      }, 1500);
+      typingSendRef.current = setTimeout(() => { typingSendRef.current = null; }, 1500);
     }
   };
 
@@ -364,10 +295,7 @@ export default function ChatScreen() {
     setEditingText(msg.content || "");
   };
 
-  const cancelEdit = () => {
-    setEditingMessageId(null);
-    setEditingText("");
-  };
+  const cancelEdit = () => { setEditingMessageId(null); setEditingText(""); };
 
   const saveEdit = async () => {
     if (!editingMessageId || !editingText.trim()) return;
@@ -375,11 +303,7 @@ export default function ChatScreen() {
     try {
       await editMessage(editingMessageId, editingText.trim());
       setMessages((prev) =>
-        prev.map((m) =>
-          m.id === editingMessageId
-            ? { ...m, content: editingText.trim(), is_edited: true }
-            : m,
-        ),
+        prev.map((m) => m.id === editingMessageId ? { ...m, content: editingText.trim(), is_edited: true } : m),
       );
       cancelEdit();
     } catch {
@@ -420,33 +344,31 @@ export default function ChatScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={90}
     >
-      <Stack.Screen
-        options={{ title: name || "Chat", headerBackTitle: "Retour" }}
-      />
+      <Stack.Screen options={{ title: name || "Chat", headerBackTitle: "Retour" }} />
 
       <View style={styles.searchRow}>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
           value={searchText}
           onChangeText={setSearchText}
           placeholder="Rechercher dans la conversation"
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
           returnKeyType="search"
           onSubmitEditing={handleSearchMessages}
         />
-        <TouchableOpacity style={styles.iconBtn} onPress={handleSearchMessages}>
+        <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.accent }]} onPress={handleSearchMessages}>
           {searching ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
@@ -455,22 +377,18 @@ export default function ChatScreen() {
         </TouchableOpacity>
         {searchMode && (
           <TouchableOpacity
-            style={styles.iconBtnSecondary}
-            onPress={() => {
-              setSearchText("");
-              setSearchMode(false);
-              loadMessages();
-            }}
+            style={[styles.iconBtn, { backgroundColor: colors.cardSecondary }]}
+            onPress={() => { setSearchText(""); setSearchMode(false); loadMessages(); }}
           >
-            <Ionicons name="close" size={18} color="#9ca3af" />
+            <Ionicons name="close" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         )}
       </View>
 
       {typingActive && (
         <View style={styles.typingWrap}>
-          <Text style={styles.typingText}>
-            {name || "Utilisateur"} est en train d'ecrire...
+          <Text style={[styles.typingText, { color: colors.textMuted }]}>
+            {name || "Utilisateur"} est en train d&apos;écrire...
           </Text>
         </View>
       )}
@@ -491,39 +409,33 @@ export default function ChatScreen() {
                 Alert.alert("Message", "Choisis une action", [
                   { text: "Annuler", style: "cancel" },
                   { text: "Modifier", onPress: () => startEdit(item) },
-                  {
-                    text: "Supprimer",
-                    style: "destructive",
-                    onPress: () => confirmDelete(item.id),
-                  },
+                  { text: "Supprimer", style: "destructive", onPress: () => confirmDelete(item.id) },
                 ]);
               }}
               style={[
                 styles.bubble,
-                isMe ? styles.bubbleMe : styles.bubbleOther,
+                isMe
+                  ? styles.bubbleMe
+                  : [styles.bubbleOther, { backgroundColor: colors.cardSecondary }],
               ]}
             >
-              <Text style={[styles.msgText, isMe && styles.msgTextMe]}>
+              <Text style={[styles.msgText, { color: isMe ? "#fff" : colors.text }]}>
                 {item.content}
               </Text>
               {!!item.image_url && (
-                <Image
-                  source={{ uri: item.image_url }}
-                  style={styles.msgImage}
-                />
+                <Image source={{ uri: item.image_url }} style={styles.msgImage} />
               )}
-              {item.is_edited && <Text style={styles.edited}>modifie</Text>}
-              <Text style={styles.msgTime}>{formatTime(item.created_at)}</Text>
-
+              {item.is_edited && (
+                <Text style={[styles.edited, { color: isMe ? "rgba(255,255,255,0.5)" : colors.textMuted }]}>
+                  modifié
+                </Text>
+              )}
+              <Text style={[styles.msgTime, { color: isMe ? "rgba(255,255,255,0.5)" : colors.textMuted }]}>
+                {formatTime(item.created_at)}
+              </Text>
               {isMe && (
-                <Text style={styles.deliveryState}>
-                  {item.pending
-                    ? "Envoi..."
-                    : item.failed
-                      ? "Erreur"
-                      : item.is_read
-                        ? "Lu"
-                        : "Envoye"}
+                <Text style={[styles.deliveryState, { color: "rgba(255,255,255,0.62)" }]}>
+                  {item.pending ? "Envoi..." : item.failed ? "Erreur" : item.is_read ? "Lu" : "Envoyé"}
                 </Text>
               )}
             </TouchableOpacity>
@@ -536,12 +448,10 @@ export default function ChatScreen() {
           <Ionicons
             name={latestOwnMessageRead ? "checkmark-done" : "checkmark"}
             size={14}
-            color={latestOwnMessageRead ? "#7c3aed" : "#777"}
+            color={latestOwnMessageRead ? colors.accent : colors.textMuted}
           />
-          <Text style={styles.readReceiptText}>
-            {latestOwnMessageRead
-              ? "Dernier message lu"
-              : "Dernier message envoye"}
+          <Text style={[styles.readReceiptText, { color: colors.textMuted }]}>
+            {latestOwnMessageRead ? "Dernier message lu" : "Dernier message envoyé"}
           </Text>
         </View>
       )}
@@ -549,56 +459,51 @@ export default function ChatScreen() {
       {editingMessageId && (
         <View style={styles.editRow}>
           <TextInput
-            style={styles.editInput}
+            style={[styles.editInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
             value={editingText}
             onChangeText={setEditingText}
             placeholder="Modifier le message"
-            placeholderTextColor="#666"
+            placeholderTextColor={colors.placeholder}
           />
           <TouchableOpacity
-            style={styles.editAction}
+            style={[styles.actionBtn, { backgroundColor: colors.accent }]}
             onPress={saveEdit}
             disabled={opInProgress}
           >
             <Ionicons name="checkmark" size={18} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.editActionGhost} onPress={cancelEdit}>
-            <Ionicons name="close" size={18} color="#9ca3af" />
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: colors.cardSecondary }]}
+            onPress={cancelEdit}
+          >
+            <Ionicons name="close" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
       )}
 
-      <View style={styles.inputRow}>
+      <View style={[styles.inputRow, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
         <TouchableOpacity
-          style={styles.attachBtn}
+          style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
           onPress={handleSendImage}
           disabled={sending || !isValidReceiverId}
         >
-          <Ionicons
-            name="image"
-            size={20}
-            color={sending || !isValidReceiverId ? "#666" : "#fff"}
-          />
+          <Ionicons name="image" size={20} color={sending || !isValidReceiverId ? colors.textMuted : colors.text} />
         </TouchableOpacity>
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText, marginRight: 8 }]}
           value={text}
           onChangeText={onTypingChange}
           placeholder="Message..."
-          placeholderTextColor="#666"
+          placeholderTextColor={colors.placeholder}
           multiline
           maxLength={2000}
         />
         <TouchableOpacity
-          style={[styles.sendBtn, !text.trim() && styles.sendBtnDisabled]}
+          style={[styles.actionBtn, { backgroundColor: text.trim() ? colors.accent : colors.cardSecondary }]}
           onPress={handleSend}
           disabled={!text.trim() || sending}
         >
-          <Ionicons
-            name="send"
-            size={20}
-            color={text.trim() ? "#fff" : "#666"}
-          />
+          <Ionicons name="send" size={20} color={text.trim() ? "#fff" : colors.textMuted} />
         </TouchableOpacity>
       </View>
 
@@ -607,19 +512,13 @@ export default function ChatScreen() {
         onClose={() => setShowPayment(false)}
         onSuccess={() => {
           setShowPayment(false);
-          // Re-send after payment
           if (text.trim()) {
             sendMessage({ receiver_id: otherUserId, content: text.trim() })
               .then((res) => {
                 if (res) {
                   const sent = res as unknown as Message;
                   setMessages((prev) => [
-                    {
-                      id: sent.id || Date.now(),
-                      content: text.trim(),
-                      sender_id: user?.id || 0,
-                      created_at: new Date().toISOString(),
-                    },
+                    { id: sent.id || Date.now(), content: text.trim(), sender_id: user?.id || 0, created_at: new Date().toISOString() },
                     ...prev,
                   ]);
                   setText("");
@@ -632,73 +531,24 @@ export default function ChatScreen() {
         description={`Pour discuter avec ${name || "cet utilisateur"}, un paiement unique de 250 FCFA est requis.`}
         amount={250}
         initiatePayment={() => initiateConnectionPayment(otherUserId)}
-        confirmPayment={(paymentId, phone, otp) =>
-          confirmConnectionPayment(paymentId, phone, otp)
-        }
+        confirmPayment={(paymentId, phone, otp) => confirmConnectionPayment(paymentId, phone, otp)}
       />
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   messagesList: { paddingHorizontal: 12, paddingVertical: 8 },
-  bubble: {
-    maxWidth: "80%",
-    padding: 12,
-    borderRadius: 16,
-    marginVertical: 2,
-  },
-  bubbleMe: {
-    backgroundColor: "#7c3aed",
-    alignSelf: "flex-end",
-    borderBottomRightRadius: 4,
-  },
-  bubbleOther: {
-    backgroundColor: "#1a1a1a",
-    alignSelf: "flex-start",
-    borderBottomLeftRadius: 4,
-  },
-  msgText: { color: "#ccc", fontSize: 15, lineHeight: 20 },
-  msgTextMe: { color: "#fff" },
-  msgImage: {
-    width: 190,
-    height: 190,
-    borderRadius: 12,
-    marginTop: 8,
-    backgroundColor: "#0f0f0f",
-  },
-  msgTime: {
-    color: "rgba(255,255,255,0.5)",
-    fontSize: 11,
-    marginTop: 4,
-    alignSelf: "flex-end",
-  },
-  edited: {
-    color: "rgba(255,255,255,0.5)",
-    fontSize: 10,
-    marginTop: 2,
-  },
-  deliveryState: {
-    color: "rgba(255,255,255,0.62)",
-    fontSize: 10,
-    marginTop: 2,
-    alignSelf: "flex-end",
-  },
-  typingWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 4,
-  },
-  typingText: {
-    color: "#9ca3af",
-    fontSize: 12,
-  },
+  bubble: { maxWidth: "80%", padding: 12, borderRadius: 16, marginVertical: 2 },
+  bubbleMe: { backgroundColor: "#7c3aed", alignSelf: "flex-end", borderBottomRightRadius: 4 },
+  bubbleOther: { alignSelf: "flex-start", borderBottomLeftRadius: 4 },
+  msgText: { fontSize: 15, lineHeight: 20 },
+  msgImage: { width: 190, height: 190, borderRadius: 12, marginTop: 8 },
+  msgTime: { fontSize: 11, marginTop: 4, alignSelf: "flex-end" },
+  edited: { fontSize: 10, marginTop: 2 },
+  deliveryState: { fontSize: 10, marginTop: 2, alignSelf: "flex-end" },
+  typingWrap: { paddingHorizontal: 16, paddingBottom: 4 },
+  typingText: { fontSize: 12 },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -709,9 +559,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
     borderRadius: 10,
-    color: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
@@ -720,15 +568,6 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: "#7c3aed",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  iconBtnSecondary: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -739,10 +578,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 6,
   },
-  readReceiptText: {
-    color: "#9ca3af",
-    fontSize: 11,
-  },
+  readReceiptText: { fontSize: 11 },
   editRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -752,26 +588,15 @@ const styles = StyleSheet.create({
   },
   editInput: {
     flex: 1,
-    backgroundColor: "#111827",
     borderRadius: 10,
-    color: "#fff",
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
   },
-  editAction: {
-    width: 36,
-    height: 36,
+  actionBtn: {
+    width: 38,
+    height: 38,
     borderRadius: 10,
-    backgroundColor: "#7c3aed",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  editActionGhost: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -781,36 +606,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderTopWidth: 1,
-    borderTopColor: "#1a1a1a",
-    backgroundColor: "#0a0a0a",
-  },
-  attachBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#1a1a1a",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
   },
   input: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    color: "#fff",
     fontSize: 15,
     maxHeight: 100,
-    marginRight: 8,
   },
-  sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#7c3aed",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sendBtnDisabled: { backgroundColor: "#1a1a1a" },
 });

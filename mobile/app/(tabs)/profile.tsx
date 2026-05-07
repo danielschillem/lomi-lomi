@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,12 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 import { getProfile } from "@/lib/api";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const { colors } = useTheme();
   const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -32,8 +34,8 @@ export default function ProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
@@ -43,77 +45,27 @@ export default function ProfileScreen() {
   const isDelivery = role === "delivery" || role === "admin" || role === "owner";
 
   const menuItems: { icon: keyof typeof Ionicons.glyphMap; label: string; route: string }[] = [
-    {
-      icon: "ribbon-outline" as const,
-      label: "Lomi Pass Premium",
-      route: "/premium",
-    },
+    { icon: "ribbon-outline" as const, label: "Lomi Pass Premium", route: "/premium" },
     ...(isDelivery
-      ? [
-          {
-            icon: "car-sport-outline" as const,
-            label: "Espace livreur",
-            route: "/livreur",
-          },
-        ]
+      ? [{ icon: "car-sport-outline" as const, label: "Espace livreur", route: "/livreur" }]
       : []),
-    {
-      icon: "sparkles-outline" as const,
-      label: "Bien-être",
-      route: "/bien-etre",
-    },
-    {
-      icon: "calendar-outline" as const,
-      label: "Événements",
-      route: "/evenements",
-    },
-    {
-      icon: "create-outline" as const,
-      label: "Modifier le profil",
-      route: "/edit-profile",
-    },
+    { icon: "sparkles-outline" as const, label: "Bien-être", route: "/bien-etre" },
+    { icon: "calendar-outline" as const, label: "Événements", route: "/evenements" },
+    { icon: "create-outline" as const, label: "Modifier le profil", route: "/edit-profile" },
     { icon: "images-outline" as const, label: "Mes photos", route: "/photos" },
     { icon: "bag-outline" as const, label: "Mes commandes", route: "/orders" },
-    {
-      icon: "calendar-outline" as const,
-      label: "Mes rendez-vous",
-      route: "/bookings",
-    },
-    {
-      icon: "restaurant-outline" as const,
-      label: "Mes réservations",
-      route: "/reservations",
-    },
-    {
-      icon: "location-outline" as const,
-      label: "Mes adresses",
-      route: "/addresses",
-    },
-    {
-      icon: "navigate-outline" as const,
-      label: "Partage de position",
-      route: "/location",
-    },
-    {
-      icon: "map-outline" as const,
-      label: "Carte des lieux",
-      route: "/carte",
-    },
+    { icon: "calendar-outline" as const, label: "Mes rendez-vous", route: "/bookings" },
+    { icon: "restaurant-outline" as const, label: "Mes réservations", route: "/reservations" },
+    { icon: "location-outline" as const, label: "Mes adresses", route: "/addresses" },
+    { icon: "navigate-outline" as const, label: "Partage de position", route: "/location" },
+    { icon: "map-outline" as const, label: "Carte des lieux", route: "/carte" },
     { icon: "car-outline" as const, label: "Mes courses", route: "/rides" },
-    {
-      icon: "settings-outline" as const,
-      label: "Paramètres",
-      route: "/settings",
-    },
-    {
-      icon: "ban-outline" as const,
-      label: "Utilisateurs bloqués",
-      route: "/blocked",
-    },
+    { icon: "settings-outline" as const, label: "Paramètres", route: "/settings" },
+    { icon: "ban-outline" as const, label: "Utilisateurs bloqués", route: "/blocked" },
   ];
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ paddingBottom: 40 }}>
       <View style={styles.header}>
         <Image
           source={{
@@ -121,112 +73,102 @@ export default function ProfileScreen() {
               (p.avatar_url as string) ||
               "https://via.placeholder.com/120/1a1a1a/666?text=?",
           }}
-          style={styles.avatar}
+          style={[styles.avatar, { backgroundColor: colors.cardSecondary }]}
         />
-        <Text style={styles.name}>{user?.username || "Utilisateur"}</Text>
-        <Text style={styles.role}>
+        <Text style={[styles.name, { color: colors.text }]}>
+          {user?.username || "Utilisateur"}
+        </Text>
+        <Text style={[styles.role, { color: colors.accent }]}>
           {user?.role === "admin" ? "Administrateur" : "Membre"}
         </Text>
       </View>
 
-      <View style={styles.stats}>
+      <View style={[styles.stats, { borderColor: colors.border }]}>
         <View style={styles.stat}>
-          <Text style={styles.statNumber}>
+          <Text style={[styles.statNumber, { color: colors.text }]}>
             {(p.matches_count as number) || 0}
           </Text>
-          <Text style={styles.statLabel}>Matchs</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Matchs</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statNumber}>
+          <Text style={[styles.statNumber, { color: colors.text }]}>
             {(p.likes_count as number) || 0}
           </Text>
-          <Text style={styles.statLabel}>Likes</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Likes</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statNumber}>
+          <Text style={[styles.statNumber, { color: colors.text }]}>
             {(p.visits_count as number) || 0}
           </Text>
-          <Text style={styles.statLabel}>Visites</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Visites</Text>
         </View>
       </View>
 
       {p.bio ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Bio</Text>
-          <Text style={styles.bio}>{p.bio as string}</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Bio</Text>
+          <Text style={[styles.bio, { color: colors.textSecondary }]}>{p.bio as string}</Text>
         </View>
       ) : null}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Infos</Text>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Infos</Text>
         {p.city && (
           <View style={styles.infoRow}>
-            <Ionicons name="location" size={18} color="#7c3aed" />
-            <Text style={styles.infoText}>{p.city as string}</Text>
+            <Ionicons name="location" size={18} color={colors.accent} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{p.city as string}</Text>
           </View>
         )}
         {p.age && (
           <View style={styles.infoRow}>
-            <Ionicons name="calendar" size={18} color="#7c3aed" />
-            <Text style={styles.infoText}>{p.age as number} ans</Text>
+            <Ionicons name="calendar" size={18} color={colors.accent} />
+            <Text style={[styles.infoText, { color: colors.textSecondary }]}>{p.age as number} ans</Text>
           </View>
         )}
         <View style={styles.infoRow}>
-          <Ionicons name="mail" size={18} color="#7c3aed" />
-          <Text style={styles.infoText}>
+          <Ionicons name="mail" size={18} color={colors.accent} />
+          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
             {(p.email as string) || user?.username}
           </Text>
         </View>
       </View>
 
-      {/* Menu items */}
-      <View style={styles.menu}>
+      <View style={[styles.menu, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
         {menuItems.map((item) => (
           <TouchableOpacity
             key={item.route}
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.border }]}
             onPress={() => router.push(item.route as `/${string}`)}
           >
-            <Ionicons name={item.icon} size={22} color="#7c3aed" />
-            <Text style={styles.menuText}>{item.label}</Text>
-            <Ionicons name="chevron-forward" size={18} color="#444" />
+            <Ionicons name={item.icon} size={22} color={colors.accent} />
+            <Text style={[styles.menuText, { color: colors.text }]}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-        <Ionicons name="log-out-outline" size={20} color="#ef4444" />
-        <Text style={styles.logoutText}>Se déconnecter</Text>
+      <TouchableOpacity
+        style={[styles.logoutBtn, { borderColor: colors.error }]}
+        onPress={logout}
+      >
+        <Ionicons name="log-out-outline" size={20} color={colors.error} />
+        <Text style={[styles.logoutText, { color: colors.error }]}>Se déconnecter</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  content: { paddingBottom: 40 },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   header: { alignItems: "center", paddingTop: 24, paddingBottom: 16 },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    backgroundColor: "#1a1a1a",
     borderWidth: 3,
     borderColor: "#7c3aed",
   },
-  name: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    marginTop: 12,
-  },
-  role: { fontSize: 14, color: "#7c3aed", marginTop: 2 },
+  name: { fontSize: 24, fontWeight: "bold", marginTop: 12 },
+  role: { fontSize: 14, marginTop: 2 },
   stats: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -234,31 +176,26 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#1a1a1a",
   },
   stat: { alignItems: "center" },
-  statNumber: { fontSize: 20, fontWeight: "bold", color: "#fff" },
-  statLabel: { fontSize: 12, color: "#666", marginTop: 2 },
-  section: {
-    marginHorizontal: 16,
-    marginTop: 24,
-  },
+  statNumber: { fontSize: 20, fontWeight: "bold" },
+  statLabel: { fontSize: 12, marginTop: 2 },
+  section: { marginHorizontal: 16, marginTop: 24 },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#999",
     marginBottom: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
   },
-  bio: { fontSize: 15, color: "#ccc", lineHeight: 22 },
+  bio: { fontSize: 15, lineHeight: 22 },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     paddingVertical: 8,
   },
-  infoText: { fontSize: 15, color: "#ccc" },
+  infoText: { fontSize: 15 },
   logoutBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -269,14 +206,12 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     paddingVertical: 14,
     borderWidth: 1,
-    borderColor: "#ef4444",
     borderRadius: 12,
   },
-  logoutText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
+  logoutText: { fontSize: 16, fontWeight: "600" },
   menu: {
     marginTop: 24,
     marginHorizontal: 16,
-    backgroundColor: "#111",
     borderRadius: 12,
     overflow: "hidden",
   },
@@ -286,8 +221,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#1a1a1a",
     gap: 12,
   },
-  menuText: { flex: 1, color: "#ccc", fontSize: 15 },
+  menuText: { flex: 1, fontSize: 15 },
 });

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { getOrders, initiatePayment } from "@/lib/api";
 import ScreenState from "@/app/components/ScreenState";
 import { isValidPhone, normalizePhone } from "@/lib/validation";
+import { useTheme } from "@/lib/theme-context";
 
 interface Order {
   id: number;
@@ -28,6 +29,7 @@ interface Order {
 }
 
 export default function OrdersScreen() {
+  const { colors } = useTheme();
   const PAGE_SIZE = 20;
   const [orders, setOrders] = useState<Order[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -53,22 +55,11 @@ export default function OrdersScreen() {
     setRefreshing(false);
   }, [PAGE_SIZE]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load]),
-  );
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  const onRefresh = () => {
-    setRefreshing(true);
-    setError(null);
-    load();
-  };
-
+  const onRefresh = () => { setRefreshing(true); setError(null); load(); };
   const loadMore = () => {
     if (visibleCount >= orders.length) return;
     setVisibleCount((prev) => prev + PAGE_SIZE);
@@ -76,53 +67,34 @@ export default function OrdersScreen() {
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "paid":
-        return "#22c55e";
-      case "delivered":
-        return "#3b82f6";
-      case "pending":
-        return "#f59e0b";
-      case "preparing":
-        return "#8b5cf6";
-      case "shipped":
-        return "#3b82f6";
+      case "paid": return "#22c55e";
+      case "delivered": return "#3b82f6";
+      case "pending": return "#f59e0b";
+      case "preparing": return "#8b5cf6";
+      case "shipped": return "#3b82f6";
       case "payment_failed":
-      case "canceled":
-        return "#ef4444";
-      case "payment_expired":
-        return "#6b7280";
-      default:
-        return "#666";
+      case "canceled": return "#ef4444";
+      case "payment_expired": return colors.textMuted;
+      default: return colors.textMuted;
     }
   };
 
   const statusLabel = (s: string) => {
     switch (s) {
-      case "pending":
-        return "En attente";
-      case "paid":
-        return "Payée";
-      case "preparing":
-        return "En préparation";
-      case "shipped":
-        return "Expédiée";
-      case "delivered":
-        return "Livrée";
-      case "payment_failed":
-        return "Échec paiement";
-      case "payment_expired":
-        return "Expiré";
-      case "canceled":
-        return "Annulée";
-      case "confirmed":
-        return "Confirmée";
-      default:
-        return s;
+      case "pending": return "En attente";
+      case "paid": return "Payée";
+      case "preparing": return "En préparation";
+      case "shipped": return "Expédiée";
+      case "delivered": return "Livrée";
+      case "payment_failed": return "Échec paiement";
+      case "payment_expired": return "Expiré";
+      case "canceled": return "Annulée";
+      case "confirmed": return "Confirmée";
+      default: return s;
     }
   };
 
-  const canRetryPayment = (s: string) =>
-    s === "pending" || s === "payment_failed" || s === "payment_expired";
+  const canRetryPayment = (s: string) => s === "pending" || s === "payment_failed" || s === "payment_expired";
 
   const handleRetry = async (orderId: number) => {
     setRetryingOrderId(orderId);
@@ -132,23 +104,14 @@ export default function OrdersScreen() {
   const confirmRetry = async () => {
     if (!retryingOrderId) return;
     const cleanPhone = normalizePhone(retryPhone);
-    if (!isValidPhone(cleanPhone)) {
-      Alert.alert("Erreur", "Numéro invalide");
-      return;
-    }
+    if (!isValidPhone(cleanPhone)) { Alert.alert("Erreur", "Numéro invalide"); return; }
     try {
-      const res = await initiatePayment({
-        order_id: retryingOrderId,
-        phone: cleanPhone,
-      });
+      const res = await initiatePayment({ order_id: retryingOrderId, phone: cleanPhone });
       const pay = res as { payment_url?: string; ussd_code?: string; message?: string };
       if (pay.payment_url) {
         await Linking.openURL(pay.payment_url);
       } else if (pay.ussd_code) {
-        Alert.alert(
-          "Code USSD",
-          `Composez ${pay.ussd_code} puis confirmez le paiement Orange Money.`,
-        );
+        Alert.alert("Code USSD", `Composez ${pay.ussd_code} puis confirmez le paiement Orange Money.`);
       } else {
         Alert.alert("Succès", pay.message || "Paiement simulé !");
       }
@@ -163,15 +126,10 @@ export default function OrdersScreen() {
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
   };
 
-  const formatPrice = (price: number) =>
-    price.toLocaleString("fr-FR") + " FCFA";
+  const formatPrice = (price: number) => price.toLocaleString("fr-FR") + " FCFA";
 
   if (loading) {
     return <ScreenState mode="loading" title="Chargement..." subtitle="Récupération des commandes" />;
@@ -184,81 +142,52 @@ export default function OrdersScreen() {
         title="Erreur de chargement"
         subtitle={error}
         buttonLabel="Réessayer"
-        onPressButton={() => {
-          setLoading(true);
-          load();
-        }}
+        onPressButton={() => { setLoading(true); load(); }}
       />
     );
   }
 
   if (orders.length === 0) {
-    return (
-      <ScreenState mode="empty" title="Aucune commande" subtitle="Tes commandes apparaîtront ici." />
-    );
+    return <ScreenState mode="empty" title="Aucune commande" subtitle="Tes commandes apparaîtront ici." />;
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={orders.slice(0, visibleCount)}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#7c3aed"
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
         }
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
         ListFooterComponent={
           visibleCount < orders.length ? (
             <View style={styles.footer}>
-              <ActivityIndicator size="small" color="#7c3aed" />
+              <ActivityIndicator size="small" color={colors.accent} />
             </View>
           ) : null
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-              router.push({
-                pathname: "/order/[id]",
-                params: { id: item.id },
-              })
-            }
+            style={[styles.card, { backgroundColor: colors.card }]}
+            onPress={() => router.push({ pathname: "/order/[id]", params: { id: item.id } })}
           >
             <View style={styles.cardHeader}>
-              <Text style={styles.orderId}>Commande #{item.id}</Text>
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: statusColor(item.status) + "20" },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: statusColor(item.status) },
-                  ]}
-                >
+              <Text style={{ color: colors.text, fontSize: 16, fontWeight: "600" }}>Commande #{item.id}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) + "20" }]}>
+                <Text style={[styles.statusText, { color: statusColor(item.status) }]}>
                   {statusLabel(item.status)}
                 </Text>
               </View>
             </View>
-            <Text style={styles.date}>{formatDate(item.created_at)}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4 }}>{formatDate(item.created_at)}</Text>
             <View style={styles.cardFooter}>
-              <Text style={styles.total}>{formatPrice(item.total_amount)}</Text>
+              <Text style={{ color: colors.accent, fontSize: 18, fontWeight: "bold" }}>{formatPrice(item.total_amount)}</Text>
               {canRetryPayment(item.status) && (
-                <TouchableOpacity
-                  style={styles.retryBtn}
-                  onPress={() => handleRetry(item.id)}
-                >
+                <TouchableOpacity style={styles.retryBtn} onPress={() => handleRetry(item.id)}>
                   <Ionicons name="refresh" size={14} color="#f97316" />
-                  <Text style={styles.retryText}>
-                    {item.status === "pending" ? "Payer" : "Réessayer"}
-                  </Text>
+                  <Text style={styles.retryText}>{item.status === "pending" ? "Payer" : "Réessayer"}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -267,25 +196,25 @@ export default function OrdersScreen() {
       />
       <Modal visible={retryModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Paiement Orange Money</Text>
-            <Text style={styles.modalDesc}>Entrez votre numéro Orange Money</Text>
+          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "700" }}>Paiement Orange Money</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4, marginBottom: 12 }}>Entrez votre numéro Orange Money</Text>
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={retryPhone}
               onChangeText={setRetryPhone}
               placeholder="07XXXXXX"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               keyboardType="phone-pad"
             />
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={styles.modalCancelBtn}
+                style={[styles.modalCancelBtn, { borderColor: colors.border }]}
                 onPress={() => setRetryModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>Annuler</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "600" }}>Annuler</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalConfirmBtn} onPress={confirmRetry}>
+              <TouchableOpacity style={[styles.modalConfirmBtn, { backgroundColor: colors.orange }]} onPress={confirmRetry}>
                 <Text style={styles.modalConfirmText}>Valider</Text>
               </TouchableOpacity>
             </View>
@@ -297,35 +226,12 @@ export default function OrdersScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   footer: { paddingVertical: 14 },
-  card: {
-    margin: 12,
-    marginBottom: 0,
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  orderId: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  card: { margin: 12, marginBottom: 0, borderRadius: 12, padding: 16 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
-  date: { color: "#666", fontSize: 13, marginTop: 4 },
-  total: {
-    color: "#7c3aed",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 8,
-  },
+  cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 8 },
   retryBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -335,49 +241,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#f9731620",
   },
-  retryText: {
-    color: "#f97316",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    padding: 20,
-  },
-  modalCard: {
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 16,
-  },
-  modalTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  modalDesc: { color: "#999", fontSize: 13, marginTop: 4, marginBottom: 12 },
-  modalInput: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 12,
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 8,
-    marginTop: 14,
-  },
-  modalCancelBtn: {
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
-  modalCancelText: { color: "#bbb", fontSize: 13, fontWeight: "600" },
-  modalConfirmBtn: {
-    backgroundColor: "#f97316",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-  },
+  retryText: { color: "#f97316", fontSize: 12, fontWeight: "600" },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", padding: 20 },
+  modalCard: { borderRadius: 12, padding: 16 },
+  modalInput: { borderRadius: 10, padding: 12, marginTop: 4 },
+  modalActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 14 },
+  modalCancelBtn: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 },
+  modalConfirmBtn: { borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 },
   modalConfirmText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 });

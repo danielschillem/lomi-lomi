@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getMyWellnessBookings, cancelWellnessBooking } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 interface Booking {
   id: number;
@@ -23,6 +24,7 @@ interface Booking {
 }
 
 export default function BookingsScreen() {
+  const { colors } = useTheme();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -38,9 +40,7 @@ export default function BookingsScreen() {
     setRefreshing(false);
   }, []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const handleCancel = (b: Booking) => {
     Alert.alert("Annuler", `Annuler le rendez-vous "${b.service_name}" ?`, [
@@ -49,12 +49,7 @@ export default function BookingsScreen() {
         text: "Annuler",
         style: "destructive",
         onPress: async () => {
-          try {
-            await cancelWellnessBooking(b.id);
-            load();
-          } catch {
-            /* empty */
-          }
+          try { await cancelWellnessBooking(b.id); load(); } catch { /* empty */ }
         },
       },
     ]);
@@ -62,96 +57,69 @@ export default function BookingsScreen() {
 
   const statusLabel = (s: string) => {
     switch (s) {
-      case "pending":
-        return "En attente";
-      case "confirmed":
-        return "Confirmé";
-      case "completed":
-        return "Terminé";
-      case "cancelled":
-        return "Annulé";
-      default:
-        return s;
+      case "pending": return "En attente";
+      case "confirmed": return "Confirmé";
+      case "completed": return "Terminé";
+      case "cancelled": return "Annulé";
+      default: return s;
     }
   };
 
   const statusColor = (s: string) => {
     switch (s) {
-      case "confirmed":
-        return "#22c55e";
-      case "pending":
-        return "#f59e0b";
-      case "cancelled":
-        return "#ef4444";
-      default:
-        return "#666";
+      case "confirmed": return "#22c55e";
+      case "pending": return "#f59e0b";
+      case "cancelled": return "#ef4444";
+      default: return colors.textMuted;
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (bookings.length === 0) {
     return (
-      <View style={styles.center}>
-        <Ionicons name="calendar-outline" size={64} color="#333" />
-        <Text style={styles.emptyText}>Aucun rendez-vous</Text>
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <Ionicons name="calendar-outline" size={64} color={colors.border} />
+        <Text style={{ color: colors.textMuted, fontSize: 16, marginTop: 16 }}>Aucun rendez-vous</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={bookings}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              load();
-            }}
-            tintColor="#7c3aed"
+            onRefresh={() => { setRefreshing(true); load(); }}
+            tintColor={colors.accent}
           />
         }
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.card }]}>
             <View style={styles.cardHeader}>
-              <Text style={styles.serviceName}>{item.service_name}</Text>
-              <View
-                style={[
-                  styles.statusBadge,
-                  { backgroundColor: statusColor(item.status) + "20" },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: statusColor(item.status) },
-                  ]}
-                >
+              <Text style={[styles.serviceName, { color: colors.text }]}>{item.service_name}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: statusColor(item.status) + "20" }]}>
+                <Text style={[styles.statusText, { color: statusColor(item.status) }]}>
                   {statusLabel(item.status)}
                 </Text>
               </View>
             </View>
-            <Text style={styles.providerName}>{item.provider_name}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, marginTop: 2 }}>{item.provider_name}</Text>
             <View style={styles.infoRow}>
-              <Ionicons name="calendar" size={14} color="#7c3aed" />
-              <Text style={styles.infoText}>
-                {item.date} à {item.time}
-              </Text>
+              <Ionicons name="calendar" size={14} color={colors.accent} />
+              <Text style={{ color: colors.textSecondary, fontSize: 14 }}>{item.date} à {item.time}</Text>
             </View>
-            {item.status === "pending" || item.status === "confirmed" ? (
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => handleCancel(item)}
-              >
+            {(item.status === "pending" || item.status === "confirmed") ? (
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => handleCancel(item)}>
                 <Text style={styles.cancelText}>Annuler</Text>
               </TouchableOpacity>
             ) : null}
@@ -163,37 +131,12 @@ export default function BookingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
-  card: {
-    margin: 12,
-    marginBottom: 0,
-    backgroundColor: "#111",
-    borderRadius: 12,
-    padding: 16,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  serviceName: { color: "#fff", fontSize: 16, fontWeight: "600", flex: 1 },
-  providerName: { color: "#999", fontSize: 14, marginTop: 2 },
+  card: { margin: 12, marginBottom: 0, borderRadius: 12, padding: 16 },
+  cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  serviceName: { fontSize: 16, fontWeight: "600", flex: 1 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
   statusText: { fontSize: 12, fontWeight: "600" },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginTop: 8,
-  },
-  infoText: { color: "#ccc", fontSize: 14 },
+  infoRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8 },
   cancelBtn: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,

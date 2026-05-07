@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { getAddresses, createAddress, deleteAddress } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 interface Address {
   id: number;
@@ -23,6 +24,7 @@ interface Address {
 }
 
 export default function AddressesScreen() {
+  const { colors } = useTheme();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -54,11 +56,7 @@ export default function AddressesScreen() {
     }
     setSaving(true);
     try {
-      await createAddress({
-        label: label.trim(),
-        address: addr.trim(),
-        city: city.trim(),
-      });
+      await createAddress({ label: label.trim(), address: addr.trim(), city: city.trim() });
       setShowAdd(false);
       setLabel("");
       setAddr("");
@@ -80,9 +78,7 @@ export default function AddressesScreen() {
           try {
             await deleteAddress(a.id);
             setAddresses((prev) => prev.filter((x) => x.id !== a.id));
-          } catch {
-            /* empty */
-          }
+          } catch { /* empty */ }
         },
       },
     ]);
@@ -90,96 +86,88 @@ export default function AddressesScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <FlatList
         data={addresses}
         keyExtractor={(item) => item.id.toString()}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={() => {
-              setRefreshing(true);
-              load();
-            }}
-            tintColor="#7c3aed"
+            onRefresh={() => { setRefreshing(true); load(); }}
+            tintColor={colors.accent}
           />
         }
         contentContainerStyle={addresses.length === 0 ? { flex: 1 } : undefined}
         ListEmptyComponent={
-          <View style={styles.center}>
-            <Ionicons name="location-outline" size={64} color="#333" />
-            <Text style={styles.emptyText}>Aucune adresse</Text>
+          <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Ionicons name="location-outline" size={64} color={colors.border} />
+            <Text style={{ color: colors.textMuted, fontSize: 16, marginTop: 16 }}>Aucune adresse</Text>
           </View>
         }
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, { backgroundColor: colors.card }]}
             onLongPress={() => handleDelete(item)}
           >
-            <Ionicons name="location" size={20} color="#7c3aed" />
+            <Ionicons name="location" size={20} color={colors.accent} />
             <View style={{ flex: 1, marginLeft: 12 }}>
-              <Text style={styles.label}>
-                {item.label}
-                {item.is_default ? " (par défaut)" : ""}
+              <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>
+                {item.label}{item.is_default ? " (par défaut)" : ""}
               </Text>
-              <Text style={styles.addr}>{item.address}</Text>
-              <Text style={styles.city}>{item.city}</Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 14, marginTop: 2 }}>{item.address}</Text>
+              <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 2 }}>{item.city}</Text>
             </View>
           </TouchableOpacity>
         )}
       />
 
-      <TouchableOpacity style={styles.fab} onPress={() => setShowAdd(true)}>
+      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent }]} onPress={() => setShowAdd(true)}>
         <Ionicons name="add" size={28} color="#fff" />
       </TouchableOpacity>
 
       <Modal visible={showAdd} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Nouvelle adresse</Text>
+              <Text style={{ color: colors.text, fontSize: 18, fontWeight: "bold" }}>Nouvelle adresse</Text>
               <TouchableOpacity onPress={() => setShowAdd(false)}>
-                <Ionicons name="close" size={24} color="#fff" />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={label}
               onChangeText={setLabel}
               placeholder="Nom (ex: Maison, Bureau)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={addr}
               onChangeText={setAddr}
               placeholder="Adresse"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={city}
               onChangeText={setCity}
               placeholder="Ville"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TouchableOpacity
-              style={[styles.saveBtn, saving && { opacity: 0.5 }]}
+              style={[styles.saveBtn, { backgroundColor: colors.accent }, saving && { opacity: 0.5 }]}
               onPress={handleAdd}
               disabled={saving}
             >
-              {saving ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.saveText}>Ajouter</Text>
-              )}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Ajouter</Text>}
             </TouchableOpacity>
           </View>
         </View>
@@ -189,26 +177,14 @@ export default function AddressesScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
-  center: {
-    flex: 1,
-    backgroundColor: "#0a0a0a",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: { color: "#666", fontSize: 16, marginTop: 16 },
   card: {
     flexDirection: "row",
     alignItems: "flex-start",
     margin: 12,
     marginBottom: 0,
-    backgroundColor: "#111",
     borderRadius: 12,
     padding: 16,
   },
-  label: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  addr: { color: "#ccc", fontSize: 14, marginTop: 2 },
-  city: { color: "#999", fontSize: 13, marginTop: 2 },
   fab: {
     position: "absolute",
     bottom: 24,
@@ -216,18 +192,16 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#7c3aed",
     justifyContent: "center",
     alignItems: "center",
     elevation: 8,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#0a0a0a",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
@@ -238,17 +212,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  modalTitle: { color: "#fff", fontSize: 18, fontWeight: "bold" },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
     marginBottom: 10,
   },
   saveBtn: {
-    backgroundColor: "#7c3aed",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
