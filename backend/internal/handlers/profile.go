@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/lomilomi/backend/internal/database"
 	"github.com/lomilomi/backend/internal/models"
+	"gorm.io/gorm"
 )
 
 type ProfileHandler struct {
@@ -132,32 +133,44 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 	database.DB.Model(&models.Like{}).Where("liker_id = ?", userID).Pluck("liked_id", &likedIDs)
 	excludeIDs = append(excludeIDs, likedIDs...)
 
-	// Exclude already passed users
+	// Exclude already passed users (first pass; may be relaxed if empty)
 	var passedIDs []uint
 	database.DB.Model(&models.Pass{}).Where("user_id = ?", userID).Pluck("passed_id", &passedIDs)
 	excludeIDs = append(excludeIDs, passedIDs...)
 
-	query := database.DB.Preload("Photos").Where("id NOT IN ?", excludeIDs)
-
-	if prefs.Gender != "" {
-		query = query.Where("gender = ?", prefs.Gender)
-	}
-
-	// Age filter
-	if prefs.MinAge > 0 || prefs.MaxAge > 0 {
-		now := time.Now()
-		if prefs.MaxAge > 0 {
-			minBirth := now.AddDate(-prefs.MaxAge-1, 0, 0)
-			query = query.Where("birth_date >= ?", minBirth)
+	buildQuery := func(excluded []uint) *gorm.DB {
+		q := database.DB.Preload("Photos").Where("id NOT IN ?", excluded)
+		if prefs.Gender != "" {
+			q = q.Where("gender = ?", prefs.Gender)
 		}
-		if prefs.MinAge > 0 {
-			maxBirth := now.AddDate(-prefs.MinAge, 0, 0)
-			query = query.Where("birth_date <= ?", maxBirth)
+
+		// Age filter
+		if prefs.MinAge > 0 || prefs.MaxAge > 0 {
+			now := time.Now()
+			if prefs.MaxAge > 0 {
+				minBirth := now.AddDate(-prefs.MaxAge-1, 0, 0)
+				q = q.Where("birth_date >= ?", minBirth)
+			}
+			if prefs.MinAge > 0 {
+				maxBirth := now.AddDate(-prefs.MinAge, 0, 0)
+				q = q.Where("birth_date <= ?", maxBirth)
+			}
 		}
+		return q
 	}
 
 	var users []models.User
-	query.Limit(20).Find(&users)
+	buildQuery(excludeIDs).Limit(20).Find(&users)
+
+	// If the discovery pool is exhausted, allow resurfacing previously passed
+	// profiles to avoid a hard dead-end in the UI.
+	if len(users) == 0 && len(passedIDs) > 0 {
+		baseExclude := append([]uint{}, blockedIDs...)
+		baseExclude = append(baseExclude, blockerIDs...)
+		baseExclude = append(baseExclude, userID)
+		baseExclude = append(baseExclude, likedIDs...)
+		buildQuery(baseExclude).Limit(20).Find(&users)
+	}
 
 	// Batch-load preferences for all discovered users (avoid N+1)
 	userIDs := make([]uint, len(users))
