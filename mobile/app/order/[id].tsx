@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,9 +18,11 @@ import {
   getOrderTracking,
   initiatePayment,
 } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [payment, setPayment] = useState<Record<string, any> | null>(null);
   const [tracking, setTracking] = useState<Record<string, any> | null>(
     null,
@@ -86,7 +88,7 @@ export default function OrderDetailScreen() {
       case "delivered":
         return { name: "checkmark-done-circle", color: "#22c55e" };
       default:
-        return { name: "help-circle", color: "#666" };
+        return { name: "help-circle", color: "#6b7280" };
     }
   };
 
@@ -151,25 +153,25 @@ export default function OrderDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidOrderId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Commande introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Commande introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !payment && !tracking) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
-        <TouchableOpacity style={styles.retryLoadBtn} onPress={() => {
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>{loadError}</Text>
+        <TouchableOpacity style={[styles.retryLoadBtn, { backgroundColor: colors.accent }]} onPress={() => {
           setLoading(true);
           loadData();
         }}>
@@ -182,29 +184,29 @@ export default function OrderDetailScreen() {
   const icon = statusIcon();
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: `Commande #${orderId}` }} />
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Paiement</Text>
+      <View style={[styles.card, { backgroundColor: colors.card }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Paiement</Text>
         <View style={styles.row}>
           <Ionicons
             name={icon.name as keyof typeof Ionicons.glyphMap}
             size={24}
             color={icon.color}
           />
-          <Text style={[styles.label, { color: icon.color }]}>
+          <Text style={{ color: icon.color, fontSize: 16, fontWeight: "500" }}>
             {statusLabel()}
           </Text>
         </View>
         {payment?.transaction_id && (
-          <Text style={styles.detail}>
+          <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 8 }}>
             Transaction: {payment.transaction_id as string}
           </Text>
         )}
         {canRetry && (
           <TouchableOpacity
-            style={styles.retryBtn}
+            style={[styles.retryBtn, retrying && { opacity: 0.5 }]}
             onPress={handleRetry}
             disabled={retrying}
           >
@@ -225,35 +227,35 @@ export default function OrderDetailScreen() {
       </View>
 
       {tracking && (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Suivi</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Suivi</Text>
           <View style={styles.row}>
-            <Ionicons name="navigate" size={24} color="#7c3aed" />
-            <Text style={styles.label}>{trackStatus || "En préparation"}</Text>
+            <Ionicons name="navigate" size={24} color={colors.accent} />
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "500" }}>{trackStatus || "En préparation"}</Text>
           </View>
         </View>
       )}
 
       <Modal visible={retryModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Paiement Orange Money</Text>
-            <Text style={styles.modalDesc}>Entrez votre numéro Orange Money</Text>
+          <View style={[styles.modalCard, { backgroundColor: colors.card }]}>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: "700" }}>Paiement Orange Money</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4, marginBottom: 12 }}>Entrez votre numéro Orange Money</Text>
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={retryPhone}
               onChangeText={setRetryPhone}
               placeholder="07XXXXXX"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               keyboardType="phone-pad"
             />
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={styles.modalCancelBtn}
+                style={[styles.modalCancelBtn, { borderColor: colors.border }]}
                 onPress={() => setRetryModalVisible(false)}
                 disabled={retrying}
               >
-                <Text style={styles.modalCancelText}>Annuler</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "600" }}>Annuler</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalConfirmBtn, retrying && { opacity: 0.5 }]}
@@ -275,30 +277,25 @@ export default function OrderDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a", padding: 16 },
+  container: { flex: 1, padding: 16 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
   retryLoadBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,
   },
   retryLoadText: { color: "#fff", fontSize: 14, fontWeight: "600" },
   card: {
-    backgroundColor: "#111",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
   },
   sectionTitle: {
-    color: "#999",
     fontSize: 13,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -306,8 +303,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
-  label: { color: "#fff", fontSize: 16, fontWeight: "500" },
-  detail: { color: "#666", fontSize: 13, marginTop: 8 },
   retryBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -326,15 +321,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   modalCard: {
-    backgroundColor: "#111",
     borderRadius: 12,
     padding: 16,
   },
-  modalTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  modalDesc: { color: "#999", fontSize: 13, marginTop: 4, marginBottom: 12 },
   modalInput: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 10,
     padding: 12,
   },
@@ -346,12 +336,10 @@ const styles = StyleSheet.create({
   },
   modalCancelBtn: {
     borderWidth: 1,
-    borderColor: "#333",
     borderRadius: 8,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  modalCancelText: { color: "#bbb", fontSize: 13, fontWeight: "600" },
   modalConfirmBtn: {
     backgroundColor: "#f97316",
     borderRadius: 8,

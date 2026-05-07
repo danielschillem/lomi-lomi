@@ -355,7 +355,7 @@ export default function ChatPage() {
           const senderName =
             ((d.sender as Record<string, unknown>)?.username as string) ||
             "Quelqu'un";
-          new Notification(`${senderName} - Lomi Lomi`, {
+          new Notification(`${senderName} - Texto`, {
             body: d.content as string,
             icon: "/icon-192.png",
           });

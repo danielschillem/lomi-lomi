@@ -24,7 +24,7 @@ export default function ConfidentialitePage() {
             <h2 className="text-lg font-semibold text-white mb-3">
               1. Données collectées
             </h2>
-            <p>Lomi Lomi collecte les données suivantes :</p>
+            <p>Texto collecte les données suivantes :</p>
             <ul className="list-disc list-inside space-y-1 text-gray-300 mt-2">
               <li>
                 Informations d&apos;identité : nom, prénom, date de naissance,
@@ -116,7 +116,7 @@ export default function ConfidentialitePage() {
               7. Cookies
             </h2>
             <p>
-              Lomi Lomi utilise des cookies essentiels au fonctionnement du
+              Texto utilise des cookies essentiels au fonctionnement du
               service (authentification). Aucun cookie publicitaire tiers
               n&apos;est utilisé.
             </p>

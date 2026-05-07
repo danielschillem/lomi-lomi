@@ -13,8 +13,10 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { forgotPassword } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function ForgotPasswordScreen() {
+  const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -22,10 +24,7 @@ export default function ForgotPasswordScreen() {
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
-    if (!email.trim()) {
-      setError("Saisis ton adresse e-mail");
-      return;
-    }
+    if (!email.trim()) { setError("Saisis ton adresse e-mail"); return; }
     setError("");
     setLoading(true);
     try {
@@ -40,74 +39,59 @@ export default function ForgotPasswordScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#e5e7eb" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Mot de passe oublié</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Mot de passe oublié</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.inner}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
         {sent ? (
           <View style={styles.successCard}>
-            <View style={styles.successIcon}>
-              <Ionicons name="mail" size={36} color="#7c3aed" />
+            <View style={[styles.successIcon, { backgroundColor: colors.cardSecondary }]}>
+              <Ionicons name="mail" size={36} color={colors.accent} />
             </View>
-            <Text style={styles.title}>E-mail envoyé</Text>
-            <Text style={styles.successText}>
-              Si un compte existe avec cette adresse, tu recevras un e-mail avec
-              les instructions pour réinitialiser ton mot de passe.
+            <Text style={[styles.title, { color: colors.text }]}>E-mail envoyé</Text>
+            <Text style={[styles.successText, { color: colors.textSecondary }]}>
+              Si un compte existe avec cette adresse, tu recevras un e-mail avec les instructions pour réinitialiser ton mot de passe.
             </Text>
 
             {devToken ? (
               <View style={styles.devBox}>
                 <Text style={styles.devLabel}>Mode dev — token :</Text>
-                <Text style={styles.devToken} selectable>
-                  {devToken}
-                </Text>
+                <Text style={styles.devToken} selectable>{devToken}</Text>
                 <TouchableOpacity
                   style={styles.devUseBtn}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/reset-password",
-                      params: { token: devToken },
-                    })
-                  }
+                  onPress={() => router.push({ pathname: "/reset-password", params: { token: devToken } })}
                 >
                   <Text style={styles.devUseText}>Utiliser ce token →</Text>
                 </TouchableOpacity>
               </View>
             ) : null}
 
-            <TouchableOpacity
-              style={styles.linkBtn}
-              onPress={() => router.replace("/login")}
-            >
-              <Text style={styles.link}>Retour à la connexion</Text>
+            <TouchableOpacity style={styles.linkBtn} onPress={() => router.replace("/login")}>
+              <Text style={{ color: colors.accentLight, fontSize: 14 }}>Retour à la connexion</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <>
-            <Text style={styles.title}>Mot de passe oublié</Text>
-            <Text style={styles.subtitle}>
-              Entre ton adresse e-mail pour recevoir un lien de
-              réinitialisation.
+            <Text style={[styles.title, { color: colors.text }]}>Mot de passe oublié</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              Entre ton adresse e-mail pour recevoir un lien de réinitialisation.
             </Text>
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
 
-            <Text style={styles.label}>Adresse e-mail</Text>
+            <Text style={[styles.label, { color: colors.textMuted }]}>Adresse e-mail</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
               placeholder="vous@exemple.com"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -116,22 +100,15 @@ export default function ForgotPasswordScreen() {
             />
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[styles.button, { backgroundColor: colors.accent }, loading && styles.buttonDisabled]}
               onPress={handleSubmit}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Envoyer le lien</Text>
-              )}
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Envoyer le lien</Text>}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.linkBtn}
-              onPress={() => router.replace("/login")}
-            >
-              <Text style={styles.link}>Retour à la connexion</Text>
+            <TouchableOpacity style={styles.linkBtn} onPress={() => router.replace("/login")}>
+              <Text style={{ color: colors.accentLight, fontSize: 14 }}>Retour à la connexion</Text>
             </TouchableOpacity>
           </>
         )}
@@ -141,7 +118,6 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -149,80 +125,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#222",
   },
   backBtn: { padding: 6 },
-  headerTitle: {
-    flex: 1,
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "center",
-  },
+  headerTitle: { flex: 1, fontWeight: "700", fontSize: 16, textAlign: "center" },
   headerSpacer: { width: 36 },
   inner: { padding: 24, paddingTop: 40 },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#9ca3af",
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 32,
-    lineHeight: 20,
-  },
-  error: {
-    color: "#ef4444",
-    textAlign: "center",
-    marginBottom: 12,
-    fontSize: 14,
-  },
-  label: { color: "#9ca3af", fontSize: 13, marginBottom: 6 },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: "#7c3aed",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 8, textAlign: "center" },
+  subtitle: { fontSize: 14, textAlign: "center", marginBottom: 32, lineHeight: 20 },
+  error: { textAlign: "center", marginBottom: 12, fontSize: 14 },
+  label: { fontSize: 13, marginBottom: 6 },
+  input: { borderWidth: 1, borderRadius: 12, padding: 16, fontSize: 16, marginBottom: 16 },
+  button: { borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   linkBtn: { padding: 12, alignItems: "center", marginTop: 12 },
-  link: { color: "#a78bfa", fontSize: 14 },
   successCard: { paddingTop: 20, alignItems: "center" },
   successIcon: {
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: "#1f1239",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
   },
-  successText: {
-    color: "#d1d5db",
-    fontSize: 14,
-    textAlign: "center",
-    lineHeight: 21,
-    marginBottom: 24,
-    paddingHorizontal: 12,
-  },
+  successText: { fontSize: 14, textAlign: "center", lineHeight: 21, marginBottom: 24, paddingHorizontal: 12 },
   devBox: {
-    backgroundColor: "rgba(250, 204, 21, 0.1)",
+    backgroundColor: "rgba(250,204,21,0.1)",
     borderWidth: 1,
     borderColor: "#facc15",
     borderRadius: 10,

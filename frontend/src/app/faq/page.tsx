@@ -13,8 +13,8 @@ import {
 
 const faqs = [
   {
-    q: "Comment fonctionne Lomi Lomi ?",
-    a: "Créez un profil, explorez des profils compatibles avec vos préférences, likez ceux qui vous plaisent. Si l'intérêt est mutuel, c'est un match ! Vous pouvez alors discuter via notre messagerie chiffrée.",
+    q: "Comment fonctionne Texto ?",
+    a: "Créez un profil, explorez des profils compatibles avec vos préférences, likez ceux qui vous plaisent. Si l'intérêt est mutuel, c'est un match ! Vous pouvez alors discuter via notre messagerie interactive.",
   },
   {
     q: "Mes données sont-elles protégées ?",
@@ -42,7 +42,7 @@ const faqs = [
   },
   {
     q: "Comment contacter le support ?",
-    a: "Envoyez un email à support@lomilomi.fr. Nous répondons sous 48h ouvrées.",
+    a: "Utilisez le formulaire de contact intégré. Nous répondons sous 48h ouvrées.",
   },
 ];
 
@@ -106,7 +106,7 @@ export default function FaqPage() {
           <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
             <p>
               <strong className="text-white">1. Objet :</strong> Les présentes
-              CGU régissent l&apos;utilisation de la plateforme Lomi Lomi,
+              CGU régissent l&apos;utilisation de la plateforme Texto,
               accessible via le site web et les applications associées.
             </p>
             <p>
@@ -125,7 +125,7 @@ export default function FaqPage() {
               <strong className="text-white">4. Données personnelles :</strong>{" "}
               Conformément au RGPD, vos données sont traitées de manière
               sécurisée. Vous disposez d&apos;un droit d&apos;accès, de
-              rectification et de suppression. Contactez support@lomilomi.fr.
+              rectification et de suppression. Contactez-nous via le formulaire de contact.
             </p>
             <p>
               <strong className="text-white">5. Modération :</strong> Tout
@@ -133,8 +133,8 @@ export default function FaqPage() {
               suppression du compte sans préavis.
             </p>
             <p>
-              <strong className="text-white">6. Responsabilité :</strong> Lomi
-              Lomi ne garantit pas la véracité des profils et décline toute
+              <strong className="text-white">6. Responsabilité :</strong> Texto
+              ne garantit pas la véracité des profils et décline toute
               responsabilité en cas de litige entre utilisateurs.
             </p>
             <p>
@@ -142,11 +142,11 @@ export default function FaqPage() {
                 7. Propriété intellectuelle
               </strong>{" "}
               L&apos;ensemble du contenu de la plateforme (logo, design, code)
-              est la propriété exclusive de Lomi Lomi.
+              est la propriété exclusive de Texto.
             </p>
             <p>
-              <strong className="text-white">8. Modification :</strong> Lomi
-              Lomi se réserve le droit de modifier les présentes CGU à tout
+              <strong className="text-white">8. Modification :</strong> Texto
+              se réserve le droit de modifier les présentes CGU à tout
               moment. Les utilisateurs seront informés de toute modification
               substantielle.
             </p>
@@ -161,7 +161,7 @@ export default function FaqPage() {
           </h2>
           <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
             <p>
-              Lomi Lomi collecte uniquement les données nécessaires au
+              Texto collecte uniquement les données nécessaires au
               fonctionnement du service : pseudo, email, localisation
               approximative, préférences de recherche et messages échangés.
             </p>

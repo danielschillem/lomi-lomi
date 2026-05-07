@@ -47,7 +47,7 @@ function showBrowserNotification(title: string, body: string, target: string) {
   const notification = new window.Notification(title, {
     body,
     icon: "/icon-192x192.png",
-    tag: `lomi-lomi-${target}`,
+    tag: `texto-${target}`,
   });
 
   notification.onclick = () => {
@@ -83,7 +83,7 @@ export function PushNotificationsBridge() {
       if (event.type === "notification" || event.type === "match") {
         const type = String(event.data.type || event.type);
         const meta = parsePayloadData(event.data.data);
-        const title = String(event.data.title || "Lomi Lomi");
+        const title = String(event.data.title || "Texto");
         const body = String(event.data.body || "Nouvelle notification");
         showBrowserNotification(title, body, notificationTarget(type, meta));
       }

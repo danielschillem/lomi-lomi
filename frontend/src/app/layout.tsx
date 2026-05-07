@@ -16,11 +16,11 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL || "http://134.209.229.141",
   ),
   title: {
-    default: "Lomi Lomi - Rencontres discrètes & affinités authentiques",
-    template: "%s | Lomi Lomi",
+    default: "Texto - Messagerie ouverte & interactive",
+    template: "%s | Texto",
   },
   description:
-    "Plateforme de rencontres pour adultes. Matching par affinités, messagerie chiffrée, profils vérifiés. 100% anonyme et sécurisé.",
+    "Plateforme de messagerie ouverte tout public, avec chat interactif et espace premium TexMe.",
   keywords: [
     "rencontres",
     "discrétion",
@@ -43,24 +43,24 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Lomi Lomi",
-    title: "Lomi Lomi - Rencontres discrètes & affinités authentiques",
+    siteName: "Texto",
+    title: "Texto - Messagerie ouverte & interactive",
     description:
-      "Plateforme de rencontres anonymes et sécurisées. Matching par affinités, messagerie chiffrée, profils vérifiés.",
+      "Messagerie ouverte tout public, chat interactif et expérience premium TexMe.",
     images: [
       {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Lomi Lomi - Rencontres discrètes",
+        alt: "Texto - Messagerie ouverte",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Lomi Lomi - Rencontres discrètes",
+    title: "Texto - Messagerie ouverte",
     description:
-      "Matching par affinités, messagerie chiffrée, profils vérifiés.",
+      "Chat interactif pour tous, avec TexMe pour l'expérience premium.",
   },
   robots: {
     index: true,

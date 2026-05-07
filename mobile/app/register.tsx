@@ -179,7 +179,7 @@ export default function RegisterScreen() {
               ? "Choisis ton pseudo"
               : step === "email"
                 ? "Inscription par email"
-                : "Rejoins Lomi Lomi"}
+                : "Rejoins Texto"}
         </Text>
 
         {error ? <Text style={s.error}>{error}</Text> : null}

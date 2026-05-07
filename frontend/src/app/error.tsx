@@ -10,7 +10,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Lomi Lomi error:", error);
+    console.error("Texto error:", error);
   }, [error]);
 
   return (

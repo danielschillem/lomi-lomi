@@ -1,4 +1,4 @@
-# Lomi Lomi - Plateforme de rencontres discrètes & affinités authentiques
+# Texto - Plateforme de messagerie ouverte & interactive
 
 ## Architecture
 
@@ -77,7 +77,7 @@ npm run dev
 
 ## Licence
 
-Propriétaire - © 2026 Lomi Lomi. Tous droits réservés.
+Propriétaire - © 2026 Texto. Tous droits réservés.
 
 ## Développeur
 

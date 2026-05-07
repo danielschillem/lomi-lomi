@@ -231,7 +231,7 @@ export default function OnboardingScreen() {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={[styles.brand, { color: colors.accentLight }]}>Lomi Lomi</Text>
+        <Text style={[styles.brand, { color: colors.accentLight }]}>Texto</Text>
 
         <View style={styles.steps}>
           {STEPS.map((label, i) => {

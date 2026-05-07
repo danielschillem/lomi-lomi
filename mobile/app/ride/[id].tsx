@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,9 +11,11 @@ import {
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getVTCRide, updateVTCRideStatus } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function RideDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [ride, setRide] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -61,26 +63,26 @@ export default function RideDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidRideId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Course introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Course introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !ride) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryLoadBtn}
+          style={[styles.retryLoadBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setLoading(true);
             void loadRide();
@@ -94,8 +96,8 @@ export default function RideDetailScreen() {
 
   if (!ride) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Course introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Course introuvable</Text>
       </View>
     );
   }
@@ -104,35 +106,35 @@ export default function RideDetailScreen() {
   const canCancel = r.status === "requested" || r.status === "accepted";
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: `Course #${rideId}` }} />
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Trajet</Text>
+      <View style={[styles.card, { backgroundColor: colors.card }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Trajet</Text>
         <View style={styles.routeRow}>
           <Ionicons name="ellipse" size={10} color="#22c55e" />
-          <Text style={styles.routeText}>
+          <Text style={{ color: colors.text, fontSize: 15 }}>
             {(r.pickup_address as string) || "Départ"}
           </Text>
         </View>
-        <View style={styles.line} />
+        <View style={[styles.line, { backgroundColor: colors.border }]} />
         <View style={styles.routeRow}>
           <Ionicons name="ellipse" size={10} color="#ef4444" />
-          <Text style={styles.routeText}>
+          <Text style={{ color: colors.text, fontSize: 15 }}>
             {(r.dropoff_address as string) || "Arrivée"}
           </Text>
         </View>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Statut</Text>
-        <Text style={styles.status}>{(r.status as string) || "-"}</Text>
+      <View style={[styles.card, { backgroundColor: colors.card }]}>
+        <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Statut</Text>
+        <Text style={{ color: colors.accent, fontSize: 18, fontWeight: "600" }}>{(r.status as string) || "-"}</Text>
       </View>
 
       {r.driver_name && (
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Chauffeur</Text>
-          <Text style={styles.driverName}>{r.driver_name as string}</Text>
+        <View style={[styles.card, { backgroundColor: colors.card }]}>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Chauffeur</Text>
+          <Text style={{ color: colors.text, fontSize: 16 }}>{r.driver_name as string}</Text>
         </View>
       )}
 
@@ -147,22 +149,18 @@ export default function RideDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a", padding: 16 },
+  container: { flex: 1, padding: 16 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
   card: {
-    backgroundColor: "#111",
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
   },
   sectionTitle: {
-    color: "#999",
     fontSize: 13,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -174,16 +172,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-  routeText: { color: "#fff", fontSize: 15 },
   line: {
     width: 2,
     height: 20,
-    backgroundColor: "#333",
     marginLeft: 4,
     marginVertical: 2,
   },
-  status: { color: "#7c3aed", fontSize: 18, fontWeight: "600" },
-  driverName: { color: "#fff", fontSize: 16 },
   cancelBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -198,7 +192,6 @@ const styles = StyleSheet.create({
   cancelText: { color: "#ef4444", fontSize: 16, fontWeight: "600" },
   retryLoadBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,

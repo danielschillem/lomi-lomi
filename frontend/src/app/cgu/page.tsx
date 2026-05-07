@@ -22,13 +22,11 @@ export default function CGUPage() {
         <div className="space-y-8 text-sm leading-relaxed">
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">
-              1. Présentation de Lomi Lomi
+              1. Présentation de Texto
             </h2>
             <p>
-              Lomi Lomi est une application de rencontres et de bien-être
-              destinée aux adultes résidant principalement au Burkina Faso. Elle
-              est éditée et exploitée conformément aux lois burkinabè en
-              vigueur.
+              Texto est une application de messagerie ouverte tout public,
+              éditée et exploitée conformément aux lois burkinabè en vigueur.
             </p>
           </section>
 
@@ -37,7 +35,7 @@ export default function CGUPage() {
               2. Conditions d&apos;accès
             </h2>
             <p>
-              L&apos;utilisation de Lomi Lomi est réservée aux personnes âgées
+              L&apos;utilisation de Texto est réservée aux personnes âgées
               de 18 ans et plus. En vous inscrivant, vous confirmez avoir
               atteint cet âge et accepter les présentes conditions.
             </p>
@@ -79,10 +77,10 @@ export default function CGUPage() {
 
           <section>
             <h2 className="text-lg font-semibold text-white mb-3">
-              5. Abonnement Premium (Lomi Pass)
+              5. Abonnement Premium (TexMe)
             </h2>
             <p>
-              Lomi Lomi propose un abonnement payant (Lomi Pass) facturé en
+              Texto propose un abonnement payant (TexMe) facturé en
               Francs CFA (XOF) via Orange Money. Les abonnements sont non
               remboursables sauf en cas de défaut technique avéré. Vous pouvez
               annuler à tout moment depuis votre profil.
@@ -94,9 +92,9 @@ export default function CGUPage() {
               6. Propriété intellectuelle
             </h2>
             <p>
-              Tout le contenu de Lomi Lomi (logo, textes, design) est protégé.
+              Tout le contenu de Texto (logo, textes, design) est protégé.
               Vous conservez la propriété de vos photos et contenus, mais
-              accordez à Lomi Lomi une licence d&apos;utilisation pour le bon
+              accordez à Texto une licence d&apos;utilisation pour le bon
               fonctionnement du service.
             </p>
           </section>
@@ -106,7 +104,7 @@ export default function CGUPage() {
               7. Limitation de responsabilité
             </h2>
             <p>
-              Lomi Lomi n&apos;est pas responsable des rencontres physiques
+              Texto n&apos;est pas responsable des rencontres physiques
               entre utilisateurs. Nous vous recommandons de prendre toutes les
               précautions nécessaires lors de vos premiers rendez-vous.
             </p>
@@ -117,7 +115,7 @@ export default function CGUPage() {
               8. Résiliation
             </h2>
             <p>
-              Lomi Lomi se réserve le droit de suspendre ou supprimer tout
+              Texto se réserve le droit de suspendre ou supprimer tout
               compte ne respectant pas les présentes conditions. Vous pouvez
               supprimer votre compte à tout moment depuis les paramètres.
             </p>
@@ -128,7 +126,7 @@ export default function CGUPage() {
               9. Contact
             </h2>
             <p>
-              Pour toute question, contactez l&apos;équipe Lomi Lomi via le
+              Pour toute question, contactez l&apos;équipe Texto via le
               formulaire de contact disponible dans l&apos;application.
             </p>
           </section>

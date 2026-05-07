@@ -67,7 +67,7 @@ export default function ConversationsPage() {
             | Record<string, unknown>
             | undefined;
           const senderName = (sender?.username as string) || "Quelqu'un";
-          new Notification(`${senderName} - Lomi Lomi`, {
+          new Notification(`${senderName} - Texto`, {
             body:
               ((event.data as Record<string, unknown>)?.content as string) ||
               "Nouveau message",

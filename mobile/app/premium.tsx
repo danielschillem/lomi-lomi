@@ -75,7 +75,7 @@ export default function PremiumScreen() {
   };
 
   const handleCancel = () => {
-    Alert.alert("Annuler l'abonnement", "Voulez-vous vraiment annuler votre abonnement Lomi Pass ?", [
+    Alert.alert("Annuler l'abonnement", "Voulez-vous vraiment annuler votre abonnement TexMe ?", [
       { text: "Non", style: "cancel" },
       {
         text: "Oui, annuler",
@@ -101,7 +101,7 @@ export default function PremiumScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Lomi Pass</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>TexMe</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -110,7 +110,7 @@ export default function PremiumScreen() {
           <View style={styles.crownBadge}>
             <Ionicons name="ribbon" size={36} color="#facc15" />
           </View>
-          <Text style={styles.heroTitle}>Lomi Pass Premium</Text>
+          <Text style={styles.heroTitle}>TexMe Premium</Text>
           <Text style={styles.heroSubtitle}>
             Débloquez toutes les fonctionnalités et multipliez vos chances de rencontres
           </Text>

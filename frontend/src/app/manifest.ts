@@ -2,10 +2,10 @@
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Lomi Lomi - Rencontres discrètes",
-    short_name: "Lomi Lomi",
+    name: "Texto - Messagerie ouverte",
+    short_name: "Texto",
     description:
-      "Plateforme de rencontres anonymes et sécurisées. Matching par affinités, messagerie chiffrée, profils vérifiés.",
+      "Messagerie ouverte tout public, chat interactif et expérience premium TexMe.",
     start_url: "/",
     display: "standalone",
     background_color: "#09090b",

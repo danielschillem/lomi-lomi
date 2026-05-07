@@ -83,7 +83,7 @@ export default function PremiumPage() {
             <Crown className="w-8 h-8 text-yellow-400" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold mb-2">Lomi Pass Premium</h1>
+        <h1 className="text-2xl font-bold mb-2">TexMe Premium</h1>
         <p className="text-white/70 text-sm max-w-xs mx-auto">
           Débloquez toutes les fonctionnalités et multipliez vos chances de
           rencontres

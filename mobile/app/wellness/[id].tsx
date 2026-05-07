@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import {
   createWellnessReview,
 } from "@/lib/api";
 import { isValid24hTime, isValidIsoDate } from "@/lib/validation";
+import { useTheme } from "@/lib/theme-context";
 
 interface Service {
   id: number;
@@ -29,6 +30,7 @@ interface Service {
 
 export default function WellnessDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [provider, setProvider] = useState<Record<string, any> | null>(
     null,
   );
@@ -125,26 +127,26 @@ export default function WellnessDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidProviderId) {
     return (
-      <View style={styles.center}>
-        <Text style={{ color: "#666" }}>Prestataire introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted }}>Prestataire introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !provider) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryBtn}
+          style={[styles.retryBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setLoading(true);
             void loadProvider();
@@ -158,8 +160,8 @@ export default function WellnessDetailScreen() {
 
   if (!provider) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Prestataire introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Prestataire introuvable</Text>
       </View>
     );
   }
@@ -168,7 +170,7 @@ export default function WellnessDetailScreen() {
   const services = (p.services as Service[]) || [];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: (p.name as string) || "Bien-être" }} />
 
       <Image
@@ -177,11 +179,11 @@ export default function WellnessDetailScreen() {
             (p.image_url as string) ||
             "https://via.placeholder.com/400/1a1a1a/666?text=Spa",
         }}
-        style={styles.heroImage}
+        style={[styles.heroImage, { backgroundColor: colors.cardSecondary }]}
       />
 
       <View style={styles.body}>
-        <Text style={styles.name}>{p.name as string}</Text>
+        <Text style={[styles.name, { color: colors.text }]}>{p.name as string}</Text>
         {p.rating && (
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((star) => (
@@ -192,34 +194,34 @@ export default function WellnessDetailScreen() {
                 color="#f59e0b"
               />
             ))}
-            <Text style={styles.ratingText}>{p.rating as number}/5</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, marginLeft: 4 }}>{p.rating as number}/5</Text>
           </View>
         )}
         {p.address && (
           <View style={styles.infoRow}>
-            <Ionicons name="location" size={16} color="#7c3aed" />
-            <Text style={styles.infoText}>{p.address as string}</Text>
+            <Ionicons name="location" size={16} color={colors.accent} />
+            <Text style={{ color: colors.textMuted, fontSize: 14 }}>{p.address as string}</Text>
           </View>
         )}
-        <Text style={styles.desc}>{(p.description as string) || ""}</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginTop: 12 }}>{(p.description as string) || ""}</Text>
 
         {/* Services */}
         {services.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Services</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Services</Text>
             {services.map((svc) => (
-              <View key={svc.id} style={styles.serviceCard}>
+              <View key={svc.id} style={[styles.serviceCard, { backgroundColor: colors.card }]}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.serviceName}>{svc.name}</Text>
-                  <Text style={styles.serviceMeta}>
+                  <Text style={{ color: colors.text, fontSize: 15, fontWeight: "600" }}>{svc.name}</Text>
+                  <Text style={{ color: colors.accent, fontSize: 13, marginTop: 2 }}>
                     {svc.duration} min · {formatPrice(svc.price)}
                   </Text>
                   {svc.description && (
-                    <Text style={styles.serviceDesc}>{svc.description}</Text>
+                    <Text style={{ color: colors.textMuted, fontSize: 13, marginTop: 4 }}>{svc.description}</Text>
                   )}
                 </View>
                 <TouchableOpacity
-                  style={styles.bookBtn}
+                  style={[styles.bookBtn, { backgroundColor: colors.accent }]}
                   onPress={() => setBookingService(svc)}
                 >
                   <Text style={styles.bookBtnText}>Réserver</Text>
@@ -232,32 +234,32 @@ export default function WellnessDetailScreen() {
         {/* Booking form */}
         {bookingService && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>
               Réserver : {bookingService.name}
             </Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={bookDate}
               onChangeText={setBookDate}
               placeholder="Date (YYYY-MM-DD)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={bookTime}
               onChangeText={setBookTime}
               placeholder="Heure (HH:MM)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={bookNotes}
               onChangeText={setBookNotes}
               placeholder="Notes (optionnel)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TouchableOpacity
-              style={[styles.confirmBtn, booking && { opacity: 0.5 }]}
+              style={[styles.confirmBtn, { backgroundColor: colors.accent }, booking && { opacity: 0.5 }]}
               onPress={handleBook}
               disabled={booking}
             >
@@ -272,7 +274,7 @@ export default function WellnessDetailScreen() {
 
         {/* Review */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Laisser un avis</Text>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Laisser un avis</Text>
           <View style={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map((star) => (
               <TouchableOpacity
@@ -288,14 +290,14 @@ export default function WellnessDetailScreen() {
             ))}
           </View>
           <TextInput
-            style={[styles.input, { marginTop: 8 }]}
+            style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText, marginTop: 8 }]}
             value={reviewComment}
             onChangeText={setReviewComment}
             placeholder="Votre commentaire..."
-            placeholderTextColor="#666"
+            placeholderTextColor={colors.placeholder}
             multiline
           />
-          <TouchableOpacity style={styles.confirmBtn} onPress={handleReview}>
+          <TouchableOpacity style={[styles.confirmBtn, { backgroundColor: colors.accent }]} onPress={handleReview}>
             <Text style={styles.confirmText}>Envoyer l'avis</Text>
           </TouchableOpacity>
         </View>
@@ -305,35 +307,29 @@ export default function WellnessDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
+  container: { flex: 1 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
-  heroImage: { width: "100%", height: 250, backgroundColor: "#1a1a1a" },
+  heroImage: { width: "100%", height: 250 },
   body: { padding: 20 },
-  name: { color: "#fff", fontSize: 24, fontWeight: "bold" },
+  name: { fontSize: 24, fontWeight: "bold" },
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
     marginTop: 8,
   },
-  ratingText: { color: "#999", fontSize: 14, marginLeft: 4 },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     marginTop: 8,
   },
-  infoText: { color: "#999", fontSize: 14 },
-  desc: { color: "#ccc", fontSize: 15, lineHeight: 22, marginTop: 12 },
   section: { marginTop: 24 },
   sectionTitle: {
-    color: "#999",
     fontSize: 13,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -343,31 +339,23 @@ const styles = StyleSheet.create({
   serviceCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#111",
     borderRadius: 12,
     padding: 14,
     marginBottom: 8,
   },
-  serviceName: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  serviceMeta: { color: "#7c3aed", fontSize: 13, marginTop: 2 },
-  serviceDesc: { color: "#999", fontSize: 13, marginTop: 4 },
   bookBtn: {
-    backgroundColor: "#7c3aed",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
   },
   bookBtnText: { color: "#fff", fontSize: 13, fontWeight: "600" },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
     marginBottom: 8,
   },
   confirmBtn: {
-    backgroundColor: "#7c3aed",
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: "center",
@@ -376,7 +364,6 @@ const styles = StyleSheet.create({
   confirmText: { color: "#fff", fontSize: 15, fontWeight: "600" },
   retryBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,

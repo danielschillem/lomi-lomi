@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,9 +12,11 @@ import {
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getProduct } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function ProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [product, setProduct] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -43,26 +45,26 @@ export default function ProductScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidProductId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Produit introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>Produit introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !product) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryBtn}
+          style={[styles.retryBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setLoading(true);
             void loadProduct();
@@ -76,8 +78,8 @@ export default function ProductScreen() {
 
   if (!product) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Produit introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>Produit introuvable</Text>
       </View>
     );
   }
@@ -87,7 +89,7 @@ export default function ProductScreen() {
     price.toLocaleString("fr-FR") + " FCFA";
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: (p.name as string) || "Produit" }} />
       <Image
         source={{
@@ -95,19 +97,19 @@ export default function ProductScreen() {
             (p.image_url as string) ||
             "https://via.placeholder.com/400/1a1a1a/666?text=Produit",
         }}
-        style={styles.image}
+        style={[styles.image, { backgroundColor: colors.cardSecondary }]}
       />
       <View style={styles.body}>
-        <Text style={styles.name}>{p.name as string}</Text>
-        <Text style={styles.price}>
+        <Text style={[styles.name, { color: colors.text }]}>{p.name as string}</Text>
+        <Text style={[styles.price, { color: colors.accent }]}>
           {formatPrice((p.price as number) || 0)}
         </Text>
         {p.category && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{p.category as string}</Text>
+          <View style={[styles.badge, { backgroundColor: colors.cardSecondary }]}>
+            <Text style={{ color: colors.accent, fontSize: 12, fontWeight: "600" }}>{p.category as string}</Text>
           </View>
         )}
-        <Text style={styles.desc}>{(p.description as string) || ""}</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginTop: 16 }}>{(p.description as string) || ""}</Text>
         <View style={styles.stockRow}>
           <Ionicons
             name={(p.stock as number) > 0 ? "checkmark-circle" : "close-circle"}
@@ -131,33 +133,27 @@ export default function ProductScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
+  container: { flex: 1 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 16 },
-  image: { width: "100%", height: 300, backgroundColor: "#1a1a1a" },
+  image: { width: "100%", height: 300 },
   body: { padding: 20 },
-  name: { color: "#fff", fontSize: 22, fontWeight: "bold" },
+  name: { fontSize: 22, fontWeight: "bold" },
   price: {
-    color: "#7c3aed",
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 8,
   },
   badge: {
-    backgroundColor: "#1a1a2a",
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
     marginTop: 8,
   },
-  badgeText: { color: "#7c3aed", fontSize: 12, fontWeight: "600" },
-  desc: { color: "#ccc", fontSize: 15, lineHeight: 22, marginTop: 16 },
   stockRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -167,7 +163,6 @@ const styles = StyleSheet.create({
   stockText: { fontSize: 14, fontWeight: "500" },
   retryBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,

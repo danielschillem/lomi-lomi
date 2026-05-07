@@ -13,8 +13,10 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { resetPassword } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function ResetPasswordScreen() {
+  const { colors } = useTheme();
   const params = useLocalSearchParams<{ token?: string }>();
   const token = (params.token || "").toString();
 
@@ -24,9 +26,7 @@ export default function ResetPasswordScreen() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!token) setError("Token manquant ou invalide.");
-  }, [token]);
+  useEffect(() => { if (!token) setError("Token manquant ou invalide."); }, [token]);
 
   useEffect(() => {
     if (!success) return;
@@ -35,14 +35,8 @@ export default function ResetPasswordScreen() {
   }, [success]);
 
   const handleSubmit = async () => {
-    if (password.length < 8) {
-      setError("Le mot de passe doit faire au moins 8 caractères.");
-      return;
-    }
-    if (password !== confirm) {
-      setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
+    if (password.length < 8) { setError("Le mot de passe doit faire au moins 8 caractères."); return; }
+    if (password !== confirm) { setError("Les mots de passe ne correspondent pas."); return; }
     setError("");
     setLoading(true);
     try {
@@ -56,54 +50,51 @@ export default function ResetPasswordScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View style={styles.header}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#e5e7eb" />
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Nouveau mot de passe</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }]}>Nouveau mot de passe</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.inner}
-        keyboardShouldPersistTaps="handled"
-      >
+      <ScrollView contentContainerStyle={styles.inner} keyboardShouldPersistTaps="handled">
         {success ? (
           <View style={styles.successCard}>
-            <View style={styles.successIcon}>
+            <View style={{ marginBottom: 16 }}>
               <Ionicons name="checkmark-circle" size={48} color="#22c55e" />
             </View>
-            <Text style={styles.title}>Mot de passe mis à jour</Text>
-            <Text style={styles.subtitle}>Redirection en cours…</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Mot de passe mis à jour</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: "center", marginBottom: 28, lineHeight: 20 }}>Redirection en cours…</Text>
           </View>
         ) : (
           <>
-            <Text style={styles.title}>Nouveau mot de passe</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: colors.text }]}>Nouveau mot de passe</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14, textAlign: "center", marginBottom: 28, lineHeight: 20 }}>
               Choisis un mot de passe sécurisé (min. 8 caractères).
             </Text>
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+            {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
 
-            <Text style={styles.label}>Nouveau mot de passe</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 6 }}>Nouveau mot de passe</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
               placeholder="••••••••"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>Confirmer le mot de passe</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, marginBottom: 6 }}>Confirmer le mot de passe</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, borderColor: colors.border, color: colors.inputText }]}
               placeholder="••••••••"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               value={confirm}
               onChangeText={setConfirm}
               secureTextEntry
@@ -111,25 +102,15 @@ export default function ResetPasswordScreen() {
             />
 
             <TouchableOpacity
-              style={[
-                styles.button,
-                (loading || !token) && styles.buttonDisabled,
-              ]}
+              style={[styles.button, { backgroundColor: colors.accent }, (loading || !token) && styles.buttonDisabled]}
               onPress={handleSubmit}
               disabled={loading || !token}
             >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Réinitialiser</Text>
-              )}
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Réinitialiser</Text>}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.linkBtn}
-              onPress={() => router.replace("/login")}
-            >
-              <Text style={styles.link}>Retour à la connexion</Text>
+            <TouchableOpacity style={styles.linkBtn} onPress={() => router.replace("/login")}>
+              <Text style={{ color: colors.accentLight, fontSize: 14 }}>Retour à la connexion</Text>
             </TouchableOpacity>
           </>
         )}
@@ -139,7 +120,6 @@ export default function ResetPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -147,60 +127,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#222",
   },
   backBtn: { padding: 6 },
-  headerTitle: {
-    flex: 1,
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
-    textAlign: "center",
-  },
+  headerTitle: { flex: 1, fontWeight: "700", fontSize: 16, textAlign: "center" },
   headerSpacer: { width: 36 },
   inner: { padding: 24, paddingTop: 40 },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  subtitle: {
-    color: "#9ca3af",
-    fontSize: 14,
-    textAlign: "center",
-    marginBottom: 28,
-    lineHeight: 20,
-  },
-  error: {
-    color: "#ef4444",
-    textAlign: "center",
-    marginBottom: 12,
-    fontSize: 14,
-  },
-  label: { color: "#9ca3af", fontSize: 13, marginBottom: 6 },
-  input: {
-    backgroundColor: "#1a1a1a",
-    borderWidth: 1,
-    borderColor: "#333",
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: "#fff",
-    marginBottom: 16,
-  },
-  button: {
-    backgroundColor: "#7c3aed",
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    marginTop: 8,
-  },
+  title: { fontSize: 22, fontWeight: "700", marginBottom: 8, textAlign: "center" },
+  error: { textAlign: "center", marginBottom: 12, fontSize: 14 },
+  input: { borderWidth: 1, borderRadius: 12, padding: 16, fontSize: 16, marginBottom: 16 },
+  button: { borderRadius: 12, padding: 16, alignItems: "center", marginTop: 8 },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   linkBtn: { padding: 12, alignItems: "center", marginTop: 12 },
-  link: { color: "#a78bfa", fontSize: 14 },
   successCard: { paddingTop: 40, alignItems: "center" },
-  successIcon: { marginBottom: 16 },
 });

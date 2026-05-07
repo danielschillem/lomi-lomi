@@ -83,13 +83,13 @@ export default function Home() {
           <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
             <Image
               src="/logo.png"
-              alt="Lomi Lomi"
+              alt="Texto"
               width={36}
               height={36}
               className="rounded-lg"
             />
-            <span className="text-violet-600">Lomi</span>{" "}
-            <span className="text-pink-500">Lomi</span>
+            <span className="text-violet-600">Tex</span>{" "}
+            <span className="text-pink-500">to</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted">
             <a href="#features" className="hover:text-foreground transition">
@@ -143,9 +143,9 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto mb-10">
-              Lomi Lomi est la plateforme de rencontres pour adultes qui
-              valorise votre anonymat. Matching par affinités, messagerie
-              chiffrée et profils vérifiés.
+              Texto est une plateforme de messagerie ouverte tout public.
+              Discutez librement avec un chat interactif et accédez à
+              l&apos;expérience premium TexMe quand vous voulez plus.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Link
@@ -354,7 +354,7 @@ export default function Home() {
               href="/register"
               className="bg-linear-to-r from-violet-600 to-pink-500 hover:from-violet-700 hover:to-pink-600 text-white font-semibold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-violet-200"
             >
-              Rejoindre Lomi Lomi
+              Rejoindre Texto
             </Link>
             <p className="text-muted text-sm mt-4">
               Gratuit, anonyme, sans engagement
@@ -369,8 +369,8 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="text-xl font-bold mb-4">
-                <span className="text-violet-600">Lomi</span>{" "}
-                <span className="text-pink-500">Lomi</span>
+                <span className="text-violet-600">Tex</span>{" "}
+                <span className="text-pink-500">to</span>
               </div>
               <p className="text-muted text-sm leading-relaxed">
                 La plateforme de rencontres anonymes et sécurisées pour adultes
@@ -483,7 +483,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-border pt-8 text-center text-muted text-sm">
-            © 2026 Lomi Lomi. Tous droits réservés. Réservé aux +18 ans.
+            © 2026 Texto. Tous droits réservés.
           </div>
         </div>
       </footer>

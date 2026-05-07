@@ -65,8 +65,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className="hidden w-64 shrink-0 flex-col bg-surface border-r border-border lg:flex">
         <div className="p-6 border-b border-border">
           <Link href="/" className="text-lg font-bold">
-            <span className="text-violet-600">Lomi</span>{" "}
-            <span className="text-pink-600">Lomi</span>
+            <span className="text-violet-600">Tex</span>{" "}
+            <span className="text-pink-600">to</span>
           </Link>
           <p className="mt-1 text-sm text-muted">
             {isAdmin ? "Administration" : user.username}

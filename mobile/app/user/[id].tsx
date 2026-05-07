@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -19,10 +19,12 @@ import {
   blockUser,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useTheme } from "@/lib/theme-context";
 
 export default function UserProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user: me } = useAuth();
+  const { colors } = useTheme();
   const [profile, setProfile] = useState<Record<string, any> | null>(null);
   const [photos, setPhotos] = useState<Record<string, any>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,26 +120,26 @@ export default function UserProfileScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidUserId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Profil introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>Profil introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !profile) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryBtn}
+          style={[styles.retryBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setLoading(true);
             void loadProfile();
@@ -151,8 +153,8 @@ export default function UserProfileScreen() {
 
   if (!profile) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Profil introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 16 }}>Profil introuvable</Text>
       </View>
     );
   }
@@ -160,7 +162,7 @@ export default function UserProfileScreen() {
   const p = profile;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: (p.username as string) || "Profil" }} />
 
       <Image
@@ -169,32 +171,32 @@ export default function UserProfileScreen() {
             (p.avatar_url as string) ||
             "https://via.placeholder.com/400/1a1a1a/666?text=?",
         }}
-        style={styles.heroImage}
+        style={[styles.heroImage, { backgroundColor: colors.cardSecondary }]}
       />
 
       <View style={styles.body}>
-        <Text style={styles.name}>
+        <Text style={[styles.name, { color: colors.text }]}>
           {p.username as string}
           {p.age ? `, ${p.age}` : ""}
         </Text>
         {p.city && (
           <View style={styles.row}>
-            <Ionicons name="location" size={16} color="#7c3aed" />
-            <Text style={styles.city}>{p.city as string}</Text>
+            <Ionicons name="location" size={16} color={colors.accent} />
+            <Text style={[styles.city, { color: colors.textMuted }]}>{p.city as string}</Text>
           </View>
         )}
-        {p.bio && <Text style={styles.bio}>{p.bio as string}</Text>}
+        {p.bio && <Text style={[styles.bio, { color: colors.textSecondary }]}>{p.bio as string}</Text>}
 
         {/* Photos */}
         {photos.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Photos</Text>
+            <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Photos</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {photos.map((photo, i) => (
                 <Image
                   key={i}
                   source={{ uri: photo.url as string }}
-                  style={styles.photoThumb}
+                  style={[styles.photoThumb, { backgroundColor: colors.cardSecondary }]}
                 />
               ))}
             </ScrollView>
@@ -204,21 +206,19 @@ export default function UserProfileScreen() {
         {/* Actions */}
         {me?.id !== userId && (
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.msgBtn} onPress={handleMessage}>
+            <TouchableOpacity style={[styles.msgBtn, { backgroundColor: colors.accent }]} onPress={handleMessage}>
               <Ionicons name="chatbubble" size={20} color="#fff" />
               <Text style={styles.msgText}>Envoyer un message</Text>
             </TouchableOpacity>
 
             <View style={styles.safetyRow}>
-              <TouchableOpacity style={styles.safetyBtn} onPress={handleReport}>
+              <TouchableOpacity style={[styles.safetyBtn, { borderColor: colors.border }]} onPress={handleReport}>
                 <Ionicons name="flag" size={18} color="#f59e0b" />
-                <Text style={styles.safetyText}>Signaler</Text>
+                <Text style={{ color: "#f59e0b", fontSize: 14, fontWeight: "500" }}>Signaler</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.safetyBtn} onPress={handleBlock}>
+              <TouchableOpacity style={[styles.safetyBtn, { borderColor: colors.border }]} onPress={handleBlock}>
                 <Ionicons name="ban" size={18} color="#ef4444" />
-                <Text style={[styles.safetyText, { color: "#ef4444" }]}>
-                  Bloquer
-                </Text>
+                <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "500" }}>Bloquer</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -229,23 +229,20 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
+  container: { flex: 1 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 16 },
-  heroImage: { width: "100%", height: 350, backgroundColor: "#1a1a1a" },
+  heroImage: { width: "100%", height: 350 },
   body: { padding: 20 },
-  name: { color: "#fff", fontSize: 26, fontWeight: "bold" },
+  name: { fontSize: 26, fontWeight: "bold" },
   row: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
-  city: { color: "#999", fontSize: 15 },
-  bio: { color: "#ccc", fontSize: 15, lineHeight: 22, marginTop: 12 },
+  city: { fontSize: 15 },
+  bio: { fontSize: 15, lineHeight: 22, marginTop: 12 },
   section: { marginTop: 24 },
   sectionTitle: {
-    color: "#999",
     fontSize: 14,
     fontWeight: "600",
     textTransform: "uppercase",
@@ -257,14 +254,12 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 8,
     marginRight: 8,
-    backgroundColor: "#1a1a1a",
   },
   actions: { marginTop: 24, gap: 12 },
   msgBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
@@ -278,14 +273,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#333",
     borderRadius: 12,
     gap: 6,
   },
-  safetyText: { color: "#f59e0b", fontSize: 14, fontWeight: "500" },
   retryBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,

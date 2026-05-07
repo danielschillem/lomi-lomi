@@ -403,7 +403,7 @@ export default function RegisterPage() {
                   >
                     politique de confidentialité
                   </a>{" "}
-                  de Lomi Lomi.
+                  de Texto.
                 </span>
               </label>
               <button
@@ -513,7 +513,7 @@ export default function RegisterPage() {
                   >
                     politique de confidentialité
                   </a>{" "}
-                  de Lomi Lomi.
+                  de Texto.
                 </span>
               </label>
               <button

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -13,9 +13,11 @@ import {
 import { useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getPlace, createPlaceReservation } from "@/lib/api";
+import { useTheme } from "@/lib/theme-context";
 
 export default function PlaceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors } = useTheme();
   const [place, setPlace] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -73,26 +75,26 @@ export default function PlaceDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#7c3aed" />
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.accent} />
       </View>
     );
   }
 
   if (!isValidPlaceId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Lieu introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Lieu introuvable</Text>
       </View>
     );
   }
 
   if (loadError && !place) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>{loadError}</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>{loadError}</Text>
         <TouchableOpacity
-          style={styles.retryLoadBtn}
+          style={[styles.retryLoadBtn, { backgroundColor: colors.accent }]}
           onPress={() => {
             setLoading(true);
             void loadPlace();
@@ -106,8 +108,8 @@ export default function PlaceDetailScreen() {
 
   if (!place) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.emptyText}>Lieu introuvable</Text>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
+        <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: "center", paddingHorizontal: 24 }}>Lieu introuvable</Text>
       </View>
     );
   }
@@ -115,7 +117,7 @@ export default function PlaceDetailScreen() {
   const p = place;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: (p.name as string) || "Lieu" }} />
       <Image
         source={{
@@ -123,25 +125,25 @@ export default function PlaceDetailScreen() {
             (p.image_url as string) ||
             "https://via.placeholder.com/400/1a1a1a/666?text=Lieu",
         }}
-        style={styles.heroImage}
+        style={[styles.heroImage, { backgroundColor: colors.cardSecondary }]}
       />
       <View style={styles.body}>
-        <Text style={styles.name}>{p.name as string}</Text>
+        <Text style={[styles.name, { color: colors.text }]}>{p.name as string}</Text>
         {p.category && (
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{p.category as string}</Text>
+          <View style={[styles.badge, { backgroundColor: colors.cardSecondary }]}>
+            <Text style={{ color: colors.accent, fontSize: 12, fontWeight: "600" }}>{p.category as string}</Text>
           </View>
         )}
         {p.address && (
           <View style={styles.infoRow}>
-            <Ionicons name="location" size={16} color="#7c3aed" />
-            <Text style={styles.infoText}>{p.address as string}</Text>
+            <Ionicons name="location" size={16} color={colors.accent} />
+            <Text style={{ color: colors.textMuted, fontSize: 14 }}>{p.address as string}</Text>
           </View>
         )}
-        <Text style={styles.desc}>{(p.description as string) || ""}</Text>
+        <Text style={{ color: colors.textSecondary, fontSize: 15, lineHeight: 22, marginTop: 12 }}>{(p.description as string) || ""}</Text>
 
         <TouchableOpacity
-          style={styles.reserveBtn}
+          style={[styles.reserveBtn, { backgroundColor: colors.accent }]}
           onPress={() => setShowBook(!showBook)}
         >
           <Ionicons name="calendar" size={20} color="#fff" />
@@ -151,33 +153,33 @@ export default function PlaceDetailScreen() {
         {showBook && (
           <View style={styles.bookForm}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={date}
               onChangeText={setDate}
               placeholder="Date (YYYY-MM-DD)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={time}
               onChangeText={setTime}
               placeholder="Heure (HH:MM)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={guests}
               onChangeText={setGuests}
               placeholder="Nombre de personnes"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
               keyboardType="numeric"
             />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { backgroundColor: colors.inputBg, color: colors.inputText }]}
               value={notes}
               onChangeText={setNotes}
               placeholder="Notes (optionnel)"
-              placeholderTextColor="#666"
+              placeholderTextColor={colors.placeholder}
             />
             <TouchableOpacity
               style={[styles.confirmBtn, booking && { opacity: 0.5 }]}
@@ -198,39 +200,32 @@ export default function PlaceDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0a0a0a" },
+  container: { flex: 1 },
   center: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
     justifyContent: "center",
     alignItems: "center",
   },
-  emptyText: { color: "#666", fontSize: 15, textAlign: "center", paddingHorizontal: 24 },
-  heroImage: { width: "100%", height: 250, backgroundColor: "#1a1a1a" },
+  heroImage: { width: "100%", height: 250 },
   body: { padding: 20 },
-  name: { color: "#fff", fontSize: 24, fontWeight: "bold" },
+  name: { fontSize: 24, fontWeight: "bold" },
   badge: {
-    backgroundColor: "#1a1a2a",
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 8,
     marginTop: 8,
   },
-  badgeText: { color: "#7c3aed", fontSize: 12, fontWeight: "600" },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     marginTop: 8,
   },
-  infoText: { color: "#999", fontSize: 14 },
-  desc: { color: "#ccc", fontSize: 15, lineHeight: 22, marginTop: 12 },
   reserveBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#7c3aed",
     paddingVertical: 14,
     borderRadius: 12,
     gap: 8,
@@ -239,8 +234,6 @@ const styles = StyleSheet.create({
   reserveText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   bookForm: { marginTop: 16, gap: 8 },
   input: {
-    backgroundColor: "#1a1a1a",
-    color: "#fff",
     borderRadius: 10,
     padding: 14,
     fontSize: 15,
@@ -255,7 +248,6 @@ const styles = StyleSheet.create({
   confirmText: { color: "#fff", fontSize: 15, fontWeight: "600" },
   retryLoadBtn: {
     marginTop: 12,
-    backgroundColor: "#7c3aed",
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 10,

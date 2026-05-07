@@ -126,7 +126,7 @@ export default function LoginScreen() {
           style={s.logo}
           resizeMode="contain"
         />
-        <Text style={s.title}>Lomi Lomi</Text>
+        <Text style={s.title}>Texto</Text>
         <Text style={s.subtitle}>
           {mode === "email"
             ? "Connexion par email"
