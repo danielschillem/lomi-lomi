@@ -78,15 +78,131 @@ services:
     depends_on:
       - frontend
       - backend
+      - jitsi-web
     networks:
       - internal
+
+  # ── Jitsi Meet (self-hosted) ─────────────────────────────────────────────────
+
+  jitsi-web:
+    image: jitsi/web:stable
+    container_name: textme-jitsi-web
+    restart: unless-stopped
+    volumes:
+      - ./jitsi/web:/config:Z
+    environment:
+      PUBLIC_URL: https://meet.texto.life
+      XMPP_SERVER: jitsi-prosody
+      XMPP_BOSH_URL_BASE: http://jitsi-prosody:5280
+      XMPP_DOMAIN: ${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_MUC_DOMAIN: muc.${JITSI_DOMAIN:-meet.texto.life}
+      ENABLE_AUTH: "0"
+      ENABLE_GUESTS: "1"
+      ENABLE_LETSENCRYPT: "0"
+      DISABLE_HTTPS: "1"
+      ENABLE_HTTP_REDIRECT: "0"
+      ENABLE_LOBBY: "0"
+      ENABLE_PREJOIN_PAGE: "0"
+      ENABLE_WELCOME_PAGE: "0"
+      APP_NAME: TextMe
+      NATIVE_APP_NAME: TextMe
+      SHOW_JITSI_WATERMARK: "false"
+      SHOW_WATERMARK_FOR_GUESTS: "false"
+      TZ: UTC
+    networks:
+      - internal
+      - meet.jitsi
+
+  jitsi-prosody:
+    image: jitsi/prosody:stable
+    container_name: textme-jitsi-prosody
+    restart: unless-stopped
+    expose:
+      - "5222"
+      - "5347"
+      - "5280"
+    volumes:
+      - prosody_data:/config
+    environment:
+      AUTH_TYPE: internal
+      ENABLE_AUTH: "0"
+      ENABLE_GUESTS: "1"
+      ENABLE_LOBBY: "0"
+      JICOFO_AUTH_USER: focus
+      JICOFO_AUTH_PASSWORD: ${JITSI_JICOFO_PASSWORD}
+      JVB_AUTH_USER: jvb
+      JVB_AUTH_PASSWORD: ${JITSI_JVB_PASSWORD}
+      XMPP_DOMAIN: ${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_GUEST_DOMAIN: guest.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_MUC_DOMAIN: muc.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+      TZ: UTC
+    networks:
+      meet.jitsi:
+        aliases:
+          - ${JITSI_DOMAIN:-meet.texto.life}
+          - auth.${JITSI_DOMAIN:-meet.texto.life}
+          - guest.${JITSI_DOMAIN:-meet.texto.life}
+          - muc.${JITSI_DOMAIN:-meet.texto.life}
+          - internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+
+  jitsi-jicofo:
+    image: jitsi/jicofo:stable
+    container_name: textme-jitsi-jicofo
+    restart: unless-stopped
+    environment:
+      AUTH_TYPE: internal
+      ENABLE_AUTH: "0"
+      XMPP_DOMAIN: ${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_HOST: jitsi-prosody
+      XMPP_PORT: "5347"
+      XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+      JICOFO_AUTH_USER: focus
+      JICOFO_AUTH_PASSWORD: ${JITSI_JICOFO_PASSWORD}
+      JVB_BREWERY_MUC: jvbbrewery
+      TZ: UTC
+    depends_on:
+      - jitsi-prosody
+    networks:
+      - meet.jitsi
+
+  jitsi-jvb:
+    image: jitsi/jvb:stable
+    container_name: textme-jitsi-jvb
+    restart: unless-stopped
+    ports:
+      - "10000:10000/udp"
+    environment:
+      # JITSI_JVB_IP must be set to the server's public IP in .env
+      DOCKER_HOST_ADDRESS: ${JITSI_JVB_IP}
+      XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_SERVER: jitsi-prosody
+      JVB_AUTH_USER: jvb
+      JVB_AUTH_PASSWORD: ${JITSI_JVB_PASSWORD}
+      JVB_BREWERY_MUC: jvbbrewery
+      JVB_PORT: "10000"
+      JVB_TCP_HARVESTER_DISABLED: "true"
+      JVB_STUN_SERVERS: stun.l.google.com:19302,stun1.l.google.com:19302
+      TZ: UTC
+    depends_on:
+      - jitsi-prosody
+    networks:
+      - meet.jitsi
 
 volumes:
   pgdata:
   uploads:
   caddy_data:
   caddy_config:
+  prosody_data:
 
 networks:
   internal:
+    driver: bridge
+  meet.jitsi:
     driver: bridge

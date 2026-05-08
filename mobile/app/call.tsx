@@ -48,7 +48,7 @@ export default function CallScreen() {
     `userInfo.displayName=${displayName}`,
   ].join("&");
 
-  const jitsiUrl = `https://meet.jit.si/${room}#${configHash}`;
+  const jitsiUrl = `https://meet.texto.life/${room}#${configHash}`;
 
   const endCall = async () => {
     if (ended.current) return;

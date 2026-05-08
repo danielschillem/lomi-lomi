@@ -24,3 +24,23 @@ texto.life {
 www.texto.life {
 	redir https://texto.life{uri} permanent
 }
+
+# Jitsi Meet — TextMe self-hosted video/audio calls
+meet.texto.life {
+	# WebSocket signaling (XMPP over WebSocket)
+	handle /xmpp-websocket* {
+		reverse_proxy jitsi-web:80
+	}
+	# BOSH fallback
+	handle /http-bind* {
+		reverse_proxy jitsi-web:80
+	}
+	# Colibri WebSocket (JVB stats/bridge)
+	handle /colibri-ws* {
+		reverse_proxy jitsi-web:80
+	}
+	# Everything else → Jitsi web interface
+	handle {
+		reverse_proxy jitsi-web:80
+	}
+}
