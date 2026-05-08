@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PermissionsAndroid,
   Platform,
@@ -22,6 +22,7 @@ export default function CallScreen() {
   }>();
 
   const ended = useRef(false);
+  const [useFallbackMeet, setUseFallbackMeet] = useState(false);
   const isVideo = callType === "video";
   const displayName = encodeURIComponent(userName || "TextMe User");
 
@@ -48,7 +49,10 @@ export default function CallScreen() {
     `userInfo.displayName=${displayName}`,
   ].join("&");
 
-  const jitsiUrl = `https://meet.texto.life/${room}#${configHash}`;
+  const meetBaseUrl = useFallbackMeet
+    ? "https://meet.jit.si"
+    : "https://meet.texto.life";
+  const jitsiUrl = `${meetBaseUrl}/${room}#${configHash}`;
 
   const endCall = async () => {
     if (ended.current) return;
@@ -92,6 +96,7 @@ export default function CallScreen() {
       <StatusBar hidden />
 
       <WebView
+        key={jitsiUrl}
         source={{ uri: jitsiUrl }}
         style={styles.webview}
         // Desktop UA: prevents Jitsi from detecting Android and redirecting to intent://
@@ -109,6 +114,7 @@ export default function CallScreen() {
         onMessage={(e) => {
           if (e.nativeEvent.data === "ended") endCall();
         }}
+        onError={() => setUseFallbackMeet(true)}
         onNavigationStateChange={onNavigationStateChange}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
