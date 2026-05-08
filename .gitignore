@@ -34,3 +34,12 @@ backend/server.exe~
 # Clojure/LSP caches
 .clj-kondo/
 .lsp/
+
+# Firebase service account private keys (never commit)
+*firebase-adminsdk*.json
+
+# Claude Code memory
+.claude/
+
+# Metro logs
+mobile/*.out.log

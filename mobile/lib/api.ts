@@ -1020,6 +1020,16 @@ export function cancelSubscription() {
   });
 }
 
+export function boostProfile() {
+  return request<{ message: string; boosts_remaining: number; boosted_until: string }>("/boost", {
+    method: "POST",
+  });
+}
+
+export function getBoostStatus() {
+  return request<{ boosts_remaining: number; is_active: boolean; boosted_until?: string }>("/boost/status");
+}
+
 export function superLike(likedId: number) {
   return request<{ super_liked: boolean; is_match: boolean }>("/superlikes", {
     method: "POST",
@@ -1046,7 +1056,7 @@ export function whoLikedMe() {
     }[];
     upgrade: boolean;
     message?: string;
-  }>("/who-liked-me");
+  }>("/likes/me");
 }
 
 /* ===== Événements ===== */

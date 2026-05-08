@@ -32,8 +32,12 @@ type User struct {
 	Role       string     `gorm:"size:20;default:user" json:"role"` // user, owner, admin
 	PushToken  string     `gorm:"size:255" json:"-"`
 	// Premium
-	IsPremium    bool       `gorm:"default:false" json:"is_premium"`
-	PremiumUntil *time.Time `json:"premium_until,omitempty"`
+	IsPremium       bool       `gorm:"default:false" json:"is_premium"`
+	PremiumUntil    *time.Time `json:"premium_until,omitempty"`
+	HasBadge        bool       `gorm:"default:false" json:"has_badge"`
+	BoostsRemaining int        `gorm:"default:0" json:"boosts_remaining,omitempty"`
+	BoostPeriodStart time.Time `json:"boost_period_start,omitempty"`
+	LastBoostedAt   *time.Time `json:"last_boosted_at,omitempty"`
 	// Extended profile
 	Languages      string `gorm:"size:200" json:"languages,omitempty"`       // JSON array e.g. ["Français","Moore"]
 	LookingForType string `gorm:"size:50" json:"looking_for_type,omitempty"` // serious, casual, friendship

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -9,7 +10,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getMySubscription } from "@/lib/api";
+import { getMySubscription, getBoostStatus, boostProfile } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 
@@ -48,6 +49,9 @@ export default function TextMePlusScreen() {
   const [subscriptionLabel, setSubscriptionLabel] = useState(
     isPremium ? "Accès privé actif" : "Accès privé inactif",
   );
+  const [boostsRemaining, setBoostsRemaining] = useState(0);
+  const [boostActive, setBoostActive] = useState(false);
+  const [boosting, setBoosting] = useState(false);
 
   useEffect(() => {
     if (!isPremium) return;
@@ -61,6 +65,47 @@ export default function TextMePlusScreen() {
       })
       .catch(() => {});
   }, [isPremium]);
+
+  const loadBoostStatus = useCallback(() => {
+    if (!isPremium) return;
+    getBoostStatus()
+      .then((res) => {
+        setBoostsRemaining(res.boosts_remaining);
+        setBoostActive(res.is_active);
+      })
+      .catch(() => {});
+  }, [isPremium]);
+
+  useEffect(() => { loadBoostStatus(); }, [loadBoostStatus]);
+
+  const handleBoost = async () => {
+    if (boostsRemaining <= 0) {
+      Alert.alert("Boost épuisé", "Vous n'avez plus de boosts disponibles ce mois-ci.");
+      return;
+    }
+    Alert.alert(
+      "Booster mon profil",
+      `Votre profil sera mis en avant pendant 24h.\nBoosts restants : ${boostsRemaining}`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Booster",
+          onPress: async () => {
+            setBoosting(true);
+            try {
+              const res = await boostProfile();
+              setBoostsRemaining(res.boosts_remaining);
+              setBoostActive(true);
+              Alert.alert("Profil boosté !", "Votre profil est mis en avant pendant 24h.");
+            } catch (e: unknown) {
+              Alert.alert("Erreur", e instanceof Error ? e.message : "Impossible de booster");
+            }
+            setBoosting(false);
+          },
+        },
+      ],
+    );
+  };
 
   const avatarUrl = useMemo(
     () => String(user?.avatar_url || "https://via.placeholder.com/96/1a1a1a/666?text=?"),
@@ -163,6 +208,42 @@ export default function TextMePlusScreen() {
           ))}
         </View>
       </View>
+
+      {isPremium ? (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textMuted }]}>Boost profil</Text>
+          <TouchableOpacity
+            style={[
+              styles.boostCard,
+              {
+                backgroundColor: boostActive ? "rgba(250,204,21,0.08)" : colors.card,
+                borderColor: boostActive ? "#facc15" : colors.border,
+              },
+            ]}
+            onPress={handleBoost}
+            disabled={boosting}
+          >
+            <View style={[styles.boostIcon, { backgroundColor: "rgba(250,204,21,0.15)" }]}>
+              <Ionicons name="rocket" size={22} color="#facc15" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.boostTitle, { color: colors.text }]}>
+                {boostActive ? "Profil en avant ✓" : "Booster mon profil"}
+              </Text>
+              <Text style={[styles.boostSub, { color: colors.textMuted }]}>
+                {boostActive
+                  ? "Votre profil est mis en avant pendant 24h"
+                  : `${boostsRemaining} boost${boostsRemaining > 1 ? "s" : ""} disponible${boostsRemaining > 1 ? "s" : ""} ce mois-ci`}
+              </Text>
+            </View>
+            <Ionicons
+              name={boostActive ? "checkmark-circle" : "chevron-forward"}
+              size={20}
+              color={boostActive ? "#facc15" : colors.textMuted}
+            />
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </ScrollView>
   );
 }
@@ -273,5 +354,28 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     top: 12,
+  },
+  boostCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 14,
+  },
+  boostIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  boostTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  boostSub: {
+    fontSize: 12,
   },
 });

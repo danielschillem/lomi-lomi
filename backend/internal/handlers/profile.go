@@ -160,8 +160,11 @@ func (h *ProfileHandler) Discover(c *fiber.Ctx) error {
 		return q
 	}
 
+	boostCutoff := time.Now().Add(-24 * time.Hour)
 	var users []models.User
-	buildQuery(excludeIDs).Limit(20).Find(&users)
+	buildQuery(excludeIDs).
+		Order(gorm.Expr("CASE WHEN last_boosted_at > ? THEN 0 ELSE 1 END, created_at DESC", boostCutoff)).
+		Limit(20).Find(&users)
 
 	// If the discovery pool is exhausted, allow resurfacing previously passed
 	// profiles to avoid a hard dead-end in the UI.

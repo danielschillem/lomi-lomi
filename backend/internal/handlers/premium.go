@@ -1,4 +1,4 @@
-﻿package handlers
+package handlers
 
 import (
 	"time"
@@ -16,9 +16,11 @@ var premiumPlans = map[string]struct {
 	Label    string
 	Duration time.Duration
 	Price    float64
+	Boosts   int
+	Badge    bool
 }{
-	"monthly": {"Mensuel", 30 * 24 * time.Hour, 2000},
-	"yearly":  {"Annuel", 365 * 24 * time.Hour, 15000},
+	"monthly": {"Mensuel", 30 * 24 * time.Hour, 2000, 1, false},
+	"yearly":  {"Annuel", 365 * 24 * time.Hour, 15000, 3, true},
 }
 
 // GetPlans returns available premium plans.
@@ -85,15 +87,20 @@ func (h *PremiumHandler) Subscribe(c *fiber.Ctx) error {
 	database.DB.Create(&sub)
 
 	database.DB.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
-		"is_premium":    true,
-		"premium_until": endsAt,
+		"is_premium":        true,
+		"premium_until":     endsAt,
+		"has_badge":         plan.Badge,
+		"boosts_remaining":  plan.Boosts,
+		"boost_period_start": now,
 	})
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"message":    "Abonnement Premium activé",
-		"plan":       req.Plan,
-		"ends_at":    endsAt,
-		"is_premium": true,
+		"message":          "Abonnement Premium activé",
+		"plan":             req.Plan,
+		"ends_at":          endsAt,
+		"is_premium":       true,
+		"boosts_remaining": plan.Boosts,
+		"has_badge":        plan.Badge,
 	})
 }
 
@@ -106,11 +113,100 @@ func (h *PremiumHandler) CancelSubscription(c *fiber.Ctx) error {
 		Update("status", "cancelled")
 
 	database.DB.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
-		"is_premium":    false,
-		"premium_until": nil,
+		"is_premium":       false,
+		"premium_until":    nil,
+		"has_badge":        false,
+		"boosts_remaining": 0,
 	})
 
 	return c.JSON(fiber.Map{"message": "Abonnement annulé"})
+}
+
+// GetBoostStatus returns remaining boosts and whether the profile is currently boosted.
+func (h *PremiumHandler) GetBoostStatus(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var user models.User
+	if err := database.DB.Select("id, is_premium, boosts_remaining, boost_period_start, last_boosted_at").
+		First(&user, userID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+	}
+
+	if !user.IsPremium {
+		return c.JSON(fiber.Map{"boosts_remaining": 0, "is_active": false})
+	}
+
+	now := time.Now()
+
+	// Reset boosts if 30-day period has elapsed
+	if !user.BoostPeriodStart.IsZero() && now.After(user.BoostPeriodStart.Add(30*24*time.Hour)) {
+		var sub models.Subscription
+		allotment := 1
+		if err := database.DB.Where("user_id = ? AND status = 'active'", userID).First(&sub).Error; err == nil {
+			if sub.Plan == "yearly" {
+				allotment = 3
+			}
+		}
+		database.DB.Model(&models.User{}).Where("id = ?", userID).Updates(map[string]interface{}{
+			"boosts_remaining":  allotment,
+			"boost_period_start": now,
+		})
+		user.BoostsRemaining = allotment
+	}
+
+	isActive := user.LastBoostedAt != nil && now.Before(user.LastBoostedAt.Add(24*time.Hour))
+
+	return c.JSON(fiber.Map{
+		"boosts_remaining": user.BoostsRemaining,
+		"is_active":        isActive,
+		"boosted_until":    user.LastBoostedAt,
+	})
+}
+
+// Boost boosts the user's profile for 24 hours.
+func (h *PremiumHandler) Boost(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var user models.User
+	if err := database.DB.First(&user, userID).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+	}
+
+	if !user.IsPremium {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "TextMe+ requis pour booster"})
+	}
+
+	now := time.Now()
+
+	// Reset boosts if 30-day period has elapsed
+	if !user.BoostPeriodStart.IsZero() && now.After(user.BoostPeriodStart.Add(30*24*time.Hour)) {
+		allotment := 1
+		var sub models.Subscription
+		if err := database.DB.Where("user_id = ? AND status = 'active'", userID).First(&sub).Error; err == nil {
+			if sub.Plan == "yearly" {
+				allotment = 3
+			}
+		}
+		user.BoostsRemaining = allotment
+		user.BoostPeriodStart = now
+	}
+
+	if user.BoostsRemaining <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":            "Plus de boosts disponibles ce mois-ci",
+			"boosts_remaining": 0,
+		})
+	}
+
+	user.BoostsRemaining--
+	user.LastBoostedAt = &now
+	database.DB.Save(&user)
+
+	return c.JSON(fiber.Map{
+		"message":          "Profil boosté pour 24h !",
+		"boosts_remaining": user.BoostsRemaining,
+		"boosted_until":    now.Add(24 * time.Hour),
+	})
 }
 
 // AdminGrantPremium (admin only) grants premium to a user manually.
@@ -143,8 +239,11 @@ func (h *PremiumHandler) AdminGrantPremium(c *fiber.Ctx) error {
 	}
 	database.DB.Create(&sub)
 	database.DB.Model(&models.User{}).Where("id = ?", req.UserID).Updates(map[string]interface{}{
-		"is_premium":    true,
-		"premium_until": endsAt,
+		"is_premium":        true,
+		"premium_until":     endsAt,
+		"has_badge":         plan.Badge,
+		"boosts_remaining":  plan.Boosts,
+		"boost_period_start": now,
 	})
 
 	return c.JSON(fiber.Map{"message": "Premium accordé", "ends_at": endsAt})

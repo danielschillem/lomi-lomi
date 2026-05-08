@@ -39,6 +39,8 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       ADMIN_SECRET: ${ADMIN_SECRET:-}
       BASE_URL: ${BASE_URL:-http://134.209.229.141}
+      FIREBASE_CREDENTIALS_JSON: ${FIREBASE_CREDENTIALS_JSON:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
     volumes:
       - uploads:/app/uploads
     depends_on:

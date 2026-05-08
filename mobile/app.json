@@ -23,7 +23,14 @@
         "monochromeImage": "./assets/adaptive-icon-monochrome.png",
         "backgroundColor": "#0B1220"
       },
-      "package": "com.lomilomi.app"
+      "package": "com.lomilomi.app",
+      "googleServicesFile": "./google-services.json"
+    },
+    "notification": {
+      "icon": "./assets/adaptive-icon.png",
+      "color": "#2563eb",
+      "androidMode": "default",
+      "androidCollapsedTitle": "TextMe"
     },
     "plugins": [
       "expo-router",
@@ -43,7 +50,8 @@
       [
         "expo-notifications",
         {
-          "color": "#14B8A6"
+          "color": "#14B8A6",
+          "vapidPublicKey": "BNYU4JVgzlyDJJEPHaFXiZspQRf8evvZ34B2Xxe61mZPkv8Mi17i5J8--WW8Mf9zeOXXA3SwBFzrP0UE63srKgY"
         }
       ],
       "expo-asset",

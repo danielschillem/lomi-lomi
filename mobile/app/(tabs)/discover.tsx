@@ -33,6 +33,7 @@ interface Profile {
   distance?: number;
   interests?: string;
   photos?: { id: number; url: string }[];
+  has_badge?: boolean;
 }
 
 function DiscoverScreenInner() {
@@ -338,10 +339,15 @@ function DiscoverScreenInner() {
           style={[styles.image, { backgroundColor: colors.cardSecondary }]}
         />
         <View style={styles.info}>
-          <Text style={[styles.name, { color: colors.text }]}>
-            {current.username}
-            {current.age ? `, ${current.age}` : ""}
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Text style={[styles.name, { color: colors.text }]}>
+              {current.username}
+              {current.age ? `, ${current.age}` : ""}
+            </Text>
+            {current.has_badge ? (
+              <Ionicons name="ribbon" size={16} color="#facc15" />
+            ) : null}
+          </View>
           <View style={styles.metaRow}>
             {current.city ? (
               <Text style={[styles.city, { color: colors.textSecondary }]}>

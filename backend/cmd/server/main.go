@@ -14,6 +14,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/lomilomi/backend/internal/config"
 	"github.com/lomilomi/backend/internal/database"
+	fb "github.com/lomilomi/backend/internal/firebase"
 	"github.com/lomilomi/backend/internal/handlers"
 	"github.com/lomilomi/backend/internal/middleware"
 	"github.com/lomilomi/backend/internal/models"
@@ -26,6 +27,11 @@ func main() {
 	database.Connect(cfg)
 	database.Migrate()
 	database.Seed()
+
+	// Firebase Admin SDK (FCM)
+	if err := fb.Init(); err != nil {
+		log.Printf("[Firebase] init warning: %v", err)
+	}
 
 	// Fiber app
 	app := fiber.New(fiber.Config{
@@ -238,6 +244,8 @@ func main() {
 	api.Get("/premium/me", jwt, premiumHandler.GetMySubscription)
 	api.Post("/premium/subscribe", jwt, premiumHandler.Subscribe)
 	api.Delete("/premium/subscribe", jwt, premiumHandler.CancelSubscription)
+	api.Post("/boost", jwt, premiumHandler.Boost)
+	api.Get("/boost/status", jwt, premiumHandler.GetBoostStatus)
 
 	// Events (authenticated)
 	api.Post("/events/:id/attend", jwt, eventHandler.AttendEvent)

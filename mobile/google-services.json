@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "764546097887",
+    "project_id": "textme-7ac5d",
+    "storage_bucket": "textme-7ac5d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:764546097887:android:51e59a487874af0f7cff6a",
+        "android_client_info": {
+          "package_name": "com.lomilomi.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDT7zfxEveeLmTGqj9nWBx70lngx74oVpU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

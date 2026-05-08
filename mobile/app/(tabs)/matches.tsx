@@ -25,18 +25,21 @@ interface Match {
     username: string;
     avatar_url: string;
     is_online: boolean;
+    has_badge?: boolean;
   };
   user1?: {
     id: number;
     username: string;
     avatar_url: string;
     is_online: boolean;
+    has_badge?: boolean;
   };
   user2?: {
     id: number;
     username: string;
     avatar_url: string;
     is_online: boolean;
+    has_badge?: boolean;
   };
   user1_id?: number;
   user2_id?: number;
@@ -225,9 +228,14 @@ function MatchesScreenInner() {
               )}
             </View>
             <View style={styles.textWrap}>
-              <Text style={[styles.name, { color: colors.text }]}>
-                {matchedUser.username}
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+                <Text style={[styles.name, { color: colors.text }]}>
+                  {matchedUser.username}
+                </Text>
+                {matchedUser.has_badge ? (
+                  <Ionicons name="ribbon" size={14} color="#facc15" />
+                ) : null}
+              </View>
               <Text style={[styles.time, { color: colors.textMuted }]}>
                 Match {timeAgo(item.created_at)}
               </Text>

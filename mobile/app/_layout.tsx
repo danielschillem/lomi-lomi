@@ -1,15 +1,19 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { WSProvider } from "@/lib/ws-context";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
-import { usePushNotifications } from "@/lib/push-notifications";
+import { usePushNotifications, handleInitialNotification } from "@/lib/push-notifications";
 import IncomingCallModal from "@/app/components/IncomingCallModal";
 
 function InnerLayout() {
   const { user } = useAuth();
   const { colors } = useTheme();
   usePushNotifications(!!user);
+
+  // Handle tap on notification that launched the app from killed/background state
+  useEffect(() => { handleInitialNotification(); }, []);
 
   return (
     <>
