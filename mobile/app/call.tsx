@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   PermissionsAndroid,
   Platform,
   StatusBar,
@@ -22,7 +23,8 @@ export default function CallScreen() {
   }>();
 
   const ended = useRef(false);
-  const [useFallbackMeet, setUseFallbackMeet] = useState(false);
+  const [meetError, setMeetError] = useState(false);
+  const [retryNonce, setRetryNonce] = useState(0);
   const isVideo = callType === "video";
   const displayName = encodeURIComponent(userName || "TextMe User");
 
@@ -49,9 +51,7 @@ export default function CallScreen() {
     `userInfo.displayName=${displayName}`,
   ].join("&");
 
-  const meetBaseUrl = useFallbackMeet
-    ? "https://meet.jit.si"
-    : "https://meet.texto.life";
+  const meetBaseUrl = "https://meet.texto.life";
   const jitsiUrl = `${meetBaseUrl}/${room}#${configHash}`;
 
   const endCall = async () => {
@@ -95,35 +95,69 @@ export default function CallScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
 
-      <WebView
-        key={jitsiUrl}
-        source={{ uri: jitsiUrl }}
-        style={styles.webview}
-        // Desktop UA: prevents Jitsi from detecting Android and redirecting to intent://
-        userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        // Block intent:// and market:// deep links; WebView can't handle them
-        onShouldStartLoadWithRequest={(req: { url: string }) => {
-          const { url } = req;
-          if (url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("org.jitsi.meet://")) {
-            return false;
-          }
-          return true;
-        }}
-        mediaCapturePermissionGrantType="grant"
-        injectedJavaScript={injectedJS}
-        onMessage={(e) => {
-          if (e.nativeEvent.data === "ended") endCall();
-        }}
-        onError={() => setUseFallbackMeet(true)}
-        onNavigationStateChange={onNavigationStateChange}
-        allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction={false}
-        javaScriptEnabled
-        domStorageEnabled
-        allowsFullscreenVideo
-        originWhitelist={["https://*", "http://*", "about:*"]}
-        mixedContentMode="always"
-      />
+      {meetError ? (
+        <View style={styles.errorPanel}>
+          <View style={styles.errorIcon}>
+            <Ionicons name="videocam-off-outline" size={34} color="#fff" />
+          </View>
+          <Text style={styles.errorTitle}>Appel TextMe indisponible</Text>
+          <Text style={styles.errorText}>
+            Le serveur d'appel TextMe n'est pas encore accessible. Active le DNS
+            de meet.texto.life, puis relance l'appel.
+          </Text>
+          <TouchableOpacity
+            style={styles.retryBtn}
+            onPress={() => {
+              setMeetError(false);
+              setRetryNonce((value) => value + 1);
+            }}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="refresh" size={18} color="#111827" />
+            <Text style={styles.retryLabel}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <WebView
+          key={`${jitsiUrl}-${retryNonce}`}
+          source={{ uri: jitsiUrl }}
+          style={styles.webview}
+          startInLoadingState
+          renderLoading={() => (
+            <View style={styles.loadingPanel}>
+              <ActivityIndicator color="#fff" size="large" />
+              <Text style={styles.loadingText}>Connexion TextMe...</Text>
+            </View>
+          )}
+          // Desktop UA: prevents Jitsi from detecting Android and redirecting to intent://
+          userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+          // Block intent:// and market:// deep links; WebView can't handle them
+          onShouldStartLoadWithRequest={(req: { url: string }) => {
+            const { url } = req;
+            if (url.startsWith("intent://") || url.startsWith("market://") || url.startsWith("org.jitsi.meet://")) {
+              return false;
+            }
+            return true;
+          }}
+          mediaCapturePermissionGrantType="grant"
+          injectedJavaScript={injectedJS}
+          onMessage={(e) => {
+            if (e.nativeEvent.data === "ended") endCall();
+          }}
+          onError={() => setMeetError(true)}
+          onHttpError={(event) => {
+            if (event.nativeEvent.statusCode >= 400) setMeetError(true);
+          }}
+          onNavigationStateChange={onNavigationStateChange}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          javaScriptEnabled
+          domStorageEnabled
+          allowsFullscreenVideo
+          originWhitelist={["https://*", "http://*", "about:*"]}
+          mixedContentMode="always"
+        />
+      )}
 
       {/* Floating end-call button stays reachable */}
       <TouchableOpacity style={styles.endBtn} onPress={endCall} activeOpacity={0.85}>
@@ -137,6 +171,55 @@ export default function CallScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   webview: { flex: 1 },
+  loadingPanel: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14,
+    backgroundColor: "#050505",
+  },
+  loadingText: { color: "#fff", fontWeight: "700", fontSize: 16 },
+  errorPanel: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 28,
+    backgroundColor: "#050505",
+  },
+  errorIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+    backgroundColor: "#2563eb",
+  },
+  errorTitle: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "800",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  errorText: {
+    color: "#cbd5e1",
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: "center",
+    maxWidth: 340,
+  },
+  retryBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 24,
+    backgroundColor: "#fff",
+    borderRadius: 28,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  retryLabel: { color: "#111827", fontWeight: "800", fontSize: 15 },
   endBtn: {
     position: "absolute",
     bottom: 36,

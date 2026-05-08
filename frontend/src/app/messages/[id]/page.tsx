@@ -78,6 +78,20 @@ interface ConvUser {
   is_online?: boolean;
 }
 
+const CALL_MEET_BASE_URL = "https://meet.texto.life";
+
+function buildCallUrl(room: string, type: "audio" | "video") {
+  const config = [
+    "config.prejoinPageEnabled=false",
+    "config.prejoinConfig.enabled=false",
+    `config.startWithVideoMuted=${type === "audio"}`,
+    "config.disableDeepLinking=true",
+    "config.enableInsecureRoomNameWarning=false",
+  ].join("&");
+
+  return `${CALL_MEET_BASE_URL}/${encodeURIComponent(room)}#${config}`;
+}
+
 export default function ChatPage() {
   const router = useRouter();
   const params = useParams();
@@ -377,11 +391,7 @@ export default function ChatPage() {
         call_room: room,
       })) as unknown as Message;
       setMessages((prev) => [...prev, res]);
-      const url =
-        type === "video"
-          ? `https://meet.jit.si/${room}`
-          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
-      window.open(url, "_blank");
+      window.open(buildCallUrl(room, type), "_blank");
     } catch {
       // ignore
     }
@@ -1406,9 +1416,7 @@ export default function ChatPage() {
                           <button
                             onClick={() =>
                               window.open(
-                                msg.call_type === "video"
-                                  ? `https://meet.jit.si/${msg.call_room}`
-                                  : `https://meet.jit.si/${msg.call_room}#config.startWithVideoMuted=true`,
+                                buildCallUrl(msg.call_room!, msg.call_type!),
                                 "_blank",
                               )
                             }
