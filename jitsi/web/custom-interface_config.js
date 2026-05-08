@@ -1,5 +1,5 @@
 // TextMe - Jitsi UI / branding overrides
-// This file is automatically appended to the generated interface_config.js
+// This file is automatically appended to the generated interface_config.js.
 
 // App identity
 interfaceConfig.APP_NAME = 'TextMe';
@@ -22,7 +22,7 @@ interfaceConfig.DEFAULT_BACKGROUND = '#0B1220';
 interfaceConfig.DEFAULT_LOCAL_DISPLAY_NAME = 'Moi';
 interfaceConfig.DEFAULT_REMOTE_DISPLAY_NAME = 'Contact TextMe';
 
-// Minimal toolbar — only what's needed for a 1-on-1 call
+// Minimal toolbar: only what's needed for a 1-on-1 call
 interfaceConfig.TOOLBAR_BUTTONS = [
   'microphone',
   'camera',
