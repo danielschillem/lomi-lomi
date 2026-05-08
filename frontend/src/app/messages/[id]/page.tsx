@@ -87,6 +87,7 @@ function buildCallUrl(room: string, type: "audio" | "video") {
     `config.startWithVideoMuted=${type === "audio"}`,
     "config.disableDeepLinking=true",
     "config.enableInsecureRoomNameWarning=false",
+    "config.p2p.enabled=false",
   ].join("&");
 
   return `${CALL_MEET_BASE_URL}/${encodeURIComponent(room)}#${config}`;

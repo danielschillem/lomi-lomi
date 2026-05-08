@@ -104,6 +104,7 @@ services:
       DISABLE_HTTPS: "1"
       ENABLE_HTTP_REDIRECT: "0"
       ENABLE_LOBBY: "0"
+      ENABLE_P2P: "0"
       ENABLE_PREJOIN_PAGE: "0"
       ENABLE_WELCOME_PAGE: "0"
       APP_NAME: TextMe
@@ -157,9 +158,10 @@ services:
       AUTH_TYPE: internal
       ENABLE_AUTH: "0"
       XMPP_DOMAIN: ${JITSI_DOMAIN:-meet.texto.life}
-      XMPP_HOST: jitsi-prosody
-      XMPP_PORT: "5347"
+      XMPP_SERVER: jitsi-prosody
+      XMPP_PORT: "5222"
       XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
+      XMPP_MUC_DOMAIN: muc.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
       JICOFO_AUTH_USER: focus
       JICOFO_AUTH_PASSWORD: ${JITSI_JICOFO_PASSWORD}
@@ -179,6 +181,7 @@ services:
     environment:
       # JITSI_JVB_IP must be set to the server's public IP in .env
       DOCKER_HOST_ADDRESS: ${JITSI_JVB_IP}
+      JVB_ADVERTISE_IPS: ${JITSI_JVB_IP}
       XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_SERVER: jitsi-prosody

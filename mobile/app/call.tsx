@@ -45,6 +45,7 @@ export default function CallScreen() {
     `config.startWithVideoMuted=${!isVideo}`,
     "config.disableDeepLinking=true",
     "config.enableInsecureRoomNameWarning=false",
+    "config.p2p.enabled=false",
     "config.resolution=360",
     "config.disableLobbyChat=true",
     "config.lobby.enabled=false",

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Vibration,
   View,
 } from "react-native";
 import { router } from "expo-router";
@@ -50,11 +51,15 @@ export default function IncomingCallModal() {
 
   useEffect(() => {
     if (!call) return;
+    Vibration.vibrate([0, 900, 500], true);
     const timer = setTimeout(() => {
       updateCallStatus(call.id, "missed").catch(() => {});
       setCall(null);
     }, 60000);
-    return () => clearTimeout(timer);
+    return () => {
+      Vibration.cancel();
+      clearTimeout(timer);
+    };
   }, [call]);
 
   const callerName = useMemo(
@@ -67,6 +72,7 @@ export default function IncomingCallModal() {
     setBusyAction("accept");
     try {
       const updated = await updateCallStatus(call.id, "accepted");
+      Vibration.cancel();
       setCall(null);
       router.push({
         pathname: "/call",
@@ -83,6 +89,7 @@ export default function IncomingCallModal() {
     try {
       await updateCallStatus(call.id, "declined");
     } finally {
+      Vibration.cancel();
       setCall(null);
       setBusyAction(null);
     }
