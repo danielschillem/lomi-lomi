@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
+import PremiumGate from "@/app/components/PremiumGate";
 import { Ionicons } from "@expo/vector-icons";
 import { getWellnessProviders } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
@@ -50,7 +51,7 @@ const CATEGORIES: { value: string; label: string; icon: keyof typeof Ionicons.gl
   { value: "coaching", label: "Coaching", icon: "ribbon-outline" },
 ];
 
-export default function BienEtreScreen() {
+function BienEtreScreenInner() {
   const { colors } = useTheme();
   const [providers, setProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -287,3 +288,11 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
 });
+
+export default function BienEtreScreen() {
+  return (
+    <PremiumGate feature="Bien-être" icon="sparkles-outline" tone="#10b981">
+      <BienEtreScreenInner />
+    </PremiumGate>
+  );
+}

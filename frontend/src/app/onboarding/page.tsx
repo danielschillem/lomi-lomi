@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -88,14 +88,14 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-900 via-purple-800 to-pink-900 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-900 via-blue-800 to-blue-900 flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-lg">
         {/* Progress */}
         <div className="flex items-center gap-2 mb-8">
           {STEPS.map((s, i) => (
             <div key={s} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < step ? "bg-green-500 text-white" : i === step ? "bg-white text-purple-900" : "bg-white/20 text-white/50"}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < step ? "bg-green-500 text-white" : i === step ? "bg-white text-blue-900" : "bg-white/20 text-white/50"}`}
               >
                 {i < step ? <Check className="w-4 h-4" /> : i + 1}
               </div>
@@ -120,7 +120,7 @@ export default function OnboardingPage() {
               </p>
               <div className="flex justify-center">
                 <label className="cursor-pointer">
-                  <div className="w-32 h-32 rounded-full overflow-hidden bg-white/10 border-4 border-dashed border-white/30 flex items-center justify-center hover:border-purple-400 transition">
+                  <div className="w-32 h-32 rounded-full overflow-hidden bg-white/10 border-4 border-dashed border-white/30 flex items-center justify-center hover:border-blue-400 transition">
                     {avatarPreview ? (
                       <Image
                         src={avatarPreview}
@@ -159,7 +159,7 @@ export default function OnboardingPage() {
                   rows={3}
                   maxLength={500}
                   placeholder="Parlez de vous en quelques mots..."
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-purple-400 resize-none"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-400 resize-none"
                 />
               </div>
               <div>
@@ -169,7 +169,7 @@ export default function OnboardingPage() {
                 <select
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400"
                 >
                   <option value="">Choisir...</option>
                   <option value="Ouagadougou">Ouagadougou</option>
@@ -187,7 +187,7 @@ export default function OnboardingPage() {
                   type="date"
                   value={birthdate}
                   onChange={(e) => setBirthdate(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400"
                 />
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
                 <select
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400"
                 >
                   <option value="homme">Un homme</option>
                   <option value="femme">Une femme</option>
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
                 <select
                   value={interestedIn}
                   onChange={(e) => setInterestedIn(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400"
                 >
                   <option value="femme">Des femmes</option>
                   <option value="homme">Des hommes</option>
@@ -232,7 +232,7 @@ export default function OnboardingPage() {
                 <select
                   value={lookingFor}
                   onChange={(e) => setLookingFor(e.target.value)}
-                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-400"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-400"
                 >
                   <option value="relation_serieuse">Relation sérieuse</option>
                   <option value="amitie">Amitié</option>
@@ -259,7 +259,7 @@ export default function OnboardingPage() {
                       updated[i] = { ...updated[i], question: e.target.value };
                       setPrompts(updated);
                     }}
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-purple-400"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-400"
                   >
                     {PROMPT_QUESTIONS.map((q) => (
                       <option key={q} value={q}>
@@ -277,7 +277,7 @@ export default function OnboardingPage() {
                       setPrompts(updated);
                     }}
                     placeholder="Votre réponse..."
-                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:border-purple-400"
+                    className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
                   />
                 </div>
               ))}
@@ -294,7 +294,7 @@ export default function OnboardingPage() {
                       },
                     ])
                   }
-                  className="text-sm text-purple-300 hover:text-white"
+                  className="text-sm text-blue-300 hover:text-white"
                 >
                   + Ajouter un prompt
                 </button>
@@ -314,7 +314,7 @@ export default function OnboardingPage() {
             <button
               onClick={handleNext}
               disabled={loading}
-              className="flex-1 bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 bg-linear-to-r from-blue-600 to-blue-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? (
                 "..."

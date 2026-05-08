@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -108,7 +108,7 @@ export default function UserProfilePage() {
           <p className="text-muted">{error || "Profil introuvable"}</p>
           <Link
             href="/discover"
-            className="inline-block mt-4 text-violet-600 hover:text-violet-600 text-sm"
+            className="inline-block mt-4 text-blue-600 hover:text-blue-600 text-sm"
           >
             Retour à la découverte
           </Link>
@@ -135,7 +135,7 @@ export default function UserProfilePage() {
 
         <div className="bg-white/90 border border-border rounded-2xl overflow-hidden">
           {/* Avatar */}
-          <div className="relative h-48 bg-linear-to-br from-violet-600/30 to-pink-600/20 flex items-center justify-center">
+          <div className="relative h-48 bg-linear-to-br from-blue-600/30 to-blue-600/20 flex items-center justify-center">
             {profile.avatar_url ? (
               <Image
                 src={profile.avatar_url}
@@ -159,7 +159,7 @@ export default function UserProfilePage() {
             <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
               {profile.username}
               {profile.is_verified && (
-                <BadgeCheck className="w-5 h-5 text-violet-600" />
+                <BadgeCheck className="w-5 h-5 text-blue-600" />
               )}
             </h1>
 
@@ -224,7 +224,7 @@ export default function UserProfilePage() {
                   <button
                     onClick={handleSendMessage}
                     disabled={messaging}
-                    className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
                   >
                     <MessageCircle className="w-4 h-4" />
                     {messaging ? "Envoi..." : "Message"}
@@ -267,7 +267,7 @@ export default function UserProfilePage() {
               <div className="mt-6">
                 <Link
                   href="/settings"
-                  className="inline-flex items-center gap-2 text-sm text-violet-600 hover:text-violet-600"
+                  className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-600"
                 >
                   Modifier mes paramètres
                 </Link>

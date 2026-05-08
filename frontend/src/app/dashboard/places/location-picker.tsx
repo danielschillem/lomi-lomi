@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   MapContainer,
@@ -98,7 +98,7 @@ export default function LocationPicker({
           type="button"
           onClick={handleGeolocate}
           disabled={gpsLoading}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
         >
           <LocateFixed size={14} className={gpsLoading ? "animate-spin" : ""} />
           {gpsLoading ? "Localisation…" : "Ma position GPS"}
@@ -136,7 +136,7 @@ export default function LocationPicker({
             onChange={(e) =>
               onChange(parseFloat(e.target.value) || 0, longitude)
             }
-            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
+            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-blue-400"
           />
         </div>
         <div>
@@ -149,7 +149,7 @@ export default function LocationPicker({
             onChange={(e) =>
               onChange(latitude, parseFloat(e.target.value) || 0)
             }
-            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
+            className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-blue-400"
           />
         </div>
       </div>

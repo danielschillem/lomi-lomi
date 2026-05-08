@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -97,7 +97,7 @@ export default function OwnerProductsView() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -105,13 +105,13 @@ export default function OwnerProductsView() {
   const FormFields = ({ defaults }: { defaults?: Partial<Product> }) => (
     <div className="space-y-3">
       <input
-        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
         placeholder="Nom du produit"
         defaultValue={defaults?.name}
         onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
       />
       <textarea
-        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+        className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
         placeholder="Description"
         rows={2}
         defaultValue={defaults?.description}
@@ -121,7 +121,7 @@ export default function OwnerProductsView() {
       />
       <div className="grid grid-cols-3 gap-2">
         <input
-          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
           placeholder="Prix (FCFA)"
           type="number"
           step="0.01"
@@ -129,13 +129,13 @@ export default function OwnerProductsView() {
           onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
         />
         <input
-          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
           placeholder="Catégorie"
           defaultValue={defaults?.category}
           onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
         />
         <input
-          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+          className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
           placeholder="Stock"
           type="number"
           defaultValue={defaults?.stock}
@@ -151,7 +151,7 @@ export default function OwnerProductsView() {
         <h1 className="text-2xl font-bold text-white">Mes produits</h1>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm text-white transition hover:bg-purple-700"
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700"
         >
           <Plus size={16} /> Ajouter
         </button>
@@ -214,7 +214,7 @@ export default function OwnerProductsView() {
                       <h3 className="font-semibold text-white">
                         {product.name}
                       </h3>
-                      <p className="text-sm text-violet-600 font-bold">
+                      <p className="text-sm text-blue-600 font-bold">
                         {Math.round(product.price)} FCFA
                       </p>
                     </div>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -110,7 +110,7 @@ export default function AdminStatsPage() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white/90 border border-border rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Users className="w-5 h-5 text-violet-600" />
+            <Users className="w-5 h-5 text-blue-600" />
             <h2 className="font-semibold">Inscriptions</h2>
           </div>
           {timeline?.signups.length ? (
@@ -128,7 +128,7 @@ export default function AdminStatsPage() {
 
         <div className="bg-white/90 border border-border rounded-xl p-6">
           <div className="flex items-center gap-3 mb-4">
-            <Heart className="w-5 h-5 text-pink-500" />
+            <Heart className="w-5 h-5 text-blue-500" />
             <h2 className="font-semibold">Matches</h2>
           </div>
           {timeline?.matches.length ? (

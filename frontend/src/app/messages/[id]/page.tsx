@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   useState,
@@ -882,7 +882,7 @@ export default function ChatPage() {
             <button
               type="button"
               onClick={() => startCall("video")}
-              className="p-2 rounded-lg text-muted hover:text-pink-600 hover:bg-gray-100 transition"
+              className="p-2 rounded-lg text-muted hover:text-blue-600 hover:bg-gray-100 transition"
               title="Appel vidéo"
             >
               <Video className="w-4 h-4" />
@@ -897,7 +897,7 @@ export default function ChatPage() {
               }}
               className={`p-2 rounded-lg transition ${
                 showSearch
-                  ? "bg-violet-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "text-muted hover:text-foreground hover:bg-gray-100"
               }`}
               title="Rechercher"
@@ -926,7 +926,7 @@ export default function ChatPage() {
               }}
               className={`p-2 rounded-lg transition ${
                 showVTCForm
-                  ? "bg-violet-600 text-white"
+                  ? "bg-blue-600 text-white"
                   : "text-muted hover:text-foreground hover:bg-gray-100"
               }`}
               title="Commander un VTC"
@@ -953,13 +953,13 @@ export default function ChatPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher dans la conversation..."
-                className="flex-1 bg-surface-2 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                className="flex-1 bg-surface-2 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                 autoFocus
               />
               <button
                 type="submit"
                 disabled={searching || searchQuery.length < 2}
-                className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg transition"
+                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm px-3 py-1.5 rounded-lg transition"
               >
                 {searching ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -981,10 +981,10 @@ export default function ChatPage() {
                           behavior: "smooth",
                           block: "center",
                         });
-                        el.classList.add("ring-2", "ring-violet-400");
+                        el.classList.add("ring-2", "ring-blue-400");
                         setTimeout(
                           () =>
-                            el.classList.remove("ring-2", "ring-violet-400"),
+                            el.classList.remove("ring-2", "ring-blue-400"),
                           2000,
                         );
                       }
@@ -1068,7 +1068,7 @@ export default function ChatPage() {
           <div className="max-w-2xl mx-auto space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Car className="w-4 h-4 text-violet-600" />
+                <Car className="w-4 h-4 text-blue-600" />
                 Commander un VTC
               </h3>
               <button
@@ -1089,7 +1089,7 @@ export default function ChatPage() {
               onChange={(e) => setVtcPickupAddress(e.target.value)}
               placeholder="Adresse de prise en charge (ou position actuelle)"
               title="Adresse de prise en charge"
-              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
             />
             <input
               type="text"
@@ -1097,7 +1097,7 @@ export default function ChatPage() {
               onChange={(e) => setVtcDropoffAddress(e.target.value)}
               placeholder="Adresse de destination"
               title="Adresse de destination"
-              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
             />
             <input
               type="text"
@@ -1105,12 +1105,12 @@ export default function ChatPage() {
               onChange={(e) => setVtcNote(e.target.value)}
               placeholder="Note pour le chauffeur (optionnel)"
               title="Note"
-              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+              className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
             />
             <button
               onClick={handleRequestVTC}
               disabled={vtcRequesting}
-              className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2"
             >
               {vtcRequesting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -1125,10 +1125,10 @@ export default function ChatPage() {
 
       {/* Active VTC Ride banner */}
       {activeRide && (
-        <div className="shrink-0 bg-violet-900/30 border-b border-violet-800/50 px-4 py-3">
+        <div className="shrink-0 bg-blue-900/30 border-b border-blue-800/50 px-4 py-3">
           <div className="max-w-2xl mx-auto space-y-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-violet-600">
+              <div className="flex items-center gap-2 text-sm text-blue-600">
                 <Car className="w-4 h-4" />
                 <span className="font-medium">
                   Course VTC -{" "}
@@ -1237,7 +1237,7 @@ export default function ChatPage() {
               ) : (
                 <button
                   onClick={loadOlderMessages}
-                  className="text-xs text-violet-600 hover:text-violet-700 flex items-center gap-1 mx-auto"
+                  className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mx-auto"
                 >
                   <ChevronUp className="w-3 h-3" />
                   Charger les messages précédents
@@ -1247,8 +1247,8 @@ export default function ChatPage() {
           )}
           {messages.length === 0 ? (
             paymentChecked && !connectionPaid ? (
-              <div className="mx-auto max-w-md bg-linear-to-br from-violet-50 to-pink-50 border border-violet-200 rounded-2xl p-6 text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-violet-600 flex items-center justify-center">
+              <div className="mx-auto max-w-md bg-linear-to-br from-blue-50 to-blue-50 border border-blue-200 rounded-2xl p-6 text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-600 flex items-center justify-center">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="font-semibold text-base mb-1">
@@ -1267,7 +1267,7 @@ export default function ChatPage() {
                 </p>
                 <button
                   onClick={() => setShowPaymentModal(true)}
-                  className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-lg transition text-sm"
                 >
                   Débloquer pour 250 FCFA
                 </button>
@@ -1334,7 +1334,7 @@ export default function ChatPage() {
                   <div
                     className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
                       isMine
-                        ? "bg-violet-600 text-white rounded-br-md"
+                        ? "bg-blue-600 text-white rounded-br-md"
                         : "bg-surface-2 text-foreground rounded-bl-md"
                     }`}
                   >
@@ -1412,7 +1412,7 @@ export default function ChatPage() {
                                 "_blank",
                               )
                             }
-                            className="mb-2 inline-flex items-center gap-2 rounded-lg bg-violet-500/20 px-3 py-1.5 text-xs"
+                            className="mb-2 inline-flex items-center gap-2 rounded-lg bg-blue-500/20 px-3 py-1.5 text-xs"
                           >
                             {msg.call_type === "video" ? (
                               <Video className="h-3.5 w-3.5" />
@@ -1444,7 +1444,7 @@ export default function ChatPage() {
                     >
                       <span
                         className={`text-[10px] ${
-                          isMine ? "text-violet-200" : "text-muted"
+                          isMine ? "text-blue-200" : "text-muted"
                         }`}
                       >
                         {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
@@ -1455,7 +1455,7 @@ export default function ChatPage() {
                       {msg.is_edited && (
                         <span
                           className={`text-[9px] ${
-                            isMine ? "text-violet-200" : "text-muted"
+                            isMine ? "text-blue-200" : "text-muted"
                           }`}
                         >
                           (modifié)
@@ -1463,9 +1463,9 @@ export default function ChatPage() {
                       )}
                       {isMine &&
                         (msg.is_read ? (
-                          <CheckCheck className="w-3.5 h-3.5 text-violet-600" />
+                          <CheckCheck className="w-3.5 h-3.5 text-blue-600" />
                         ) : (
-                          <Check className="w-3 h-3 text-violet-600/60" />
+                          <Check className="w-3 h-3 text-blue-600/60" />
                         ))}
                     </div>
                   </div>
@@ -1512,7 +1512,7 @@ export default function ChatPage() {
             onClick={() => imageInputRef.current?.click()}
             disabled={uploadingImage}
             title="Envoyer une image"
-            className="w-10 h-10 rounded-full text-muted hover:text-violet-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
+            className="w-10 h-10 rounded-full text-muted hover:text-blue-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
           >
             {uploadingImage ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -1525,7 +1525,7 @@ export default function ChatPage() {
             onClick={() => audioInputRef.current?.click()}
             disabled={uploadingAudio}
             title="Envoyer une note vocale"
-            className="w-10 h-10 rounded-full text-muted hover:text-violet-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
+            className="w-10 h-10 rounded-full text-muted hover:text-blue-600 hover:bg-surface-2 disabled:opacity-50 flex items-center justify-center transition"
           >
             {uploadingAudio ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -1546,13 +1546,13 @@ export default function ChatPage() {
             value={content}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder="Votre message..."
-            className="flex-1 bg-surface border border-border rounded-full px-5 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+            className="flex-1 bg-surface border border-border rounded-full px-5 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
           />
           <button
             type="submit"
             disabled={sending || !content.trim()}
             title="Envoyer"
-            className="w-10 h-10 rounded-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 flex items-center justify-center transition"
+            className="w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center transition"
           >
             <Send className="w-4 h-4 text-white" />
           </button>

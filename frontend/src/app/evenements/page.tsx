@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -76,7 +76,7 @@ export default function EvenementsPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-16">
       {/* Header */}
-      <div className="bg-linear-to-r from-purple-900 to-pink-800 px-4 pt-10 pb-6">
+      <div className="bg-linear-to-r from-blue-900 to-blue-800 px-4 pt-10 pb-6">
         <h1 className="text-2xl font-bold mb-1">Événements</h1>
         <p className="text-white/70 text-sm">
           Rencontrez des gens lors de soirées et d&apos;activités
@@ -91,7 +91,7 @@ export default function EvenementsPage() {
             <button
               key={c.id}
               onClick={() => setCategory(c.id)}
-              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap transition ${category === c.id ? "bg-purple-600 text-white" : "bg-gray-800 text-gray-400 hover:text-white"}`}
+              className={`px-4 py-1.5 rounded-full text-sm whitespace-nowrap transition ${category === c.id ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-400 hover:text-white"}`}
             >
               {c.label}
             </button>
@@ -103,7 +103,7 @@ export default function EvenementsPage() {
             <button
               key={c}
               onClick={() => setCity(c)}
-              className={`px-3 py-1 rounded-full text-xs transition ${city === c ? "bg-pink-600 text-white" : "bg-gray-800 text-gray-500 hover:text-white"}`}
+              className={`px-3 py-1 rounded-full text-xs transition ${city === c ? "bg-blue-600 text-white" : "bg-gray-800 text-gray-500 hover:text-white"}`}
             >
               {c || "Toutes les villes"}
             </button>
@@ -125,7 +125,7 @@ export default function EvenementsPage() {
         {events.map((event) => (
           <div
             key={event.id}
-            className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-purple-700 transition"
+            className="bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-blue-700 transition"
           >
             {event.image_url && (
               <Image
@@ -141,7 +141,7 @@ export default function EvenementsPage() {
                 <h2 className="font-bold text-lg leading-tight">
                   {event.title}
                 </h2>
-                <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full capitalize whitespace-nowrap">
+                <span className="text-xs bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full capitalize whitespace-nowrap">
                   {event.category}
                 </span>
               </div>
@@ -178,7 +178,7 @@ export default function EvenementsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleAttend(event.id, "going")}
-                  className={`flex-1 py-2 rounded-xl text-sm font-medium transition ${attending[event.id] === "going" ? "bg-purple-600 text-white" : "bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white"}`}
+                  className={`flex-1 py-2 rounded-xl text-sm font-medium transition ${attending[event.id] === "going" ? "bg-blue-600 text-white" : "bg-blue-600/20 text-blue-300 hover:bg-blue-600 hover:text-white"}`}
                 >
                   {attending[event.id] === "going"
                     ? " Je vais y aller"

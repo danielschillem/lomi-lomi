@@ -205,6 +205,7 @@ type Subscription struct {
 	EndsAt    time.Time `json:"ends_at"`
 	Status    string    `gorm:"size:20;default:active" json:"status"` // active, expired, cancelled
 	TxID      string    `gorm:"size:255" json:"tx_id"`
+	Phone     string    `gorm:"size:20" json:"phone,omitempty"`
 	User      User      `gorm:"foreignKey:UserID" json:"user,omitempty"`
 }
 

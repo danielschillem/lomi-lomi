@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -76,9 +76,9 @@ export default function NotificationsPage() {
   function iconFor(type: string) {
     switch (type) {
       case "match":
-        return <Heart className="w-5 h-5 text-pink-600" />;
+        return <Heart className="w-5 h-5 text-blue-600" />;
       case "message":
-        return <MessageCircle className="w-5 h-5 text-violet-600" />;
+        return <MessageCircle className="w-5 h-5 text-blue-600" />;
       case "order":
         return <ShoppingBag className="w-5 h-5 text-green-600" />;
       default:
@@ -125,10 +125,10 @@ export default function NotificationsPage() {
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Bell className="w-5 h-5 text-violet-600" />
+            <Bell className="w-5 h-5 text-blue-600" />
             Notifications
             {unread > 0 && (
-              <span className="text-xs bg-pink-600 text-white px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full">
                 {unread}
               </span>
             )}
@@ -136,7 +136,7 @@ export default function NotificationsPage() {
           {unread > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="text-xs text-violet-600 hover:text-violet-600 transition flex items-center gap-1"
+              className="text-xs text-blue-600 hover:text-blue-600 transition flex items-center gap-1"
             >
               <Check className="w-3.5 h-3.5" />
               Tout lire
@@ -158,8 +158,8 @@ export default function NotificationsPage() {
                   className={`flex items-start gap-4 p-4 rounded-xl border transition ${
                     n.is_read
                       ? "bg-surface/40 border-border"
-                      : "bg-surface/80 border-violet-200"
-                  } ${href ? "hover:border-violet-300 cursor-pointer" : ""}`}
+                      : "bg-surface/80 border-blue-200"
+                  } ${href ? "hover:border-blue-300 cursor-pointer" : ""}`}
                 >
                   <div className="mt-0.5">{iconFor(n.type)}</div>
                   <div className="flex-1 min-w-0">

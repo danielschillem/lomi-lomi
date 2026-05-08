@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -46,7 +46,7 @@ const statusLabels: Record<
   },
   in_progress: {
     label: "En cours",
-    color: "text-violet-600 bg-violet-50",
+    color: "text-blue-600 bg-blue-50",
     icon: Navigation,
   },
   completed: {
@@ -147,13 +147,13 @@ export default function RidesPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-lg font-bold flex items-center gap-2">
-              <Car className="w-5 h-5 text-violet-600" />
+              <Car className="w-5 h-5 text-blue-600" />
               VTC &amp; Courses
             </h1>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
           >
             {showForm ? "Fermer" : "Réserver"}
           </button>
@@ -165,7 +165,7 @@ export default function RidesPage() {
         {showForm && (
           <div className="bg-surface rounded-2xl p-5 border border-border space-y-4 animate-in fade-in slide-in-from-top-2">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <Navigation className="w-4 h-4 text-pink-500" />
+              <Navigation className="w-4 h-4 text-blue-500" />
               Nouvelle course
             </h2>
 
@@ -185,7 +185,7 @@ export default function RidesPage() {
                   setForm({ ...form, pickup_address: e.target.value })
                 }
                 placeholder="Ma position actuelle"
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </label>
 
@@ -200,7 +200,7 @@ export default function RidesPage() {
                   setForm({ ...form, dropoff_address: e.target.value })
                 }
                 placeholder="Ex: Aéroport, centre-ville…"
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </label>
 
@@ -215,7 +215,7 @@ export default function RidesPage() {
                     setForm({ ...form, dropoff_lat: e.target.value })
                   }
                   placeholder="5.3364"
-                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </label>
               <label className="block">
@@ -228,7 +228,7 @@ export default function RidesPage() {
                     setForm({ ...form, dropoff_lng: e.target.value })
                   }
                   placeholder="-4.0267"
-                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </label>
             </div>
@@ -240,14 +240,14 @@ export default function RidesPage() {
                 value={form.note}
                 onChange={(e) => setForm({ ...form, note: e.target.value })}
                 placeholder="Ex: 2 bagages"
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </label>
 
             <button
               onClick={handleRequest}
               disabled={!position || !form.dropoff_address || requesting}
-              className="w-full py-2.5 rounded-xl bg-violet-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-violet-700 transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-blue-700 transition flex items-center justify-center gap-2"
             >
               {requesting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -273,7 +273,7 @@ export default function RidesPage() {
               <p className="text-muted text-sm">Aucune course pour le moment</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="text-sm text-violet-600 font-medium hover:underline"
+                className="text-sm text-blue-600 font-medium hover:underline"
               >
                 Réserver ma première course
               </button>

@@ -36,7 +36,7 @@ const STATUS_LABEL: Record<DeliveryStatus, string> = {
 const STATUS_COLOR: Record<DeliveryStatus, string> = {
   pending: "bg-amber-50 text-amber-700",
   accepted: "bg-blue-50 text-blue-700",
-  picking_up: "bg-violet-50 text-violet-700",
+  picking_up: "bg-blue-50 text-blue-700",
   picked_up: "bg-indigo-50 text-indigo-700",
   delivering: "bg-orange-50 text-orange-700",
   delivered: "bg-green-50 text-green-700",
@@ -129,7 +129,7 @@ function AvailableCard({
             }
           }}
           disabled={loading}
-          className="w-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -159,7 +159,7 @@ function ActiveCard({
   const next = NEXT_STATUS[d.status];
 
   return (
-    <div className="bg-white rounded-2xl border border-violet-100 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-gray-400">
@@ -189,7 +189,7 @@ function ActiveCard({
         )}
 
         {isSendingLocation && (
-          <div className="flex items-center gap-2 text-xs text-violet-600">
+          <div className="flex items-center gap-2 text-xs text-blue-600">
             <Navigation className="w-3 h-3 animate-pulse" />
             Partage GPS actif
           </div>
@@ -208,7 +208,7 @@ function ActiveCard({
               }
             }}
             disabled={loading}
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -352,7 +352,7 @@ export default function LivreurDashboard() {
           <div className="flex-1">
             <h1 className="font-semibold text-gray-900">Espace livreur</h1>
             {sendingLocationFor && (
-              <p className="text-xs text-violet-600 flex items-center gap-1">
+              <p className="text-xs text-blue-600 flex items-center gap-1">
                 <Navigation className="w-3 h-3 animate-pulse" />
                 GPS actif · Mission #{sendingLocationFor}
               </p>
@@ -373,13 +373,13 @@ export default function LivreurDashboard() {
             onClick={() => setTab("available")}
             className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
               tab === "available"
-                ? "bg-violet-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
             }`}
           >
             Disponibles
             {available.length > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-violet-600 text-xs font-bold">
+              <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-blue-600 text-xs font-bold">
                 {available.length}
               </span>
             )}
@@ -388,13 +388,13 @@ export default function LivreurDashboard() {
             onClick={() => setTab("mine")}
             className={`flex-1 py-2 rounded-xl text-sm font-medium transition-colors ${
               tab === "mine"
-                ? "bg-violet-600 text-white"
+                ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-500 hover:bg-gray-200"
             }`}
           >
             Mes missions
             {activeMissions.length > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-violet-600 text-xs font-bold">
+              <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-white text-blue-600 text-xs font-bold">
                 {activeMissions.length}
               </span>
             )}
@@ -405,7 +405,7 @@ export default function LivreurDashboard() {
       <div className="max-w-lg mx-auto px-4 pt-5 space-y-4">
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
@@ -484,7 +484,7 @@ export default function LivreurDashboard() {
                 <p className="text-sm">Aucune mission pour l&apos;instant</p>
                 <button
                   onClick={() => setTab("available")}
-                  className="text-violet-600 text-sm hover:underline"
+                  className="text-blue-600 text-sm hover:underline"
                 >
                   Voir les missions disponibles
                 </button>

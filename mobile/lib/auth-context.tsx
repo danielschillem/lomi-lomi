@@ -15,11 +15,13 @@ interface User {
   avatar_url: string;
   is_verified: boolean;
   role: string;
+  is_premium?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isPremium: boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithToken: (token: string, user: User) => Promise<void>;
   register: (
@@ -28,20 +30,28 @@ interface AuthContextType {
     password: string,
   ) => Promise<void>;
   logout: () => Promise<void>;
+  refreshPremium: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  isPremium: false,
   login: async () => {},
   loginWithToken: async () => {},
   register: async () => {},
   logout: async () => {},
+  refreshPremium: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const isPremium =
+    Boolean(user?.is_premium) ||
+    user?.role === "admin" ||
+    user?.role === "owner";
 
   useEffect(() => {
     (async () => {
@@ -82,6 +92,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(res.user);
   };
 
+  const refreshPremium = async () => {
+    try {
+      const profile = await getProfile();
+      setUser(profile as unknown as User);
+    } catch { /* ignore */ }
+  };
+
   const logout = async () => {
     await clearToken();
     setUser(null);
@@ -89,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, loginWithToken, register, logout }}
+      value={{ user, loading, isPremium, login, loginWithToken, register, logout, refreshPremium }}
     >
       {children}
     </AuthContext.Provider>

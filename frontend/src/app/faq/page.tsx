@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -61,7 +61,7 @@ export default function FaqPage() {
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <HelpCircle className="w-5 h-5 text-violet-600" />
+            <HelpCircle className="w-5 h-5 text-blue-600" />
             Aide & Légal
           </h1>
           <div className="w-16" />
@@ -100,7 +100,7 @@ export default function FaqPage() {
         {/* CGU */}
         <section className="mb-10">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Scale className="w-5 h-5 text-violet-600" />
+            <Scale className="w-5 h-5 text-blue-600" />
             Conditions générales d&apos;utilisation
           </h2>
           <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">
@@ -156,7 +156,7 @@ export default function FaqPage() {
         {/* Privacy */}
         <section>
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Shield className="w-5 h-5 text-violet-600" />
+            <Shield className="w-5 h-5 text-blue-600" />
             Politique de confidentialité
           </h2>
           <div className="bg-white/90 border border-border rounded-xl p-6 text-sm text-muted space-y-4 leading-relaxed">

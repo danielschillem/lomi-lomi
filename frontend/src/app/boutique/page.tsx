@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -322,7 +322,7 @@ function BoutiqueContent() {
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-violet-600" />
+            <ShoppingBag className="w-5 h-5 text-blue-600" />
             Boutique
           </h1>
           <button
@@ -332,7 +332,7 @@ function BoutiqueContent() {
           >
             <ShoppingCart className="w-6 h-6" />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-pink-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white">
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-blue-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white">
                 {itemCount}
               </span>
             )}
@@ -340,11 +340,11 @@ function BoutiqueContent() {
         </div>
 
         {/* Hero banner */}
-        <div className="relative mb-8 rounded-2xl overflow-hidden bg-linear-to-br from-violet-700 via-purple-600 to-fuchsia-500 px-6 py-7">
+        <div className="relative mb-8 rounded-2xl overflow-hidden bg-linear-to-br from-blue-700 via-blue-600 to-fuchsia-500 px-6 py-7">
           <div className="relative z-10">
-            <p className="text-violet-200 text-[10px] font-semibold uppercase tracking-widest mb-1.5">Burkina Faso · Sahel</p>
+            <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-widest mb-1.5">Burkina Faso · Sahel</p>
             <h2 className="text-2xl font-bold text-white mb-1 leading-tight">Artisanat & Bien-être</h2>
-            <p className="text-violet-200/80 text-sm max-w-xs leading-relaxed">Cosmétiques naturels, bijoux et saveurs du Sahel · direct artisans</p>
+            <p className="text-blue-200/80 text-sm max-w-xs leading-relaxed">Cosmétiques naturels, bijoux et saveurs du Sahel · direct artisans</p>
           </div>
           <div className="absolute right-5 bottom-2 text-7xl opacity-[0.15] select-none pointer-events-none leading-none">🌿</div>
           <Sparkles className="absolute right-16 top-4 w-8 h-8 text-white opacity-[0.12] pointer-events-none" />
@@ -412,7 +412,7 @@ function BoutiqueContent() {
                                       : o.status === "canceled"
                                         ? "bg-red-50 text-red-400"
                                         : o.status === "preparing"
-                                          ? "bg-violet-50 text-violet-500"
+                                          ? "bg-blue-50 text-blue-500"
                                           : o.status === "shipped"
                                             ? "bg-blue-50 text-blue-500"
                                             : "bg-surface-2 text-muted"
@@ -472,7 +472,7 @@ function BoutiqueContent() {
                                 /* ignore */
                               }
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs text-violet-600 hover:text-violet-500 transition"
+                            className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-500 transition"
                           >
                             {o.status === "pending" ? (
                               <Phone className="w-3 h-3" />
@@ -502,7 +502,7 @@ function BoutiqueContent() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher un produit…"
-              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-border rounded-xl text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 transition"
             />
           </div>
           <div className="relative shrink-0">
@@ -511,7 +511,7 @@ function BoutiqueContent() {
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as "default" | "asc" | "desc")}
               title="Trier les produits"
-              className="pl-8 pr-3 py-2.5 bg-surface border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-violet-400/40 focus:border-violet-400 transition appearance-none cursor-pointer"
+              className="pl-8 pr-3 py-2.5 bg-surface border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-400/40 focus:border-blue-400 transition appearance-none cursor-pointer"
             >
               <option value="default">Trier</option>
               <option value="asc">Prix ↑</option>
@@ -528,8 +528,8 @@ function BoutiqueContent() {
               onClick={() => setCategory("")}
               className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                 category === ""
-                  ? "bg-violet-500/20 text-violet-600 border border-violet-300"
-                  : "bg-surface text-muted border border-border hover:border-violet-200 hover:text-violet-600"
+                  ? "bg-blue-500/20 text-blue-600 border border-blue-300"
+                  : "bg-surface text-muted border border-border hover:border-blue-200 hover:text-blue-600"
               }`}
             >
               Tous
@@ -541,8 +541,8 @@ function BoutiqueContent() {
                 onClick={() => setCategory(cat)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap capitalize ${
                   category === cat
-                    ? "bg-violet-500/20 text-violet-600 border border-violet-300"
-                    : "bg-surface text-muted border border-border hover:border-violet-200 hover:text-violet-600"
+                    ? "bg-blue-500/20 text-blue-600 border border-blue-300"
+                    : "bg-surface text-muted border border-border hover:border-blue-200 hover:text-blue-600"
                 }`}
               >
                 {getCategoryIcon(cat)} {cat}
@@ -577,7 +577,7 @@ function BoutiqueContent() {
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="mt-4 text-xs text-violet-600 hover:underline"
+                className="mt-4 text-xs text-blue-600 hover:underline"
               >
                 Effacer la recherche
               </button>
@@ -588,7 +588,7 @@ function BoutiqueContent() {
             {filtered.map((product) => (
               <div
                 key={product.id}
-                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md hover:border-violet-200 transition-all duration-200 group flex flex-col"
+                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md hover:border-blue-200 transition-all duration-200 group flex flex-col"
               >
                 {/* Image */}
                 <div className="relative h-52 bg-gray-50 overflow-hidden shrink-0">
@@ -628,7 +628,7 @@ function BoutiqueContent() {
                 </div>
                 {/* Info */}
                 <div className="p-4 flex flex-col flex-1">
-                  <h3 className="font-semibold text-sm text-gray-900 mb-1.5 line-clamp-2 group-hover:text-violet-700 transition-colors leading-snug">
+                  <h3 className="font-semibold text-sm text-gray-900 mb-1.5 line-clamp-2 group-hover:text-blue-700 transition-colors leading-snug">
                     {product.name}
                   </h3>
                   <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed flex-1">
@@ -636,7 +636,7 @@ function BoutiqueContent() {
                   </p>
                   <div className="flex items-center justify-between mt-4">
                     <div>
-                      <span className="text-lg font-bold text-violet-600">
+                      <span className="text-lg font-bold text-blue-600">
                         {Math.round(product.price).toLocaleString("fr-FR")}
                       </span>
                       <span className="text-xs text-gray-400 ml-1">FCFA</span>
@@ -645,7 +645,7 @@ function BoutiqueContent() {
                       type="button"
                       onClick={() => addToCart(product)}
                       disabled={product.stock === 0}
-                      className="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150"
+                      className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all duration-150"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Ajouter
@@ -672,7 +672,7 @@ function BoutiqueContent() {
             {/* Header */}
             <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200">
               <h2 className="text-lg font-bold flex items-center gap-2 text-gray-900">
-                <ShoppingCart className="w-5 h-5 text-violet-600" />
+                <ShoppingCart className="w-5 h-5 text-blue-600" />
                 Panier ({itemCount})
               </h2>
               <button
@@ -717,7 +717,7 @@ function BoutiqueContent() {
                       <h4 className="text-sm font-semibold text-gray-900 truncate">
                         {item.product.name}
                       </h4>
-                      <p className="text-violet-600 text-xs font-medium">
+                      <p className="text-blue-600 text-xs font-medium">
                         {Math.round(item.product.price)} FCFA
                       </p>
                     </div>
@@ -734,10 +734,10 @@ function BoutiqueContent() {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.product.id, 1)}
-                        className="w-7 h-7 rounded-full bg-violet-100 hover:bg-violet-200 flex items-center justify-center transition"
+                        className="w-7 h-7 rounded-full bg-blue-100 hover:bg-blue-200 flex items-center justify-center transition"
                         title="Ajouter"
                       >
-                        <Plus className="w-3 h-3 text-violet-600" />
+                        <Plus className="w-3 h-3 text-blue-600" />
                       </button>
                     </div>
                   </div>
@@ -759,7 +759,7 @@ function BoutiqueContent() {
                 {!user ? (
                   <Link
                     href="/login"
-                    className="block text-center bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl transition text-sm"
+                    className="block text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm"
                   >
                     Se connecter pour commander
                   </Link>
@@ -774,7 +774,7 @@ function BoutiqueContent() {
                       {addresses.length === 0 ? (
                         <Link
                           href="/settings/addresses"
-                          className="text-xs text-violet-600 hover:underline"
+                          className="text-xs text-blue-600 hover:underline"
                         >
                           + Ajouter une adresse de livraison
                         </Link>
@@ -787,7 +787,7 @@ function BoutiqueContent() {
                               onClick={() => setSelectedAddressId(addr.id)}
                               className={`w-full text-left text-xs rounded-xl border px-3 py-2 transition ${
                                 selectedAddressId === addr.id
-                                  ? "border-violet-400 bg-violet-50 text-violet-900"
+                                  ? "border-blue-400 bg-blue-50 text-blue-900"
                                   : "border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300"
                               }`}
                             >
@@ -797,7 +797,7 @@ function BoutiqueContent() {
                           ))}
                           <Link
                             href="/settings/addresses"
-                            className="text-xs text-violet-600 hover:underline block"
+                            className="text-xs text-blue-600 hover:underline block"
                           >
                             + Gérer mes adresses
                           </Link>
@@ -867,7 +867,7 @@ function BoutiqueContent() {
                     </div>
                     <button
                       onClick={() => setCheckoutStep("otp")}
-                      className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-violet-500/25"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-blue-500/25"
                     >
                       J&apos;ai reçu mon code OTP
                     </button>

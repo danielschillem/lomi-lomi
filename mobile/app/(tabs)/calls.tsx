@@ -12,7 +12,13 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { getConversations, getOrCreateConversation, sendMessage } from "@/lib/api";
+import {
+  CallRecord,
+  getCalls,
+  getConversations,
+  sendMessage,
+  startCall as createCall,
+} from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import {
@@ -34,6 +40,7 @@ export default function CallsScreen() {
   const { user } = useAuth();
   const { colors } = useTheme();
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
+  const [calls, setCalls] = useState<CallRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [callingKey, setCallingKey] = useState<string | null>(null);
@@ -42,9 +49,11 @@ export default function CallsScreen() {
   const load = useCallback(async () => {
     try {
       const rows = await getConversations();
+      const callRows = await getCalls().catch(() => []);
       setConversations(
         Array.isArray(rows) ? (rows as unknown as ConversationListItem[]) : [],
       );
+      setCalls(Array.isArray(callRows) ? callRows : []);
       setError(null);
     } catch (err) {
       setError((err as Error)?.message || "Impossible de charger les contacts");
@@ -84,28 +93,73 @@ export default function CallsScreen() {
     const key = `${contact.id}-${type}`;
     setCallingKey(key);
     try {
-      const conversation = await getOrCreateConversation(contact.id);
-      const conversationId = Number(conversation.id || contact.conversationId);
-      const room = `textme-${conversationId || contact.id}-${Date.now()}`;
-      await sendMessage({
+      const call = await createCall({
+        conversation_id: contact.conversationId,
         receiver_id: contact.id,
-        content:
-          type === "video"
-            ? "Invitation appel vidéo"
-            : "Invitation appel audio",
         call_type: type,
-        call_room: room,
       });
       const url =
         type === "video"
-          ? `https://meet.jit.si/${room}`
-          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+          ? `https://meet.jit.si/${call.room}`
+          : `https://meet.jit.si/${call.room}#config.startWithVideoMuted=true`;
       await Linking.openURL(url);
+      load();
     } catch {
-      Alert.alert("Appel", "Impossible de démarrer l'appel.");
+      try {
+        const room = `textme-${contact.conversationId || contact.id}-${Date.now()}`;
+        await sendMessage({
+          conversation_id: contact.conversationId,
+          receiver_id: contact.id,
+          content:
+            type === "video"
+              ? "Invitation appel vidéo"
+              : "Invitation appel audio",
+          call_type: type,
+          call_room: room,
+        });
+        const fallbackUrl =
+          type === "video"
+            ? `https://meet.jit.si/${room}`
+            : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+        await Linking.openURL(fallbackUrl);
+      } catch {
+        Alert.alert("Appel", "Impossible de démarrer l'appel.");
+      }
     } finally {
       setCallingKey(null);
     }
+  };
+
+  const callPeer = (call: CallRecord) =>
+    call.caller_id === user?.id ? call.receiver : call.caller;
+
+  const callStatusLabel = (call: CallRecord) => {
+    const outgoing = call.caller_id === user?.id;
+    switch (call.status) {
+      case "accepted":
+        return outgoing ? "Appel accepté" : "Appel répondu";
+      case "declined":
+        return outgoing ? "Refusé" : "Refusé par vous";
+      case "missed":
+        return outgoing ? "Sans réponse" : "Manqué";
+      case "ended":
+        return "Terminé";
+      case "cancelled":
+        return outgoing ? "Annulé" : "Annulé par l'appelant";
+      default:
+        return outgoing ? "Appel sortant" : "Appel entrant";
+    }
+  };
+
+  const formatCallTime = (value: string) => {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")} ${date.getHours().toString().padStart(2, "0")}:${date
+      .getMinutes()
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   if (loading) {
@@ -146,6 +200,90 @@ export default function CallsScreen() {
         data={contacts}
         keyExtractor={(item) => String(item.id)}
         contentContainerStyle={contacts.length === 0 ? styles.emptyList : undefined}
+        ListHeaderComponent={
+          calls.length > 0 ? (
+            <View style={styles.history}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Récents
+              </Text>
+              {calls.slice(0, 5).map((call) => {
+                const peer = callPeer(call);
+                const outgoing = call.caller_id === user?.id;
+                return (
+                  <View
+                    key={call.id}
+                    style={[
+                      styles.historyRow,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.historyIcon,
+                        { backgroundColor: colors.cardSecondary },
+                      ]}
+                    >
+                      <Ionicons
+                        name={
+                          call.call_type === "video"
+                            ? "videocam-outline"
+                            : outgoing
+                              ? "call-outline"
+                              : "call"
+                        }
+                        size={18}
+                        color={call.status === "missed" ? colors.error : colors.text}
+                      />
+                    </View>
+                    <View style={styles.historyText}>
+                      <Text
+                        style={[styles.name, { color: colors.text }]}
+                        numberOfLines={1}
+                      >
+                        {peer?.username || "Contact TextMe"}
+                      </Text>
+                      <Text style={[styles.meta, { color: colors.textMuted }]}>
+                        {callStatusLabel(call)} · {formatCallTime(call.created_at)}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={[
+                        styles.smallCallButton,
+                        {
+                          backgroundColor: colors.cardSecondary,
+                          borderColor: colors.border,
+                        },
+                      ]}
+                      onPress={() => {
+                        if (!peer?.id) return;
+                        startCall(
+                          {
+                            id: peer.id,
+                            username: peer.username || "Contact TextMe",
+                            avatar_url: peer.avatar_url || "",
+                            is_online: Boolean(peer.is_online),
+                            conversationId: call.conversation_id,
+                            lastActivity: call.created_at,
+                          },
+                          call.call_type,
+                        );
+                      }}
+                      disabled={!!callingKey || !peer?.id}
+                    >
+                      <Ionicons name="call-outline" size={18} color={colors.text} />
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                Contacts
+              </Text>
+            </View>
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -236,6 +374,45 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     marginTop: 4,
+  },
+  history: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 10,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  historyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 8,
+  },
+  historyIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  historyText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  smallCallButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyList: {
     flexGrow: 1,

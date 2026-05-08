@@ -1,75 +1,92 @@
 const Jimp = require("jimp");
 const path = require("path");
 
-const BRAND = {
-  bg: 0x0b1220ff,
-  primary: 0x14b8a6ff,
-  primaryDark: 0x0f766eff,
-  white: 0xffffffff,
-  transparent: 0x00000000,
-};
+const WHITE = 0xffffffff;
+const TRANSPARENT = 0x00000000;
 
-function drawCircle(img, cx, cy, r, color) {
-  const r2 = r * r;
-  const minX = Math.max(0, Math.floor(cx - r));
-  const maxX = Math.min(img.bitmap.width - 1, Math.ceil(cx + r));
-  const minY = Math.max(0, Math.floor(cy - r));
-  const maxY = Math.min(img.bitmap.height - 1, Math.ceil(cy + r));
-
-  for (let y = minY; y <= maxY; y++) {
-    for (let x = minX; x <= maxX; x++) {
-      const dx = x - cx;
-      const dy = y - cy;
-      if (dx * dx + dy * dy <= r2) {
-        img.setPixelColor(color, x, y);
-      }
-    }
-  }
+function rgbaFromInt(color) {
+  return Jimp.intToRGBA(color);
 }
 
-async function createLogo(size = 1024) {
-  const logo = new Jimp(size, size, BRAND.transparent);
-  const center = size / 2;
+function colorDistance(a, b) {
+  return (
+    Math.abs(a.r - b.r) + Math.abs(a.g - b.g) + Math.abs(a.b - b.b)
+  );
+}
 
-  drawCircle(logo, center, center, Math.floor(size * 0.42), BRAND.primary);
-  drawCircle(logo, center, center, Math.floor(size * 0.32), BRAND.primaryDark);
+function trimSolidBackground(image, tolerance = 12) {
+  const width = image.bitmap.width;
+  const height = image.bitmap.height;
+  const bg = rgbaFromInt(image.getPixelColor(0, 0));
 
-  const font = await Jimp.loadFont(Jimp.FONT_SANS_128_WHITE);
-  const textW = Jimp.measureText(font, "L");
-  const textH = Jimp.measureTextHeight(font, "L", size);
-  const x = Math.round(center - textW / 2);
-  const y = Math.round(center - textH / 2 - size * 0.015);
-  logo.print(font, x, y, "L");
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
 
-  return logo;
+  image.scan(0, 0, width, height, function scan(x, y) {
+    const pixel = rgbaFromInt(this.getPixelColor(x, y));
+    if (colorDistance(pixel, bg) > tolerance) {
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x);
+      maxY = Math.max(maxY, y);
+    }
+  });
+
+  if (maxX < minX || maxY < minY) {
+    return image.clone();
+  }
+
+  return image.clone().crop(minX, minY, maxX - minX + 1, maxY - minY + 1);
 }
 
 async function generateIcons() {
   const assetsDir = path.join(__dirname, "assets");
-  const logo = await createLogo(1024);
+  const sourcePath = path.join(__dirname, "..", "logo.png");
+  const source = await Jimp.read(sourcePath);
+  const trimmed = trimSolidBackground(source);
 
-  await logo.writeAsync(path.join(assetsDir, "logo.png"));
+  // App logo used in auth screens.
+  const appLogo = trimmed.clone().contain(1024, 1024);
+  await appLogo.writeAsync(path.join(assetsDir, "logo.png"));
 
-  const icon = new Jimp(1024, 1024, BRAND.bg);
-  const iconLogo = logo.clone().contain(760, 760, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
-  icon.composite(iconLogo, Math.floor((1024 - iconLogo.bitmap.width) / 2), Math.floor((1024 - iconLogo.bitmap.height) / 2));
+  // Launcher icon.
+  const icon = trimmed.clone().contain(1024, 1024);
   await icon.writeAsync(path.join(assetsDir, "icon.png"));
 
-  const adaptive = new Jimp(1024, 1024, BRAND.transparent);
-  const adaptiveLogo = logo.clone().contain(640, 640, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
-  adaptive.composite(adaptiveLogo, Math.floor((1024 - adaptiveLogo.bitmap.width) / 2), Math.floor((1024 - adaptiveLogo.bitmap.height) / 2));
+  // Adaptive foreground (keep inside safe zone).
+  const adaptive = new Jimp(1024, 1024, TRANSPARENT);
+  const adaptiveFg = trimmed.clone().contain(820, 820);
+  adaptive.composite(
+    adaptiveFg,
+    Math.floor((1024 - adaptiveFg.bitmap.width) / 2),
+    Math.floor((1024 - adaptiveFg.bitmap.height) / 2),
+  );
   await adaptive.writeAsync(path.join(assetsDir, "adaptive-icon.png"));
 
-  const splash = new Jimp(1024, 1024, BRAND.transparent);
-  const splashLogo = logo.clone().contain(700, 700, Jimp.HORIZONTAL_ALIGN_CENTER | Jimp.VERTICAL_ALIGN_MIDDLE);
-  splash.composite(splashLogo, Math.floor((1024 - splashLogo.bitmap.width) / 2), Math.floor((1024 - splashLogo.bitmap.height) / 2));
+  // Splash icon.
+  const splash = trimmed.clone().contain(900, 900);
   await splash.writeAsync(path.join(assetsDir, "splash-icon.png"));
 
-  const mono = new Jimp(1024, 1024, BRAND.transparent);
-  drawCircle(mono, 512, 512, 420, BRAND.white);
+  // Monochrome for Android 13 themed icons.
+  const mono = new Jimp(1024, 1024, TRANSPARENT);
+  const monoFg = trimmed.clone().contain(820, 820).greyscale();
+  monoFg.scan(0, 0, monoFg.bitmap.width, monoFg.bitmap.height, function scan(x, y, idx) {
+    const alpha = this.bitmap.data[idx + 3];
+    this.bitmap.data[idx] = 255;
+    this.bitmap.data[idx + 1] = 255;
+    this.bitmap.data[idx + 2] = 255;
+    this.bitmap.data[idx + 3] = alpha;
+  });
+  mono.composite(
+    monoFg,
+    Math.floor((1024 - monoFg.bitmap.width) / 2),
+    Math.floor((1024 - monoFg.bitmap.height) / 2),
+  );
   await mono.writeAsync(path.join(assetsDir, "adaptive-icon-monochrome.png"));
 
-  console.log("Brand logo and icons generated:");
+  console.log("Icons generated from /logo.png:");
   console.log("- assets/logo.png");
   console.log("- assets/icon.png");
   console.log("- assets/adaptive-icon.png");

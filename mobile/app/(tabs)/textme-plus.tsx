@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
@@ -10,7 +9,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getMySubscription, getProfile } from "@/lib/api";
+import { getMySubscription } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 
@@ -44,71 +43,33 @@ const privateFeatures: PrivateFeature[] = [
 ];
 
 export default function TextMePlusScreen() {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const { colors } = useTheme();
-  const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
-  const [subscriptionLabel, setSubscriptionLabel] = useState("Accès privé inactif");
-  const [loading, setLoading] = useState(true);
+  const [subscriptionLabel, setSubscriptionLabel] = useState(
+    isPremium ? "Accès privé actif" : "Accès privé inactif",
+  );
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [profileRes, subscriptionRes] = await Promise.all([
-          getProfile().catch(() => null),
-          getMySubscription().catch(() => null),
-        ]);
-        setProfile(profileRes);
-        const hasAccess =
-          Boolean(subscriptionRes?.is_premium) ||
-          user?.role === "admin" ||
-          user?.role === "owner";
-        setIsPremium(hasAccess);
-        if (hasAccess) {
-          setSubscriptionLabel(
-            subscriptionRes?.ends_at
-              ? `Actif jusqu'au ${new Date(subscriptionRes.ends_at).toLocaleDateString()}`
-              : "Accès privé actif",
-          );
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [user?.role]);
+    if (!isPremium) return;
+    getMySubscription()
+      .then((res) => {
+        setSubscriptionLabel(
+          res?.ends_at
+            ? `Actif jusqu'au ${new Date(res.ends_at).toLocaleDateString()}`
+            : "Accès privé actif",
+        );
+      })
+      .catch(() => {});
+  }, [isPremium]);
 
   const avatarUrl = useMemo(
-    () =>
-      String(
-        profile?.avatar_url ||
-          user?.avatar_url ||
-          "https://via.placeholder.com/96/1a1a1a/666?text=?",
-      ),
-    [profile?.avatar_url, user?.avatar_url],
+    () => String(user?.avatar_url || "https://via.placeholder.com/96/1a1a1a/666?text=?"),
+    [user?.avatar_url],
   );
 
   const openPrivateFeature = (feature: PrivateFeature) => {
-    if (!isPremium) {
-      router.push("/premium");
-      return;
-    }
     router.push(feature.route as `/${string}`);
   };
-
-  if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <ActivityIndicator size="large" color={colors.accent} />
-      </View>
-    );
-  }
 
   return (
     <ScrollView

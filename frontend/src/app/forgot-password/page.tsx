@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-900 via-blue-800 to-blue-800 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
         <h1 className="text-2xl font-bold text-white mb-2 text-center">
           Mot de passe oublié
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
             )}
             <Link
               href="/login"
-              className="text-purple-300 hover:text-white text-sm underline"
+              className="text-blue-300 hover:text-white text-sm underline"
             >
               Retour à la connexion
             </Link>
@@ -78,14 +78,14 @@ export default function ForgotPasswordPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-purple-400"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
                 placeholder="vous@exemple.com"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-linear-to-r from-blue-600 to-blue-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50"
             >
               {loading ? "Envoi..." : "Envoyer le lien"}
             </button>

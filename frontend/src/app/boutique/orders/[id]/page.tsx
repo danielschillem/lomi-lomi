@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -49,7 +49,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   canceled: { label: "Annulée", color: "bg-red-50 text-red-500" },
   preparing: {
     label: "En préparation",
-    color: "bg-violet-100 text-violet-600",
+    color: "bg-blue-100 text-blue-600",
   },
   shipped: { label: "Expédiée", color: "bg-blue-100 text-blue-600" },
   delivered: { label: "Livrée", color: "bg-green-100 text-green-700" },
@@ -79,7 +79,7 @@ export default function OrderTrackingPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function OrderTrackingPage() {
         <p className="text-red-600">{error || "Commande non trouvée"}</p>
         <Link
           href="/boutique"
-          className="mt-4 inline-block text-violet-600 hover:underline"
+          className="mt-4 inline-block text-blue-600 hover:underline"
         >
           Retour à la boutique
         </Link>
@@ -110,7 +110,7 @@ export default function OrderTrackingPage() {
         {/* Nav */}
         <Link
           href="/boutique"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600 transition"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-blue-600 transition"
         >
           <ArrowLeft size={16} /> Retour à la boutique
         </Link>
@@ -138,8 +138,8 @@ export default function OrderTrackingPage() {
         <div className="rounded-2xl bg-white p-6 shadow-sm mb-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-violet-600" />
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-blue-600" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-gray-900">
@@ -177,7 +177,7 @@ export default function OrderTrackingPage() {
         {order.items && order.items.length > 0 && (
           <div className="rounded-2xl bg-white p-6 shadow-sm mb-4">
             <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Package className="w-4 h-4 text-violet-600" />
+              <Package className="w-4 h-4 text-blue-600" />
               Articles commandés
             </h2>
             <div className="space-y-3">
@@ -213,7 +213,7 @@ export default function OrderTrackingPage() {
             {/* Total recap */}
             <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
               <span className="text-sm text-gray-500">Total</span>
-              <span className="text-base font-bold text-violet-600">
+              <span className="text-base font-bold text-blue-600">
                 {Math.round(order.total_amount)} FCFA
               </span>
             </div>
@@ -260,7 +260,7 @@ export default function OrderTrackingPage() {
         {order.delivery_address && (
           <div className="rounded-2xl bg-white p-6 shadow-sm mb-4">
             <h2 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-violet-600" />
+              <MapPin className="w-4 h-4 text-blue-600" />
               Adresse de livraison
             </h2>
             <div className="space-y-1">
@@ -287,7 +287,7 @@ export default function OrderTrackingPage() {
         <div className="flex gap-3 mt-6">
           <Link
             href="/boutique"
-            className="flex-1 text-center bg-violet-600 hover:bg-violet-700 text-white font-semibold py-3 rounded-xl transition text-sm"
+            className="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition text-sm"
           >
             Continuer mes achats
           </Link>

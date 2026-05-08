@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Heart,
@@ -88,8 +88,7 @@ export default function Home() {
               height={36}
               className="rounded-lg"
             />
-            <span className="text-violet-600">Tex</span>{" "}
-            <span className="text-pink-500">to</span>
+            <span className="text-blue-600">Texto</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted">
             <a href="#features" className="hover:text-foreground transition">
@@ -117,7 +116,7 @@ export default function Home() {
             </Link>
             <Link
               href="/register"
-              className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-5 py-2.5 rounded-full transition shadow-sm shadow-violet-600/20"
+              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-full transition shadow-sm shadow-blue-600/20"
             >
               Commencer
             </Link>
@@ -128,17 +127,17 @@ export default function Home() {
       <main className="flex-1">
         {/* HERO */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-gradient">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-200/40 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-200/30 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/40 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl" />
 
           <div className="relative z-10 max-w-4xl mx-auto text-center px-6 pt-24">
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border border-violet-200 bg-violet-50 text-violet-600 text-xs font-medium tracking-wider uppercase">
+            <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-600 text-xs font-medium tracking-wider uppercase">
               <Sparkles className="w-3.5 h-3.5" />
               100% anonyme & sécurisé
             </div>
             <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-foreground">
               Rencontres discrètes &{" "}
-              <span className="bg-linear-to-r from-violet-600 to-pink-500 bg-clip-text text-transparent">
+              <span className="bg-linear-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
                 affinités authentiques
               </span>
             </h1>
@@ -150,7 +149,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Link
                 href="/register"
-                className="bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-4 rounded-full text-lg transition shadow-lg shadow-violet-600/20 flex items-center gap-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-full text-lg transition shadow-lg shadow-blue-600/20 flex items-center gap-2"
               >
                 Créer mon profil gratuit
                 <ArrowRight className="w-5 h-5" />
@@ -166,7 +165,7 @@ export default function Home() {
             <div className="flex items-center justify-center gap-8 md:gap-16">
               {stats.map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-violet-600">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600">
                     {s.value}
                   </div>
                   <div className="text-sm text-muted mt-1">{s.label}</div>
@@ -180,7 +179,7 @@ export default function Home() {
         <section id="features" className="py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <span className="text-violet-600 text-sm font-medium tracking-wider uppercase">
+              <span className="text-blue-600 text-sm font-medium tracking-wider uppercase">
                 Fonctionnalités
               </span>
               <h2 className="text-4xl md:text-5xl font-bold mt-3 text-foreground">
@@ -195,12 +194,12 @@ export default function Home() {
               {features.map((f) => (
                 <div
                   key={f.title}
-                  className="bg-white border border-border rounded-2xl p-8 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-100/50 transition group"
+                  className="bg-white border border-border rounded-2xl p-8 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50 transition group"
                 >
-                  <div className="mb-4 w-12 h-12 bg-violet-50 rounded-xl flex items-center justify-center text-violet-600 group-hover:bg-violet-100 transition">
+                  <div className="mb-4 w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-100 transition">
                     <f.icon className="w-6 h-6" strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-foreground group-hover:text-violet-600 transition">
+                  <h3 className="text-xl font-semibold mb-2 text-foreground group-hover:text-blue-600 transition">
                     {f.title}
                   </h3>
                   <p className="text-muted text-sm leading-relaxed">{f.desc}</p>
@@ -214,7 +213,7 @@ export default function Home() {
         <section id="how-it-works" className="py-24 px-6 bg-surface">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-16">
-              <span className="text-pink-500 text-sm font-medium tracking-wider uppercase">
+              <span className="text-blue-500 text-sm font-medium tracking-wider uppercase">
                 Comment ça marche
               </span>
               <h2 className="text-4xl md:text-5xl font-bold mt-3 text-foreground">
@@ -228,9 +227,9 @@ export default function Home() {
               {steps.map((step) => (
                 <div
                   key={step.num}
-                  className="flex items-start gap-6 bg-white border border-border rounded-2xl p-8 hover:border-pink-300 hover:shadow-md transition"
+                  className="flex items-start gap-6 bg-white border border-border rounded-2xl p-8 hover:border-blue-300 hover:shadow-md transition"
                 >
-                  <div className="shrink-0 w-14 h-14 bg-linear-to-br from-violet-600 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md shadow-violet-200">
+                  <div className="shrink-0 w-14 h-14 bg-linear-to-br from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md shadow-blue-200">
                     {step.num}
                   </div>
                   <div>
@@ -250,9 +249,9 @@ export default function Home() {
         {/* BOUTIQUE */}
         <section id="boutique" className="py-24 px-6 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="bg-linear-to-r from-violet-50 to-pink-50 border border-border rounded-3xl p-12 md:p-16 flex flex-col md:flex-row items-center gap-12">
+            <div className="bg-linear-to-r from-blue-50 to-blue-100 border border-border rounded-3xl p-12 md:p-16 flex flex-col md:flex-row items-center gap-12">
               <div className="flex-1">
-                <span className="text-violet-600 text-sm font-medium tracking-wider uppercase">
+                <span className="text-blue-600 text-sm font-medium tracking-wider uppercase">
                   Boutique
                 </span>
                 <h2 className="text-4xl md:text-5xl font-bold mt-3 mb-4 text-foreground">
@@ -271,7 +270,7 @@ export default function Home() {
                   ].map((tag) => (
                     <span
                       key={tag}
-                      className="bg-violet-100 text-violet-700 text-xs font-medium px-3 py-1.5 rounded-full border border-violet-200"
+                      className="bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full border border-blue-200"
                     >
                       {tag}
                     </span>
@@ -279,7 +278,7 @@ export default function Home() {
                 </div>
                 <Link
                   href="/boutique"
-                  className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-3 rounded-full transition shadow-md shadow-violet-200"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-full transition shadow-md shadow-blue-200"
                 >
                   Explorer la boutique
                   <ArrowRight className="w-4 h-4" />
@@ -287,7 +286,7 @@ export default function Home() {
               </div>
               <div className="shrink-0 w-64 h-64 bg-white/80 rounded-2xl flex items-center justify-center shadow-sm border border-border">
                 <ShoppingBag
-                  className="w-24 h-24 text-violet-600"
+                  className="w-24 h-24 text-blue-600"
                   strokeWidth={1}
                 />
               </div>
@@ -299,7 +298,7 @@ export default function Home() {
         <section id="map" className="py-24 px-6 bg-surface">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <span className="text-pink-500 text-sm font-medium tracking-wider uppercase">
+              <span className="text-blue-500 text-sm font-medium tracking-wider uppercase">
                 Carte interactive
               </span>
               <h2 className="text-4xl md:text-5xl font-bold mt-3 text-foreground">
@@ -321,7 +320,7 @@ export default function Home() {
                   key={item.label}
                   className="bg-white border border-border rounded-2xl p-8 text-center hover:shadow-md transition"
                 >
-                  <div className="text-4xl font-bold text-pink-500 mb-2">
+                  <div className="text-4xl font-bold text-blue-500 mb-2">
                     {item.count}
                   </div>
                   <div className="text-muted text-sm">{item.label}</div>
@@ -331,7 +330,7 @@ export default function Home() {
             <div className="text-center">
               <Link
                 href="/carte"
-                className="inline-flex items-center gap-2 border border-pink-300 text-pink-600 hover:bg-pink-50 font-semibold px-8 py-3 rounded-full transition"
+                className="inline-flex items-center gap-2 border border-blue-300 text-blue-600 hover:bg-blue-50 font-semibold px-8 py-3 rounded-full transition"
               >
                 Explorer la carte
                 <MapPin className="w-4 h-4" />
@@ -352,7 +351,7 @@ export default function Home() {
             </p>
             <Link
               href="/register"
-              className="bg-linear-to-r from-violet-600 to-pink-500 hover:from-violet-700 hover:to-pink-600 text-white font-semibold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-violet-200"
+              className="bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold px-10 py-4 rounded-full text-lg transition shadow-lg shadow-blue-200"
             >
               Rejoindre Texto
             </Link>
@@ -369,8 +368,7 @@ export default function Home() {
           <div className="grid md:grid-cols-4 gap-12 mb-12">
             <div>
               <div className="text-xl font-bold mb-4">
-                <span className="text-violet-600">Tex</span>{" "}
-                <span className="text-pink-500">to</span>
+                <span className="text-blue-600">Texto</span>
               </div>
               <p className="text-muted text-sm leading-relaxed">
                 La plateforme de rencontres anonymes et sécurisées pour adultes

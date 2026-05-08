@@ -18,6 +18,7 @@ import {
   cancelSubscription,
   type PremiumPlan,
 } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 
 interface Subscription {
@@ -28,6 +29,7 @@ interface Subscription {
 }
 
 export default function PremiumScreen() {
+  const { refreshPremium } = useAuth();
   const { colors } = useTheme();
   const [plans, setPlans] = useState<PremiumPlan[]>([]);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
@@ -67,7 +69,7 @@ export default function PremiumScreen() {
       const endsAt = res.ends_at ? new Date(res.ends_at).toLocaleDateString("fr-BF") : "";
       setMessage(`Abonnement activé jusqu'au ${endsAt}`);
       setPhone("");
-      await refreshSubscription();
+      await Promise.all([refreshSubscription(), refreshPremium()]);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Erreur de paiement");
     }
@@ -85,7 +87,7 @@ export default function PremiumScreen() {
           try {
             await cancelSubscription();
             setMessage("Abonnement annulé.");
-            await refreshSubscription();
+            await Promise.all([refreshSubscription(), refreshPremium()]);
           } catch (e: unknown) {
             setError(e instanceof Error ? e.message : "Erreur");
           }

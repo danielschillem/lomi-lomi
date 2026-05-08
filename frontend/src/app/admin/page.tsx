@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -38,13 +38,13 @@ export default function AdminDashboard() {
       label: "Utilisateurs",
       value: stats?.users ?? "-",
       icon: Users,
-      color: "text-violet-600",
+      color: "text-blue-600",
     },
     {
       label: "Produits",
       value: stats?.products ?? "-",
       icon: ShoppingBag,
-      color: "text-pink-500",
+      color: "text-blue-500",
     },
     {
       label: "Lieux",

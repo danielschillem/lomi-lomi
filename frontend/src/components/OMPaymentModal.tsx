@@ -200,7 +200,7 @@ export default function OMPaymentModal({
               )}
               <button
                 onClick={() => setStep("otp")}
-                className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3 rounded-xl transition text-sm"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition text-sm"
               >
                 J&apos;ai reçu mon code OTP
               </button>

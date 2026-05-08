@@ -25,6 +25,7 @@ import {
   editMessage,
   deleteMessage,
   searchMessages,
+  startCall as createCall,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
@@ -330,29 +331,42 @@ export default function ChatScreen() {
 
   const startCall = async (type: "audio" | "video") => {
     if (!canCall || sending) return;
-    const room = `texto-${conversationId}-${Date.now()}`;
     try {
-      const res = await sendMessage(
-        buildMessagePayload({
-          content:
-            type === "video"
-              ? "Invitation appel vidéo"
-              : "Invitation appel audio",
-          call_type: type,
-          call_room: room,
-        }),
-      );
-      if (res) {
-        const sent = res as unknown as Message;
-        setMessages((prev) => [sent, ...prev]);
-      }
+      const call = await createCall({
+        conversation_id: conversationId,
+        receiver_id: otherUserId,
+        call_type: type,
+      });
       const url =
         type === "video"
-          ? `https://meet.jit.si/${room}`
-          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+          ? `https://meet.jit.si/${call.room}`
+          : `https://meet.jit.si/${call.room}#config.startWithVideoMuted=true`;
       await Linking.openURL(url);
     } catch {
-      Alert.alert("Appel", "Impossible de démarrer l'appel.");
+      try {
+        const room = `textme-${conversationId}-${Date.now()}`;
+        const res = await sendMessage(
+          buildMessagePayload({
+            content:
+              type === "video"
+                ? "Invitation appel vidéo"
+                : "Invitation appel audio",
+            call_type: type,
+            call_room: room,
+          }),
+        );
+        if (res) {
+          const sent = res as unknown as Message;
+          setMessages((prev) => [sent, ...prev]);
+        }
+        const fallbackUrl =
+          type === "video"
+            ? `https://meet.jit.si/${room}`
+            : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+        await Linking.openURL(fallbackUrl);
+      } catch {
+        Alert.alert("Appel", "Impossible de démarrer l'appel.");
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -714,7 +714,7 @@ export default function AdminWellnessView() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div className="col-span-2">
@@ -734,7 +734,7 @@ export default function AdminWellnessView() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 resize-none"
                 />
               </div>
               <div>
@@ -753,7 +753,7 @@ export default function AdminWellnessView() {
                       category: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 >
                   {providerCategories.map((c) => (
                     <option key={c} value={c}>
@@ -775,7 +775,7 @@ export default function AdminWellnessView() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, city: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div className="col-span-2">
@@ -794,7 +794,7 @@ export default function AdminWellnessView() {
                       address: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -810,7 +810,7 @@ export default function AdminWellnessView() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, phone: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -827,7 +827,7 @@ export default function AdminWellnessView() {
                   onChange={(e) =>
                     setProviderForm({ ...providerForm, email: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -846,7 +846,7 @@ export default function AdminWellnessView() {
                       website: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -865,7 +865,7 @@ export default function AdminWellnessView() {
                       image_url: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
                 <input
                   type="file"
@@ -890,7 +890,7 @@ export default function AdminWellnessView() {
                     type="button"
                     onClick={handleGeolocateProvider}
                     disabled={gpsLoading}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-200 text-white text-xs font-medium rounded-lg transition-colors"
                   >
                     <LocateFixed
                       size={14}
@@ -921,7 +921,7 @@ export default function AdminWellnessView() {
                           latitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                     />
                   </div>
                   <div>
@@ -942,7 +942,7 @@ export default function AdminWellnessView() {
                           longitude: parseFloat(e.target.value) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                      className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                     />
                   </div>
                 </div>
@@ -960,7 +960,7 @@ export default function AdminWellnessView() {
                     })
                   }
                   placeholder="RNCP, FFMBE, ..."
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm text-muted cursor-pointer">
@@ -1048,7 +1048,7 @@ export default function AdminWellnessView() {
                   onChange={(e) =>
                     setServiceForm({ ...serviceForm, name: e.target.value })
                   }
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -1068,7 +1068,7 @@ export default function AdminWellnessView() {
                     })
                   }
                   rows={2}
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 resize-none"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 resize-none"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -1089,7 +1089,7 @@ export default function AdminWellnessView() {
                         duration: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                   />
                 </div>
                 <div>
@@ -1110,7 +1110,7 @@ export default function AdminWellnessView() {
                         price: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                    className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                   />
                 </div>
               </div>
@@ -1131,7 +1131,7 @@ export default function AdminWellnessView() {
                     })
                   }
                   placeholder="relaxation, hot_stones, thai..."
-                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full px-3 py-2 bg-surface-2 border border-border rounded-lg text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div className="flex gap-4">
@@ -1145,7 +1145,7 @@ export default function AdminWellnessView() {
                         is_duo: e.target.checked,
                       })
                     }
-                    className="rounded border-border bg-surface text-pink-600"
+                    className="rounded border-border bg-surface text-blue-600"
                   />
                   Duo possible
                 </label>

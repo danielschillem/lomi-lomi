@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -267,10 +267,10 @@ export default function ProfilePage() {
 
         <div className="bg-white/90 border border-border rounded-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-linear-to-r from-violet-50 to-pink-50 p-8">
+          <div className="bg-linear-to-r from-blue-50 to-blue-50 p-8">
             <div className="flex items-center gap-5">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full bg-surface-2 border-2 border-violet-500/50 flex items-center justify-center overflow-hidden">
+                <div className="w-20 h-20 rounded-full bg-surface-2 border-2 border-blue-500/50 flex items-center justify-center overflow-hidden">
                   {profile?.avatar_url ? (
                     <Image
                       src={profile.avatar_url}
@@ -280,10 +280,10 @@ export default function ProfilePage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <User className="w-10 h-10 text-violet-600" />
+                    <User className="w-10 h-10 text-blue-600" />
                   )}
                 </div>
-                <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-violet-600 hover:bg-violet-700 rounded-full flex items-center justify-center cursor-pointer transition">
+                <label className="absolute -bottom-1 -right-1 w-7 h-7 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center cursor-pointer transition">
                   <Camera className="w-3.5 h-3.5 text-white" />
                   <input
                     type="file"
@@ -320,13 +320,13 @@ export default function ProfilePage() {
           <div className="p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold flex items-center gap-2">
-                <Settings className="w-5 h-5 text-violet-600" />
+                <Settings className="w-5 h-5 text-blue-600" />
                 Informations
               </h2>
               {!editing && (
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-sm text-violet-600 hover:text-violet-600 transition"
+                  className="text-sm text-blue-600 hover:text-blue-600 transition"
                 >
                   Modifier
                 </button>
@@ -345,7 +345,7 @@ export default function ProfilePage() {
                     maxLength={500}
                     rows={3}
                     placeholder="Parlez de vous en quelques mots..."
-                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition resize-none"
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition resize-none"
                   />
                 </div>
 
@@ -358,7 +358,7 @@ export default function ProfilePage() {
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       title="Genre"
-                      className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none focus:border-violet-400 transition"
+                      className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none focus:border-blue-400 transition"
                     >
                       <option value="">Non spécifié</option>
                       <option value="homme">Homme</option>
@@ -375,7 +375,7 @@ export default function ProfilePage() {
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Votre ville"
-                      className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                      className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                     />
                   </div>
                 </div>
@@ -389,7 +389,7 @@ export default function ProfilePage() {
                     value={birthDate}
                     onChange={(e) => setBirthDate(e.target.value)}
                     title="Date de naissance"
-                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none focus:border-violet-400 transition"
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none focus:border-blue-400 transition"
                   />
                 </div>
 
@@ -397,7 +397,7 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-lg transition text-sm"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold px-6 py-2.5 rounded-lg transition text-sm"
                   >
                     <Save className="w-4 h-4" />
                     {saving ? "Sauvegarde..." : "Sauvegarder"}
@@ -456,7 +456,7 @@ export default function ProfilePage() {
             <div className="mt-6 pt-6 border-t border-border">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-violet-600" />
+                  <ImageIcon className="w-5 h-5 text-blue-600" />
                   Galerie photos
                 </h2>
                 <span className="text-xs text-muted">{photos.length}/6</span>
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                   </div>
                 ))}
                 {photos.length < 6 && (
-                  <label className="aspect-square border-2 border-dashed border-border hover:border-violet-400 rounded-lg flex flex-col items-center justify-center cursor-pointer transition">
+                  <label className="aspect-square border-2 border-dashed border-border hover:border-blue-400 rounded-lg flex flex-col items-center justify-center cursor-pointer transition">
                     <Plus className="w-6 h-6 text-muted" />
                     <span className="text-xs text-muted mt-1">
                       {uploadingPhoto ? "Upload..." : "Ajouter"}
@@ -503,7 +503,7 @@ export default function ProfilePage() {
               {/* Selfie Verification */}
               <div>
                 <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  <Shield className="w-4 h-4 text-violet-400" />
+                  <Shield className="w-4 h-4 text-blue-400" />
                   Vérification d&apos;identité
                 </h3>
                 <div
@@ -519,7 +519,7 @@ export default function ProfilePage() {
                 </div>
                 {selfieStatus !== "approved" && (
                   <label className="block cursor-pointer">
-                    <div className="flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300">
+                    <div className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300">
                       <Camera className="w-4 h-4" />
                       {uploadingSelfie
                         ? "Upload..."
@@ -576,7 +576,7 @@ export default function ProfilePage() {
                           setPrompts(updated);
                         }}
                         placeholder="Votre réponse..."
-                        className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                        className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-400"
                       />
                       <button
                         onClick={() =>
@@ -596,7 +596,7 @@ export default function ProfilePage() {
                           { question: "Ma passion secrète", answer: "" },
                         ])
                       }
-                      className="text-sm text-violet-400 hover:text-violet-300 flex items-center gap-1"
+                      className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
                     >
                       <Plus className="w-4 h-4" /> Ajouter un prompt
                     </button>
@@ -604,7 +604,7 @@ export default function ProfilePage() {
                   <button
                     onClick={handleSavePrompts}
                     disabled={savingPrompts}
-                    className="text-sm bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition"
+                    className="text-sm bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition"
                   >
                     {savingPrompts ? "..." : "Sauvegarder"}
                   </button>
@@ -613,7 +613,7 @@ export default function ProfilePage() {
 
               <Link
                 href="/settings"
-                className="flex items-center gap-2 text-sm text-muted hover:text-violet-600 transition"
+                className="flex items-center gap-2 text-sm text-muted hover:text-blue-600 transition"
               >
                 <Settings className="w-4 h-4" />
                 Paramètres du compte

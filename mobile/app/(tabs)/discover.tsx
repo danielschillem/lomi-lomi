@@ -18,6 +18,7 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useWS } from "@/lib/ws-context";
 import { useTheme } from "@/lib/theme-context";
 import ScreenState from "@/app/components/ScreenState";
+import PremiumGate from "@/app/components/PremiumGate";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
@@ -34,7 +35,7 @@ interface Profile {
   photos?: { id: number; url: string }[];
 }
 
-export default function DiscoverScreen() {
+function DiscoverScreenInner() {
   const { colors } = useTheme();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -499,3 +500,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
 });
+
+export default function DiscoverScreen() {
+  return (
+    <PremiumGate feature="Découverte" icon="heart-outline" tone="#ec4899">
+      <DiscoverScreenInner />
+    </PremiumGate>
+  );
+}

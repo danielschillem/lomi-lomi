@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -190,7 +190,7 @@ export default function WellnessPage() {
                     </span>
                   )}
                   {provider.mobile_service && (
-                    <span className="absolute top-3 left-3 bg-violet-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <span className="absolute top-3 left-3 bg-blue-500/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                       <MapPin className="w-3 h-3" />À domicile
                     </span>
                   )}

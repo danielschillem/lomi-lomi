@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getEvents, attendEvent } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
+import PremiumGate from "@/app/components/PremiumGate";
 
 interface EventItem {
   id: number;
@@ -48,7 +49,7 @@ function formatDate(d: string) {
   } catch { return d; }
 }
 
-export default function EvenementsScreen() {
+function EvenementsScreenInner() {
   const { colors } = useTheme();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -244,3 +245,11 @@ const styles = StyleSheet.create({
   btn: { flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center" },
   btnText: { color: "#c4b5fd", fontSize: 13, fontWeight: "600" },
 });
+
+export default function EvenementsScreen() {
+  return (
+    <PremiumGate feature="Événements" icon="calendar-number-outline" tone="#f59e0b">
+      <EvenementsScreenInner />
+    </PremiumGate>
+  );
+}

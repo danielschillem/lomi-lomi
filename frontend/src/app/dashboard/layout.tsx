@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useAuth } from "@/lib/auth-context";
 import { useRouter, usePathname } from "next/navigation";
@@ -49,7 +49,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -65,8 +65,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <aside className="hidden w-64 shrink-0 flex-col bg-surface border-r border-border lg:flex">
         <div className="p-6 border-b border-border">
           <Link href="/" className="text-lg font-bold">
-            <span className="text-violet-600">Tex</span>{" "}
-            <span className="text-pink-600">to</span>
+            <span className="text-blue-600">Tex</span>{" "}
+            <span className="text-blue-600">to</span>
           </Link>
           <p className="mt-1 text-sm text-muted">
             {isAdmin ? "Administration" : user.username}
@@ -82,7 +82,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 href={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
                   active
-                    ? "bg-violet-50 text-violet-600 font-medium"
+                    ? "bg-blue-50 text-blue-600 font-medium"
                     : "text-muted hover:text-foreground hover:bg-gray-100"
                 }`}
               >
@@ -107,7 +107,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition ${
                       active
-                        ? "bg-violet-50 text-violet-600 font-medium"
+                        ? "bg-blue-50 text-blue-600 font-medium"
                         : "text-muted hover:text-foreground hover:bg-gray-100"
                     }`}
                   >
@@ -141,7 +141,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 key={item.href}
                 href={item.href}
                 className={`flex flex-col items-center gap-1 text-xs ${
-                  active ? "text-violet-600" : "text-muted"
+                  active ? "text-blue-600" : "text-muted"
                 }`}
               >
                 <item.icon size={18} />

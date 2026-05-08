@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
-import { Platform } from "react-native";
+import { Linking, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { registerPushToken } from "./api";
@@ -99,7 +99,19 @@ export function usePushNotifications(isLoggedIn: boolean) {
           unknown
         >;
 
-        if (data?.type === "message" && data?.conversation_id) {
+        if (data?.type === "call") {
+          const room = data.call_room ? String(data.call_room) : "";
+          const callType = data.call_type ? String(data.call_type) : "audio";
+          if (room) {
+            const url =
+              callType === "video"
+                ? `https://meet.jit.si/${room}`
+                : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
+            Linking.openURL(url).catch(() => router.push("/(tabs)/calls"));
+          } else {
+            router.push("/(tabs)/calls");
+          }
+        } else if (data?.type === "message" && data?.conversation_id) {
           router.push({
             pathname: "/chat/[id]",
             params: { id: String(data.conversation_id) },

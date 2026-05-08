@@ -24,10 +24,10 @@ var premiumPlans = map[string]struct {
 // GetPlans returns available premium plans.
 func (h *PremiumHandler) GetPlans(c *fiber.Ctx) error {
 	plans := []fiber.Map{
-		{"id": "monthly", "label": "Lomi Pass Mensuel", "price": 2000, "currency": "XOF", "duration_days": 30, "features": []string{"Swipes illimités", "Voir qui m'a liké", "Super Likes (×5/jour)", "Rewind (annuler)", "Profil boosté 1×/mois"}},
-		{"id": "yearly", "label": "Lomi Pass Annuel", "price": 15000, "currency": "XOF", "duration_days": 365, "features": []string{"Tout le mensuel", "Économisez 37%", "Boosts ×3/mois", "Super Likes illimités", "Badge Premium exclusif"}},
+		{"id": "monthly", "name": "Lomi Pass Mensuel", "price": 2000, "currency": "XOF", "duration_days": 30, "features": []string{"Swipes illimités", "Voir qui m'a liké", "Super Likes (×5/jour)", "Rewind (annuler)", "Profil boosté 1×/mois"}},
+		{"id": "yearly", "name": "Lomi Pass Annuel", "price": 15000, "currency": "XOF", "duration_days": 365, "features": []string{"Tout le mensuel", "Économisez 37%", "Boosts ×3/mois", "Super Likes illimités", "Badge Premium exclusif"}},
 	}
-	return c.JSON(plans)
+	return c.JSON(fiber.Map{"plans": plans})
 }
 
 // GetMySubscription returns the current user's active subscription.
@@ -39,12 +39,14 @@ func (h *PremiumHandler) GetMySubscription(c *fiber.Ctx) error {
 		Order("ends_at DESC").First(&sub).Error
 
 	if err != nil {
-		return c.JSON(fiber.Map{"is_premium": false, "subscription": nil})
+		return c.JSON(fiber.Map{"is_premium": false})
 	}
 
 	return c.JSON(fiber.Map{
-		"is_premium":   true,
-		"subscription": sub,
+		"is_premium": true,
+		"plan":       sub.Plan,
+		"ends_at":    sub.EndsAt,
+		"status":     sub.Status,
 	})
 }
 
@@ -53,8 +55,9 @@ func (h *PremiumHandler) Subscribe(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
 	type Req struct {
-		Plan string `json:"plan"` // monthly or yearly
-		TxID string `json:"tx_id"`
+		Plan  string `json:"plan"`  // monthly or yearly
+		Phone string `json:"phone"` // Orange Money number
+		TxID  string `json:"tx_id"` // payment transaction ID (optional)
 	}
 	var req Req
 	if err := c.BodyParser(&req); err != nil || req.Plan == "" {
@@ -77,6 +80,7 @@ func (h *PremiumHandler) Subscribe(c *fiber.Ctx) error {
 		EndsAt:    endsAt,
 		Status:    "active",
 		TxID:      req.TxID,
+		Phone:     req.Phone,
 	}
 	database.DB.Create(&sub)
 

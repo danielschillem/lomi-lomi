@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -164,7 +164,7 @@ export default function MapView({
               onClick={() => setLayer(key)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                 layer === key
-                  ? "bg-pink-500/15 text-pink-600"
+                  ? "bg-blue-500/15 text-blue-600"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >

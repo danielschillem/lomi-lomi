@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -84,7 +84,7 @@ export default function CartePage() {
             Accueil
           </Link>
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-pink-600" />
+            <MapPin className="w-5 h-5 text-blue-600" />
             Carte interactive
           </h1>
           <div className="w-16" />
@@ -103,7 +103,7 @@ export default function CartePage() {
                 onClick={() => setCategory(cat.value)}
                 className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium transition whitespace-nowrap ${
                   category === cat.value
-                    ? "bg-pink-500/20 text-pink-500 border border-pink-500/30"
+                    ? "bg-blue-500/20 text-blue-500 border border-blue-500/30"
                     : "bg-surface text-muted border border-border hover:border-border"
                 }`}
               >
@@ -148,7 +148,7 @@ export default function CartePage() {
               </button>
               <h2 className="text-xl font-bold mb-1">{selected.name}</h2>
               {selected.is_partner && (
-                <span className="inline-block text-xs bg-pink-50 text-pink-500 border border-pink-200 px-2 py-0.5 rounded-full mb-3">
+                <span className="inline-block text-xs bg-blue-50 text-blue-500 border border-blue-200 px-2 py-0.5 rounded-full mb-3">
                   Partenaire
                 </span>
               )}
@@ -178,7 +178,7 @@ export default function CartePage() {
                   href={selected.website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-violet-600 text-xs flex items-center gap-1 hover:text-violet-600 transition"
+                  className="text-blue-600 text-xs flex items-center gap-1 hover:text-blue-600 transition"
                 >
                   <Globe className="w-3 h-3" />
                   Site web
@@ -195,10 +195,10 @@ export default function CartePage() {
                 <button
                   key={place.id}
                   onClick={() => setSelected(place)}
-                  className="w-full text-left flex items-start gap-3 bg-white/90 border border-border hover:border-pink-500/30 rounded-xl p-3 transition"
+                  className="w-full text-left flex items-start gap-3 bg-white/90 border border-border hover:border-blue-500/30 rounded-xl p-3 transition"
                 >
                   <div className="shrink-0 w-10 h-10 rounded-lg bg-surface-2 flex items-center justify-center mt-0.5">
-                    <MapPin className="w-5 h-5 text-pink-500" />
+                    <MapPin className="w-5 h-5 text-blue-500" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="font-semibold text-sm truncate">

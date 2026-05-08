@@ -62,3 +62,22 @@ type Message struct {
 
 	Sender User `gorm:"foreignKey:SenderID" json:"sender,omitempty"`
 }
+
+type Call struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	ConversationID uint       `gorm:"not null;index" json:"conversation_id"`
+	CallerID       uint       `gorm:"not null;index" json:"caller_id"`
+	ReceiverID     uint       `gorm:"not null;index" json:"receiver_id"`
+	CallType       string     `gorm:"size:10;not null" json:"call_type"` // audio, video
+	Room           string     `gorm:"size:120;not null;uniqueIndex" json:"room"`
+	Status         string     `gorm:"size:20;default:ringing;index" json:"status"` // ringing, accepted, declined, missed, ended, cancelled
+	AcceptedAt     *time.Time `json:"accepted_at,omitempty"`
+	EndedAt        *time.Time `json:"ended_at,omitempty"`
+
+	Conversation Conversation `gorm:"foreignKey:ConversationID" json:"conversation,omitempty"`
+	Caller       User         `gorm:"foreignKey:CallerID" json:"caller,omitempty"`
+	Receiver     User         `gorm:"foreignKey:ReceiverID" json:"receiver,omitempty"`
+}

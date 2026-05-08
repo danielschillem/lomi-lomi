@@ -57,6 +57,7 @@ func Migrate() {
 		&models.Conversation{},
 		&models.ConversationMember{},
 		&models.Message{},
+		&models.Call{},
 		&models.LocationShare{},
 		&models.VTCRide{},
 		&models.Product{},

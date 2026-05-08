@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
@@ -319,7 +319,7 @@ export default function ProviderPage() {
             {/* Badges */}
             <div className="flex flex-wrap gap-2 mb-4">
               {provider.mobile_service && (
-                <span className="inline-flex items-center gap-1 text-xs bg-violet-50 text-violet-600 border border-violet-200 px-2.5 py-1 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2.5 py-1 rounded-full">
                   <MapPin className="w-3 h-3" />
                   Se déplace à domicile
                 </span>
@@ -425,7 +425,7 @@ export default function ProviderPage() {
                   {service.duration} min
                 </span>
                 {service.is_duo && (
-                  <span className="flex items-center gap-1 text-pink-600">
+                  <span className="flex items-center gap-1 text-blue-600">
                     <Users className="w-3 h-3" />
                     Duo possible
                   </span>
@@ -527,7 +527,7 @@ export default function ProviderPage() {
                     onClick={() => setPersons(2)}
                     className={`px-4 py-2 rounded-lg text-sm transition flex items-center gap-1.5 ${
                       persons === 2
-                        ? "bg-pink-500/20 text-pink-600 border border-pink-500/30"
+                        ? "bg-blue-500/20 text-blue-600 border border-blue-500/30"
                         : "bg-surface-2 text-muted border border-border"
                     }`}
                   >
@@ -553,7 +553,7 @@ export default function ProviderPage() {
                           e.target.value ? Number(e.target.value) : undefined,
                         )
                       }
-                      className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-pink-300 transition"
+                      className="w-full px-3 py-2.5 bg-surface-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-blue-300 transition"
                     >
                       <option value="">Aucun invité</option>
                       {matches.map((m) => (

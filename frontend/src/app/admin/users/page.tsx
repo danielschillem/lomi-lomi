@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -99,7 +99,7 @@ export default function AdminUsersPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Users className="w-6 h-6 text-violet-600" />
+          <Users className="w-6 h-6 text-blue-600" />
           Utilisateurs
         </h1>
         <span className="text-sm text-muted">{total} au total</span>
@@ -113,7 +113,7 @@ export default function AdminUsersPage() {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder="Rechercher par pseudo ou email..."
-          className="w-full bg-white/90 border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+          className="w-full bg-white/90 border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
         />
       </form>
 
@@ -201,7 +201,7 @@ export default function AdminUsersPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-1.5">
                       {u.role === "admin" && (
-                        <span className="text-[10px] bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full font-medium">
                           Admin
                         </span>
                       )}
@@ -221,7 +221,7 @@ export default function AdminUsersPage() {
                             ? "Rétrograder"
                             : "Promouvoir admin"
                         }
-                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-violet-600"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-blue-600"
                       >
                         <Crown className="w-4 h-4" />
                       </button>

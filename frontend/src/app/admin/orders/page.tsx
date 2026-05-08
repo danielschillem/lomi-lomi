@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight, Package } from "lucide-react";
@@ -26,7 +26,7 @@ interface Order {
 const statusColors: Record<string, string> = {
   pending: "bg-yellow-50 text-yellow-600 border-yellow-200",
   paid: "bg-blue-50 text-blue-600 border-blue-200",
-  shipped: "bg-violet-50 text-violet-600 border-violet-200",
+  shipped: "bg-blue-50 text-blue-600 border-blue-200",
   delivered: "bg-emerald-50 text-emerald-600 border-emerald-200",
   cancelled: "bg-red-50 text-red-400 border-red-200",
 };

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -51,7 +51,7 @@ const statusConfig: Record<
   },
   preparing: {
     label: "En préparation",
-    color: "text-violet-600 bg-violet-50",
+    color: "text-blue-600 bg-blue-50",
     icon: Package,
   },
   shipped: {
@@ -103,7 +103,7 @@ export default function OrdersPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Package className="w-5 h-5 text-violet-600" />
+            <Package className="w-5 h-5 text-blue-600" />
             Mes commandes
           </h1>
         </div>
@@ -120,7 +120,7 @@ export default function OrdersPage() {
             <p className="text-muted">Aucune commande pour le moment</p>
             <Link
               href="/boutique"
-              className="inline-block text-sm text-violet-600 font-medium hover:underline"
+              className="inline-block text-sm text-blue-600 font-medium hover:underline"
             >
               Découvrir la boutique
             </Link>
@@ -137,7 +137,7 @@ export default function OrdersPage() {
               <Link
                 key={order.id}
                 href={`/boutique/orders/${order.id}`}
-                className="block bg-surface rounded-xl p-4 border border-border hover:border-violet-300 transition space-y-3"
+                className="block bg-surface rounded-xl p-4 border border-border hover:border-blue-300 transition space-y-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -196,7 +196,7 @@ export default function OrdersPage() {
                         Suivre
                       </Link>
                     )}
-                    <span className="text-xs text-violet-600 font-medium">
+                    <span className="text-xs text-blue-600 font-medium">
                       Voir le détail →
                     </span>
                   </div>

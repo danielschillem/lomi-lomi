@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getMyWellnessBookings, cancelWellnessBooking } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
+import PremiumGate from "@/app/components/PremiumGate";
 
 interface Booking {
   id: number;
@@ -23,7 +24,7 @@ interface Booking {
   notes?: string;
 }
 
-export default function BookingsScreen() {
+function BookingsScreenInner() {
   const { colors } = useTheme();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,3 +149,11 @@ const styles = StyleSheet.create({
   },
   cancelText: { color: "#ef4444", fontSize: 13, fontWeight: "500" },
 });
+
+export default function BookingsScreen() {
+  return (
+    <PremiumGate feature="Rendez-vous" icon="calendar-outline" tone="#2563eb">
+      <BookingsScreenInner />
+    </PremiumGate>
+  );
+}

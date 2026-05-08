@@ -80,7 +80,7 @@ function DeliveryMap({
       />
       <div className="absolute bottom-2 left-2 right-2 flex gap-2">
         {hasDriver && (
-          <span className="bg-violet-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <Truck className="w-3 h-3" /> Livreur
           </span>
         )}
@@ -171,7 +171,7 @@ export default function SuiviLivraisonPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -185,7 +185,7 @@ export default function SuiviLivraisonPage() {
         </p>
         <Link
           href="/boutique/orders"
-          className="text-violet-600 hover:underline text-sm"
+          className="text-blue-600 hover:underline text-sm"
         >
           Retour aux commandes
         </Link>
@@ -230,7 +230,7 @@ export default function SuiviLivraisonPage() {
         {/* Statut livreur */}
         {delivery.delivery_person && (
           <div className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center overflow-hidden">
+            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
               {delivery.delivery_person.avatar_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -239,7 +239,7 @@ export default function SuiviLivraisonPage() {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User className="w-6 h-6 text-violet-500" />
+                <User className="w-6 h-6 text-blue-500" />
               )}
             </div>
             <div>
@@ -248,7 +248,7 @@ export default function SuiviLivraisonPage() {
               </p>
               <p className="text-xs text-gray-400">Votre livreur</p>
             </div>
-            <Truck className="w-5 h-5 text-violet-500 ml-auto" />
+            <Truck className="w-5 h-5 text-blue-500 ml-auto" />
           </div>
         )}
 
@@ -293,9 +293,9 @@ export default function SuiviLivraisonPage() {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                       done
-                        ? "bg-violet-600"
+                        ? "bg-blue-600"
                         : active
-                          ? "bg-violet-100 ring-2 ring-violet-400"
+                          ? "bg-blue-100 ring-2 ring-blue-400"
                           : "bg-gray-100"
                     }`}
                   >
@@ -304,7 +304,7 @@ export default function SuiviLivraisonPage() {
                         done
                           ? "text-white"
                           : active
-                            ? "text-violet-600"
+                            ? "text-blue-600"
                             : "text-gray-400"
                       }`}
                     />
@@ -321,8 +321,8 @@ export default function SuiviLivraisonPage() {
                     {step.label}
                   </span>
                   {active && (
-                    <span className="ml-auto inline-flex items-center gap-1 text-xs text-violet-600 font-medium">
-                      <span className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
+                    <span className="ml-auto inline-flex items-center gap-1 text-xs text-blue-600 font-medium">
+                      <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
                       En cours
                     </span>
                   )}

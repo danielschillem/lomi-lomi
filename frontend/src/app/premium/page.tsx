@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import {
@@ -77,7 +77,7 @@ export default function PremiumPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white pb-16">
       {/* Header */}
-      <div className="bg-linear-to-br from-purple-900 to-pink-800 px-4 pt-12 pb-16 text-center">
+      <div className="bg-linear-to-br from-blue-900 to-blue-800 px-4 pt-12 pb-16 text-center">
         <div className="flex justify-center mb-4">
           <div className="w-16 h-16 rounded-full bg-yellow-400/20 flex items-center justify-center">
             <Crown className="w-8 h-8 text-yellow-400" />
@@ -122,7 +122,7 @@ export default function PremiumPage() {
             <button
               key={plan.id}
               onClick={() => setSelected(plan.id)}
-              className={`rounded-2xl p-4 border-2 text-left transition-all ${selected === plan.id ? "border-purple-500 bg-purple-500/10" : "border-gray-700 bg-gray-900"}`}
+              className={`rounded-2xl p-4 border-2 text-left transition-all ${selected === plan.id ? "border-blue-500 bg-blue-500/10" : "border-gray-700 bg-gray-900"}`}
             >
               {plan.id === "yearly" && (
                 <span className="text-xs bg-yellow-500 text-black font-bold px-2 py-0.5 rounded-full mb-2 inline-block">
@@ -135,7 +135,7 @@ export default function PremiumPage() {
               <p className="text-gray-400 text-xs">
                 par {plan.id === "monthly" ? "mois" : "an"}
               </p>
-              <p className="text-purple-300 text-sm font-medium mt-1">
+              <p className="text-blue-300 text-sm font-medium mt-1">
                 {plan.name}
               </p>
             </button>
@@ -178,13 +178,13 @@ export default function PremiumPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="07XXXXXXXX"
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
               />
             </div>
             <button
               onClick={handleSubscribe}
               disabled={loading}
-              className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-linear-to-r from-blue-600 to-blue-600 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition disabled:opacity-50"
             >
               {loading
                 ? "Traitement..."

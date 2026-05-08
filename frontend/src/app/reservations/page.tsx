@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
@@ -142,13 +142,13 @@ export default function ReservationsPage() {
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-lg font-bold flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-pink-500" />
+              <CalendarDays className="w-5 h-5 text-blue-500" />
               Mes réservations
             </h1>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
             {showForm ? "Fermer" : "Réserver"}
@@ -161,7 +161,7 @@ export default function ReservationsPage() {
         {showForm && (
           <div className="bg-surface rounded-2xl p-5 border border-border space-y-4 animate-in fade-in slide-in-from-top-2">
             <h2 className="font-semibold text-foreground flex items-center gap-2">
-              <CalendarDays className="w-4 h-4 text-violet-600" />
+              <CalendarDays className="w-4 h-4 text-blue-600" />
               Nouvelle réservation
             </h2>
 
@@ -170,7 +170,7 @@ export default function ReservationsPage() {
               <select
                 value={form.place_id}
                 onChange={(e) => setForm({ ...form, place_id: e.target.value })}
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               >
                 <option value="">Sélectionner un lieu</option>
                 {places.map((place) => (
@@ -190,7 +190,7 @@ export default function ReservationsPage() {
                   type="datetime-local"
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </label>
               <label className="block">
@@ -201,7 +201,7 @@ export default function ReservationsPage() {
                   onChange={(e) =>
                     setForm({ ...form, end_date: e.target.value })
                   }
-                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                  className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                 />
               </label>
             </div>
@@ -214,7 +214,7 @@ export default function ReservationsPage() {
                 max="50"
                 value={form.persons}
                 onChange={(e) => setForm({ ...form, persons: e.target.value })}
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </label>
 
@@ -225,14 +225,14 @@ export default function ReservationsPage() {
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 placeholder="Demandes particulières…"
                 rows={2}
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50 resize-none"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none"
               />
             </label>
 
             <button
               onClick={handleCreate}
               disabled={!form.place_id || !form.date || submitting}
-              className="w-full py-2.5 rounded-xl bg-violet-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-violet-700 transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-blue-700 transition flex items-center justify-center gap-2"
             >
               {submitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -262,7 +262,7 @@ export default function ReservationsPage() {
               </p>
               <button
                 onClick={() => setShowForm(true)}
-                className="text-sm text-violet-600 font-medium hover:underline"
+                className="text-sm text-blue-600 font-medium hover:underline"
               >
                 Faire ma première réservation
               </button>

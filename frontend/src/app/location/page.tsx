@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
@@ -149,7 +149,7 @@ export default function LocationPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="text-lg font-bold flex items-center gap-2">
-            <Navigation className="w-5 h-5 text-violet-600" />
+            <Navigation className="w-5 h-5 text-blue-600" />
             Partage de position
           </h1>
         </div>
@@ -174,7 +174,7 @@ export default function LocationPage() {
         {/* Start new share */}
         <div className="bg-surface rounded-2xl p-5 border border-border space-y-4">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Radio className="w-4 h-4 text-pink-500" />
+            <Radio className="w-4 h-4 text-blue-500" />
             Démarrer un partage
           </h2>
           <div className="space-y-3">
@@ -185,7 +185,7 @@ export default function LocationPage() {
                 value={receiverId}
                 onChange={(e) => setReceiverId(e.target.value)}
                 placeholder="Ex: 42"
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </label>
             <label className="block">
@@ -193,7 +193,7 @@ export default function LocationPage() {
               <select
                 value={duration}
                 onChange={(e) => setDuration(parseInt(e.target.value))}
-                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                className="mt-1 w-full px-3 py-2 bg-white border border-border rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               >
                 <option value={15}>15 min</option>
                 <option value={30}>30 min</option>
@@ -205,7 +205,7 @@ export default function LocationPage() {
             <button
               onClick={handleStart}
               disabled={!position || !receiverId || starting}
-              className="w-full py-2.5 rounded-xl bg-violet-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-violet-700 transition flex items-center justify-center gap-2"
+              className="w-full py-2.5 rounded-xl bg-blue-600 text-white font-medium text-sm disabled:opacity-50 hover:bg-blue-700 transition flex items-center justify-center gap-2"
             >
               {starting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -220,7 +220,7 @@ export default function LocationPage() {
         {/* My active shares */}
         <section className="space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <Users className="w-4 h-4 text-violet-600" />
+            <Users className="w-4 h-4 text-blue-600" />
             Mes partages actifs ({myShares.length})
           </h2>
           {loading ? (
@@ -263,7 +263,7 @@ export default function LocationPage() {
         {/* Shares with me */}
         <section className="space-y-3">
           <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-pink-500" />
+            <MapPin className="w-4 h-4 text-blue-500" />
             Partagés avec moi ({sharedWithMe.length})
           </h2>
           {sharedWithMe.length === 0 ? (

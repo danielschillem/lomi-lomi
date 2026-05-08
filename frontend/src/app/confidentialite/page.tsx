@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 export default function ConfidentialitePage() {
   return (
@@ -7,7 +7,7 @@ export default function ConfidentialitePage() {
         <div className="mb-8">
           <Link
             href="/"
-            className="text-purple-400 hover:text-purple-300 text-sm"
+            className="text-blue-400 hover:text-blue-300 text-sm"
           >
             ← Retour
           </Link>
@@ -137,13 +137,13 @@ export default function ConfidentialitePage() {
         <div className="mt-10 pt-6 border-t border-gray-800 text-center">
           <Link
             href="/cgu"
-            className="text-purple-400 hover:text-purple-300 text-sm mr-4"
+            className="text-blue-400 hover:text-blue-300 text-sm mr-4"
           >
             Conditions d&apos;utilisation
           </Link>
           <Link
             href="/register"
-            className="text-purple-400 hover:text-purple-300 text-sm"
+            className="text-blue-400 hover:text-blue-300 text-sm"
           >
             S&apos;inscrire
           </Link>

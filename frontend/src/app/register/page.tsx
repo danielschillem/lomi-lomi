@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -152,7 +152,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="absolute inset-0 bg-linear-to-br from-violet-50 via-white to-pink-50" />
+      <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-white to-blue-50" />
 
       <div className="relative w-full max-w-md">
         <button
@@ -172,8 +172,8 @@ export default function RegisterPage() {
 
         <div className="bg-white/90 border border-border rounded-2xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-50 border border-violet-200 mb-4">
-              <UserPlus className="w-7 h-7 text-violet-600" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-50 border border-blue-200 mb-4">
+              <UserPlus className="w-7 h-7 text-blue-600" />
             </div>
             <h1 className="text-2xl font-bold">
               {step === "choose" && "Créer un compte"}
@@ -208,12 +208,12 @@ export default function RegisterPage() {
             <div className="space-y-3">
               <button
                 onClick={() => setStep("phone")}
-                className="w-full flex items-center gap-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-4 px-5 rounded-xl transition"
+                className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-5 rounded-xl transition"
               >
                 <Phone className="w-5 h-5" />
                 <div className="text-left flex-1">
                   <p className="text-sm font-semibold">Numéro de téléphone</p>
-                  <p className="text-xs text-violet-600">
+                  <p className="text-xs text-blue-600">
                     Rapide et sécurisé via code SMS
                   </p>
                 </div>
@@ -247,7 +247,7 @@ export default function RegisterPage() {
                     <button
                       type="button"
                       onClick={() => setShowCountries(!showCountries)}
-                      className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-3 py-3 text-sm text-white hover:border-violet-400 transition whitespace-nowrap"
+                      className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-3 py-3 text-sm text-white hover:border-blue-400 transition whitespace-nowrap"
                     >
                       <span>{country.flag}</span>
                       <span className="text-muted">{country.dial}</span>
@@ -277,7 +277,7 @@ export default function RegisterPage() {
                             }}
                             className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 transition text-left ${
                               c.code === country.code
-                                ? "bg-violet-50 text-violet-600"
+                                ? "bg-blue-50 text-blue-600"
                                 : "text-white"
                             }`}
                           >
@@ -297,14 +297,14 @@ export default function RegisterPage() {
                     }
                     required
                     placeholder="6 12 34 56 78"
-                    className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                    className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                   />
                 </div>
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Envoi..." : "Recevoir le code SMS"}
               </button>
@@ -328,14 +328,14 @@ export default function RegisterPage() {
                   required
                   maxLength={6}
                   placeholder="000000"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition font-mono"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition font-mono"
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || otpCode.length !== 6}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Vérification..." : "Vérifier"}
               </button>
@@ -374,7 +374,7 @@ export default function RegisterPage() {
                   minLength={3}
                   maxLength={50}
                   placeholder="Votre pseudo anonyme"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                   autoFocus
                 />
               </div>
@@ -383,15 +383,15 @@ export default function RegisterPage() {
                   type="checkbox"
                   checked={acceptCGU}
                   onChange={(e) => setAcceptCGU(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-border bg-surface-2 text-violet-600 focus:ring-violet-500"
+                  className="mt-0.5 w-4 h-4 rounded border-border bg-surface-2 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-xs text-muted leading-relaxed">
-                  <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-violet-600" />
+                  <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-blue-600" />
                   J&apos;accepte les{" "}
                   <a
                     href="/cgu"
                     target="_blank"
-                    className="text-violet-400 hover:underline"
+                    className="text-blue-400 hover:underline"
                   >
                     conditions d&apos;utilisation
                   </a>{" "}
@@ -399,7 +399,7 @@ export default function RegisterPage() {
                   <a
                     href="/confidentialite"
                     target="_blank"
-                    className="text-violet-400 hover:underline"
+                    className="text-blue-400 hover:underline"
                   >
                     politique de confidentialité
                   </a>{" "}
@@ -409,7 +409,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Création..." : "Créer mon profil"}
               </button>
@@ -431,7 +431,7 @@ export default function RegisterPage() {
                   minLength={3}
                   maxLength={50}
                   placeholder="Votre pseudo anonyme"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                 />
               </div>
               <div>
@@ -444,7 +444,7 @@ export default function RegisterPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="votre@email.com"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                 />
               </div>
               <div>
@@ -459,7 +459,7 @@ export default function RegisterPage() {
                     required
                     minLength={8}
                     placeholder="8 caractères minimum"
-                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 pr-12 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 pr-12 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                   />
                   <button
                     type="button"
@@ -485,7 +485,7 @@ export default function RegisterPage() {
                   required
                   minLength={8}
                   placeholder="Retapez votre mot de passe"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                 />
               </div>
               <label className="flex items-start gap-3 cursor-pointer">
@@ -493,15 +493,15 @@ export default function RegisterPage() {
                   type="checkbox"
                   checked={acceptCGU}
                   onChange={(e) => setAcceptCGU(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-border bg-surface-2 text-violet-600 focus:ring-violet-500"
+                  className="mt-0.5 w-4 h-4 rounded border-border bg-surface-2 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-xs text-muted leading-relaxed">
-                  <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-violet-600" />
+                  <ShieldCheck className="w-3.5 h-3.5 inline mr-1 text-blue-600" />
                   J&apos;accepte les{" "}
                   <a
                     href="/cgu"
                     target="_blank"
-                    className="text-violet-400 hover:underline"
+                    className="text-blue-400 hover:underline"
                   >
                     conditions d&apos;utilisation
                   </a>{" "}
@@ -509,7 +509,7 @@ export default function RegisterPage() {
                   <a
                     href="/confidentialite"
                     target="_blank"
-                    className="text-violet-400 hover:underline"
+                    className="text-blue-400 hover:underline"
                   >
                     politique de confidentialité
                   </a>{" "}
@@ -519,7 +519,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Création..." : "Créer mon profil"}
               </button>
@@ -531,7 +531,7 @@ export default function RegisterPage() {
               Déjà membre ?{" "}
               <Link
                 href="/login"
-                className="text-violet-600 hover:text-violet-600 transition"
+                className="text-blue-600 hover:text-blue-600 transition"
               >
                 Se connecter
               </Link>

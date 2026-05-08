@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -92,7 +92,7 @@ export default function MatchesPage() {
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-600" />
+            <Heart className="w-5 h-5 text-blue-600" />
             Mes matches ({matches.length})
           </h1>
           <div className="w-16" />
@@ -107,7 +107,7 @@ export default function MatchesPage() {
             </p>
             <Link
               href="/discover"
-              className="inline-block bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6 py-3 rounded-lg transition text-sm"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition text-sm"
             >
               Découvrir des profils
             </Link>
@@ -119,7 +119,7 @@ export default function MatchesPage() {
               return (
                 <div
                   key={match.id}
-                  className="bg-white/90 border border-border rounded-2xl overflow-hidden hover:border-violet-400/30 transition"
+                  className="bg-white/90 border border-border rounded-2xl overflow-hidden hover:border-blue-400/30 transition"
                 >
                   <Link href={`/users/${other.id}`}>
                     <div className="relative h-36 bg-surface-2 flex items-center justify-center">
@@ -145,7 +145,7 @@ export default function MatchesPage() {
                         {other.username}
                       </span>
                       {other.is_verified && (
-                        <BadgeCheck className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+                        <BadgeCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                       )}
                     </div>
                     {other.city && (
@@ -173,7 +173,7 @@ export default function MatchesPage() {
                           setMessaging(null);
                         }}
                         disabled={messaging === other.id}
-                        className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-semibold py-1.5 rounded-lg transition flex items-center justify-center gap-1"
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-semibold py-1.5 rounded-lg transition flex items-center justify-center gap-1"
                       >
                         <MessageCircle className="w-3 h-3" />
                         {messaging === other.id ? "..." : "Message"}

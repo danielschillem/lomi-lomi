@@ -13,6 +13,7 @@ import {
   Modal,
 } from "react-native";
 import { router } from "expo-router";
+import PremiumGate from "@/app/components/PremiumGate";
 import { Ionicons } from "@expo/vector-icons";
 import { getProducts, createOrder, getOMUssdCode, confirmOMPayment } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
@@ -32,7 +33,7 @@ interface CartItem {
   quantity: number;
 }
 
-export default function ShopScreen() {
+function ShopScreenInner() {
   const { colors } = useTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -434,3 +435,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
+
+export default function ShopScreen() {
+  return (
+    <PremiumGate feature="Boutique" icon="bag-outline" tone="#f97316">
+      <ShopScreenInner />
+    </PremiumGate>
+  );
+}

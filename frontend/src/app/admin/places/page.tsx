@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
@@ -169,7 +169,7 @@ export default function AdminPlacesPage() {
         </h1>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
         >
           <Plus className="w-4 h-4" />
           Ajouter
@@ -214,7 +214,7 @@ export default function AdminPlacesPage() {
               placeholder="Nom du lieu"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <textarea
               placeholder="Description"
@@ -223,7 +223,7 @@ export default function AdminPlacesPage() {
                 setForm({ ...form, description: e.target.value })
               }
               rows={3}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -236,7 +236,7 @@ export default function AdminPlacesPage() {
                     setForm({ ...form, category: e.target.value })
                   }
                   title="Catégorie"
-                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-blue-400"
                 >
                   {Object.entries(categories).map(([val, label]) => (
                     <option key={val} value={val}>
@@ -251,7 +251,7 @@ export default function AdminPlacesPage() {
                   placeholder="Ville"
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
-                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
                 />
               </div>
             </div>
@@ -259,7 +259,7 @@ export default function AdminPlacesPage() {
               placeholder="Adresse complète"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <LocationPicker
               latitude={form.latitude}
@@ -272,19 +272,19 @@ export default function AdminPlacesPage() {
               placeholder="Téléphone"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <input
               placeholder="Site web"
               value={form.website}
               onChange={(e) => setForm({ ...form, website: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <input
               placeholder="URL de l'image (auto après upload)"
               value={form.image_url}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <div className="space-y-2">
               <input
@@ -310,7 +310,7 @@ export default function AdminPlacesPage() {
             </label>
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+              className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
             >
               <Save className="w-4 h-4" />
               {editId ? "Mettre à jour" : "Créer"}
@@ -387,7 +387,7 @@ export default function AdminPlacesPage() {
                         <span className="font-medium flex items-center gap-2">
                           {p.name}
                           {p.is_partner && (
-                            <span className="text-[10px] bg-violet-50 text-violet-600 border border-violet-200 px-1.5 py-0.5 rounded-full font-medium">
+                            <span className="text-[10px] bg-blue-50 text-blue-600 border border-blue-200 px-1.5 py-0.5 rounded-full font-medium">
                               Partenaire
                             </span>
                           )}
@@ -429,7 +429,7 @@ export default function AdminPlacesPage() {
                       <button
                         onClick={() => openEdit(p)}
                         title="Modifier"
-                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-violet-600"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-blue-600"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>

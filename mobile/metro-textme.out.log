@@ -1,0 +1,13 @@
+
+> lomilomi-mobile@1.0.0 start
+> expo start --offline
+
+Networking has been disabled
+Starting project at C:\Users\DEVBACKEND\Desktop\LOMI-LOMI\mobile
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web Bundled 18598ms node_modules\expo-router\entry.js (993 modules)
+ LOG  [web] Logs will appear in the browser console
+Web Bundled 261ms node_modules\expo-router\entry.js (1 module)
+ LOG  [web] Logs will appear in the browser console

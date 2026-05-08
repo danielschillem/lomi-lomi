@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { getMyReservations, cancelReservation } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
+import PremiumGate from "@/app/components/PremiumGate";
 
 interface Reservation {
   id: number;
@@ -22,7 +23,7 @@ interface Reservation {
   status: string;
 }
 
-export default function ReservationsScreen() {
+function ReservationsScreenInner() {
   const { colors } = useTheme();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -151,3 +152,11 @@ const styles = StyleSheet.create({
   },
   cancelText: { color: "#ef4444", fontSize: 13, fontWeight: "500" },
 });
+
+export default function ReservationsScreen() {
+  return (
+    <PremiumGate feature="Réservations" icon="restaurant-outline" tone="#22c55e">
+      <ReservationsScreenInner />
+    </PremiumGate>
+  );
+}

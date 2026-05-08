@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
@@ -57,7 +57,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -68,13 +68,13 @@ export default function DashboardPage() {
           label: "Utilisateurs",
           value: adminStats.users,
           icon: Users,
-          color: "bg-violet-50 text-violet-600",
+          color: "bg-blue-50 text-blue-600",
         },
         {
           label: "Produits (tous)",
           value: adminStats.products,
           icon: ShoppingBag,
-          color: "bg-pink-50 text-pink-500",
+          color: "bg-blue-50 text-blue-500",
         },
         {
           label: "Lieux (tous)",
@@ -133,7 +133,7 @@ export default function DashboardPage() {
           label: "Bien-être",
           value: ownerStats.wellness,
           icon: Heart,
-          color: "bg-pink-50 text-pink-500",
+          color: "bg-blue-50 text-blue-500",
         },
         {
           label: "Commandes",
@@ -151,7 +151,7 @@ export default function DashboardPage() {
           label: "Réservations bien-être",
           value: ownerStats.bookings,
           icon: BarChart3,
-          color: "bg-violet-50 text-violet-600",
+          color: "bg-blue-50 text-blue-600",
         },
         {
           label: "Réservations lieux",
@@ -177,7 +177,7 @@ export default function DashboardPage() {
             {adminCards.map((card) => (
               <div
                 key={card.label}
-                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-violet-400/30"
+                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-blue-400/30"
               >
                 <div className="flex items-center gap-3">
                   <div className={`rounded-lg p-2 ${card.color}`}>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
             {ownerCards.map((card) => (
               <div
                 key={card.label}
-                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-violet-400/30"
+                className="rounded-xl bg-white/90 border border-border p-5 transition hover:border-blue-400/30"
               >
                 <div className="flex items-center gap-3">
                   <div className={`rounded-lg p-2 ${card.color}`}>

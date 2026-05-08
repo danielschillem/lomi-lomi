@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Radar as RadarIcon, User, Wifi, WifiOff } from "lucide-react";
@@ -80,7 +80,7 @@ export default function Radar({ className = "" }: Props) {
           <select
             value={radius}
             onChange={(e) => setRadius(Number(e.target.value))}
-            className="bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 rounded-lg px-2 py-1 focus:outline-none focus:border-violet-500"
+            className="bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 rounded-lg px-2 py-1 focus:outline-none focus:border-blue-500"
             title="Rayon"
           >
             <option value={1}>1 km</option>

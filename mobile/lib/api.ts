@@ -352,6 +352,62 @@ export function sendMessage(data: {
   });
 }
 
+export type CallType = "audio" | "video";
+export type CallStatus =
+  | "ringing"
+  | "accepted"
+  | "declined"
+  | "missed"
+  | "ended"
+  | "cancelled";
+
+export interface CallRecord {
+  id: number;
+  conversation_id: number;
+  caller_id: number;
+  receiver_id: number;
+  call_type: CallType;
+  room: string;
+  status: CallStatus;
+  created_at: string;
+  accepted_at?: string;
+  ended_at?: string;
+  caller?: {
+    id: number;
+    username: string;
+    avatar_url?: string;
+    is_online?: boolean;
+  };
+  receiver?: {
+    id: number;
+    username: string;
+    avatar_url?: string;
+    is_online?: boolean;
+  };
+}
+
+export function getCalls(limit: number = 50) {
+  return request<CallRecord[]>(`/calls?limit=${limit}`);
+}
+
+export function startCall(data: {
+  conversation_id?: number;
+  receiver_id?: number;
+  call_type: CallType;
+}) {
+  return request<CallRecord>("/calls", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCallStatus(callId: number, status: CallStatus) {
+  return request<CallRecord>(`/calls/${callId}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}
+
 export function uploadMessageImage(uri: string) {
   const formData = new FormData();
   const filename = uri.split("/").pop() || "message.jpg";

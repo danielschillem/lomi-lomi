@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -102,13 +102,13 @@ export default function Navbar() {
               key={link.href}
               href={link.href}
               className={`relative flex flex-col items-center gap-0.5 px-2 py-1 transition ${
-                active ? "text-violet-600" : "text-gray-400 hover:text-gray-600"
+                active ? "text-blue-600" : "text-gray-400 hover:text-gray-600"
               }`}
             >
               <Icon className="w-5 h-5" />
               <span className="text-[10px]">{link.label}</span>
               {link.badge && link.badge > 0 ? (
-                <span className="absolute -top-1 -right-0.5 min-w-4.5 h-4.5 flex items-center justify-center text-[10px] font-bold bg-pink-500 text-white rounded-full px-1">
+                <span className="absolute -top-1 -right-0.5 min-w-4.5 h-4.5 flex items-center justify-center text-[10px] font-bold bg-red-500 text-white rounded-full px-1">
                   {link.badge > 99 ? "99+" : link.badge}
                 </span>
               ) : null}

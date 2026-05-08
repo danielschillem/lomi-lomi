@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -125,12 +125,12 @@ export default function AdminProductsView() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ShoppingBag className="w-6 h-6 text-pink-500" />
+          <ShoppingBag className="w-6 h-6 text-blue-500" />
           Produits
         </h1>
         <button
           onClick={openCreate}
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
         >
           <Plus className="w-4 h-4" />
           Ajouter
@@ -162,7 +162,7 @@ export default function AdminProductsView() {
               placeholder="Nom du produit"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <textarea
               placeholder="Description"
@@ -171,7 +171,7 @@ export default function AdminProductsView() {
                 setForm({ ...form, description: e.target.value })
               }
               rows={3}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -188,7 +188,7 @@ export default function AdminProductsView() {
                   onChange={(e) =>
                     setForm({ ...form, price: parseFloat(e.target.value) || 0 })
                   }
-                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -201,7 +201,7 @@ export default function AdminProductsView() {
                   onChange={(e) =>
                     setForm({ ...form, stock: parseInt(e.target.value) || 0 })
                   }
-                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground focus:outline-none focus:border-blue-400"
                 />
               </div>
             </div>
@@ -209,13 +209,13 @@ export default function AdminProductsView() {
               placeholder="Catégorie"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <input
               placeholder="URL de l'image (auto après upload)"
               value={form.image_url}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
-              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface-2 border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <div className="space-y-2">
               <input
@@ -241,7 +241,7 @@ export default function AdminProductsView() {
             </label>
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+              className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
             >
               <Save className="w-4 h-4" />
               {editId ? "Mettre à jour" : "Créer"}
@@ -332,7 +332,7 @@ export default function AdminProductsView() {
                   <td className="px-6 py-4 text-muted hidden sm:table-cell">
                     {p.category || "-"}
                   </td>
-                  <td className="px-6 py-4 font-medium text-pink-500">
+                  <td className="px-6 py-4 font-medium text-blue-500">
                     {Math.round(p.price)} FCFA
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
@@ -353,7 +353,7 @@ export default function AdminProductsView() {
                       <button
                         onClick={() => openEdit(p)}
                         title="Modifier"
-                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-violet-600"
+                        className="p-1.5 rounded-md hover:bg-gray-100 transition text-muted hover:text-blue-600"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>

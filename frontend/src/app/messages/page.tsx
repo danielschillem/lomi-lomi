@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -108,7 +108,7 @@ export default function ConversationsPage() {
             Accueil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-violet-600" />
+            <MessageCircle className="w-5 h-5 text-blue-600" />
             Messages
           </h1>
           <div className="w-16" />
@@ -123,7 +123,7 @@ export default function ConversationsPage() {
             </p>
             <Link
               href="/discover"
-              className="inline-block bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6 py-3 rounded-lg transition text-sm"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition text-sm"
             >
               Découvrir des profils
             </Link>
@@ -138,7 +138,7 @@ export default function ConversationsPage() {
                 <Link
                   key={conv.id}
                   href={`/messages/${conv.id}`}
-                  className="flex items-center gap-4 bg-white/90 border border-border hover:border-violet-400/30 rounded-xl p-4 transition"
+                  className="flex items-center gap-4 bg-white/90 border border-border hover:border-blue-400/30 rounded-xl p-4 transition"
                 >
                   <div className="relative shrink-0">
                     <div className="w-12 h-12 rounded-full bg-surface-2 flex items-center justify-center overflow-hidden">
@@ -176,7 +176,7 @@ export default function ConversationsPage() {
                         {conv.last_message || "Commencez la conversation..."}
                       </p>
                       {hasUnread && (
-                        <span className="shrink-0 ml-2 w-5 h-5 rounded-full bg-violet-600 text-white text-[10px] font-bold flex items-center justify-center">
+                        <span className="shrink-0 ml-2 w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] font-bold flex items-center justify-center">
                           {conv.unread_count}
                         </span>
                       )}

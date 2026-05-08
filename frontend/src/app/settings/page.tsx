@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -156,7 +156,7 @@ export default function SettingsPage() {
             Profil
           </Link>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Settings className="w-5 h-5 text-violet-600" />
+            <Settings className="w-5 h-5 text-blue-600" />
             Paramètres
           </h1>
           <div className="w-16" />
@@ -165,7 +165,7 @@ export default function SettingsPage() {
         {/* Preferences */}
         <section className="bg-white/90 border border-border rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Sliders className="w-5 h-5 text-violet-600" />
+            <Sliders className="w-5 h-5 text-blue-600" />
             Préférences de découverte
           </h2>
           <form onSubmit={handleSavePreferences} className="space-y-4">
@@ -181,7 +181,7 @@ export default function SettingsPage() {
                   value={minAge}
                   onChange={(e) => setMinAge(Number(e.target.value))}
                   title="Âge minimum"
-                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-400"
                 />
               </div>
               <div>
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                   value={maxAge}
                   onChange={(e) => setMaxAge(Number(e.target.value))}
                   title="Âge maximum"
-                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                  className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-400"
                 />
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                 value={maxDistance}
                 onChange={(e) => setMaxDistance(Number(e.target.value))}
                 title="Distance maximale"
-                className="w-full accent-violet-500"
+                className="w-full accent-blue-500"
               />
             </div>
             <div>
@@ -221,7 +221,7 @@ export default function SettingsPage() {
                 value={prefGender}
                 onChange={(e) => setPrefGender(e.target.value)}
                 title="Genre recherché"
-                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-violet-400"
+                className="w-full bg-surface border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-400"
               >
                 <option value="">Tous</option>
                 <option value="homme">Homme</option>
@@ -232,7 +232,7 @@ export default function SettingsPage() {
             <button
               type="submit"
               disabled={prefLoading}
-              className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm flex items-center justify-center gap-2"
             >
               <Save className="w-4 h-4" />
               {prefLoading ? "Sauvegarde..." : "Sauvegarder"}
@@ -249,7 +249,7 @@ export default function SettingsPage() {
             href="/settings/blocked"
             className="flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition"
           >
-            <ShieldOff className="w-5 h-5 text-pink-500" />
+            <ShieldOff className="w-5 h-5 text-blue-500" />
             <span className="flex-1 text-sm font-medium text-gray-900">
               Utilisateurs bloques
             </span>
@@ -259,7 +259,7 @@ export default function SettingsPage() {
             href="/settings/addresses"
             className="flex items-center gap-3 px-5 py-4 hover:bg-gray-50 transition"
           >
-            <MapPin className="w-5 h-5 text-violet-500" />
+            <MapPin className="w-5 h-5 text-blue-500" />
             <span className="flex-1 text-sm font-medium text-gray-900">
               Adresses de livraison
             </span>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
         {/* Change Password */}
         <section className="bg-white/90 border border-border rounded-2xl p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Lock className="w-5 h-5 text-violet-600" />
+            <Lock className="w-5 h-5 text-blue-600" />
             Changer le mot de passe
           </h2>
           <form onSubmit={handleChangePassword} className="space-y-4">
@@ -279,26 +279,26 @@ export default function SettingsPage() {
               placeholder="Mot de passe actuel"
               value={currentPwd}
               onChange={(e) => setCurrentPwd(e.target.value)}
-              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <input
               type="password"
               placeholder="Nouveau mot de passe"
               value={newPwd}
               onChange={(e) => setNewPwd(e.target.value)}
-              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <input
               type="password"
               placeholder="Confirmer le nouveau mot de passe"
               value={confirmPwd}
               onChange={(e) => setConfirmPwd(e.target.value)}
-              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+              className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
             />
             <button
               type="submit"
               disabled={pwdLoading}
-              className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition text-sm"
             >
               {pwdLoading ? "Modification..." : "Modifier le mot de passe"}
             </button>

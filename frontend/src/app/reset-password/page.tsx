@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -44,7 +44,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-purple-900 via-purple-800 to-pink-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-linear-to-br from-blue-900 via-blue-800 to-blue-800 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-2xl">
         <h1 className="text-2xl font-bold text-white mb-2 text-center">
           Nouveau mot de passe
@@ -77,7 +77,7 @@ function ResetPasswordForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-purple-400"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
                 placeholder="••••••••"
               />
             </div>
@@ -90,14 +90,14 @@ function ResetPasswordForm() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 required
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-purple-400"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-blue-400"
                 placeholder="••••••••"
               />
             </div>
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full bg-linear-to-r from-purple-600 to-pink-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50"
+              className="w-full bg-linear-to-r from-blue-600 to-blue-600 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition disabled:opacity-50"
             >
               {loading ? "Enregistrement..." : "Réinitialiser"}
             </button>

@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as Location from "expo-location";
+import PremiumGate from "@/app/components/PremiumGate";
 import { updateLocation, nearbyUsers } from "@/lib/api";
 import { useWS } from "@/lib/ws-context";
 import { useTheme } from "@/lib/theme-context";
@@ -30,7 +31,7 @@ interface NearbyUser {
   angle: number;
 }
 
-export default function NearbyScreen() {
+function NearbyScreenInner() {
   const { colors } = useTheme();
   const [users, setUsers] = useState<NearbyUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -421,3 +422,11 @@ const styles = StyleSheet.create({
   },
   onlineBadgeText: { color: "#22c55e", fontSize: 11, fontWeight: "600" },
 });
+
+export default function NearbyScreen() {
+  return (
+    <PremiumGate feature="Radar" icon="radio-outline" tone="#06b6d4">
+      <NearbyScreenInner />
+    </PremiumGate>
+  );
+}

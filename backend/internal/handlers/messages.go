@@ -70,6 +70,40 @@ func normalizeMemberIDs(ownerID uint, memberIDs []uint) []uint {
 	return result
 }
 
+func makeCallRoom(conversationID uint) string {
+	b := make([]byte, 8)
+	if _, err := rand.Read(b); err != nil {
+		return fmt.Sprintf("textme-call-%d-%d", conversationID, time.Now().UnixNano())
+	}
+	return fmt.Sprintf("textme-call-%d-%s", conversationID, hex.EncodeToString(b))
+}
+
+func callParticipantPayload(user models.User) map[string]interface{} {
+	return map[string]interface{}{
+		"id":         user.ID,
+		"username":   user.Username,
+		"avatar_url": user.AvatarURL,
+		"is_online":  user.IsOnline,
+	}
+}
+
+func callEventPayload(call models.Call) map[string]interface{} {
+	return map[string]interface{}{
+		"id":              call.ID,
+		"conversation_id": call.ConversationID,
+		"caller_id":       call.CallerID,
+		"receiver_id":     call.ReceiverID,
+		"call_type":       call.CallType,
+		"room":            call.Room,
+		"status":          call.Status,
+		"created_at":      call.CreatedAt,
+		"accepted_at":     call.AcceptedAt,
+		"ended_at":        call.EndedAt,
+		"caller":          callParticipantPayload(call.Caller),
+		"receiver":        callParticipantPayload(call.Receiver),
+	}
+}
+
 func (h *MessageHandler) GetConversations(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
 
@@ -382,6 +416,221 @@ func (h *MessageHandler) SendMessage(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(msg)
+}
+
+// GetCalls returns recent direct audio/video calls for the authenticated user.
+func (h *MessageHandler) GetCalls(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	limit, _ := strconv.Atoi(c.Query("limit", "50"))
+	if limit < 1 || limit > 100 {
+		limit = 50
+	}
+
+	var calls []models.Call
+	if err := database.DB.
+		Preload("Caller").
+		Preload("Receiver").
+		Where("caller_id = ? OR receiver_id = ?", userID, userID).
+		Order("created_at DESC").
+		Limit(limit).
+		Find(&calls).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de charger les appels"})
+	}
+
+	return c.JSON(calls)
+}
+
+// StartCall creates a direct call session and notifies the receiver in real time.
+func (h *MessageHandler) StartCall(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	var req struct {
+		ConversationID uint   `json:"conversation_id,omitempty"`
+		ReceiverID     uint   `json:"receiver_id,omitempty"`
+		CallType       string `json:"call_type"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
+	}
+
+	req.CallType = strings.ToLower(strings.TrimSpace(req.CallType))
+	if req.CallType != "audio" && req.CallType != "video" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Type d'appel invalide"})
+	}
+	if req.ConversationID == 0 && req.ReceiverID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Destinataire ou conversation requis"})
+	}
+
+	var conv models.Conversation
+	if req.ConversationID > 0 {
+		if err := database.DB.First(&conv, req.ConversationID).Error; err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Conversation non trouvée"})
+		}
+		if !userCanAccessConversation(userID, conv) {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+		}
+		if conv.IsGroup {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Les appels de groupe arrivent dans une prochaine étape"})
+		}
+		if req.ReceiverID == 0 {
+			if conv.User1ID == userID {
+				req.ReceiverID = conv.User2ID
+			} else {
+				req.ReceiverID = conv.User1ID
+			}
+		}
+	} else {
+		if req.ReceiverID == userID {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Destinataire invalide"})
+		}
+
+		var receiver models.User
+		if err := database.DB.First(&receiver, req.ReceiverID).Error; err != nil || receiver.IsBanned {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Utilisateur non trouvé"})
+		}
+
+		result := database.DB.
+			Where("(is_group = ? OR is_group IS NULL) AND ((user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?))",
+				false, userID, req.ReceiverID, req.ReceiverID, userID).
+			First(&conv)
+		if result.Error != nil {
+			conv = models.Conversation{
+				User1ID: userID,
+				User2ID: req.ReceiverID,
+			}
+			if err := database.DB.Create(&conv).Error; err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de créer la conversation"})
+			}
+		}
+	}
+
+	if req.ReceiverID == 0 || req.ReceiverID == userID {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Destinataire invalide"})
+	}
+
+	var blockCount int64
+	database.DB.Model(&models.Block{}).Where(
+		"(blocker_id = ? AND blocked_id = ?) OR (blocker_id = ? AND blocked_id = ?)",
+		userID, req.ReceiverID, req.ReceiverID, userID,
+	).Count(&blockCount)
+	if blockCount > 0 {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Communication impossible avec cet utilisateur"})
+	}
+
+	call := models.Call{
+		ConversationID: conv.ID,
+		CallerID:       userID,
+		ReceiverID:     req.ReceiverID,
+		CallType:       req.CallType,
+		Room:           makeCallRoom(conv.ID),
+		Status:         "ringing",
+	}
+	if err := database.DB.Create(&call).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de démarrer l'appel"})
+	}
+
+	database.DB.Model(&conv).Update("updated_at", call.CreatedAt)
+	database.DB.Preload("Caller").Preload("Receiver").First(&call, call.ID)
+
+	payload := callEventPayload(call)
+	if h.WSHub != nil {
+		h.WSHub.SendToUser(call.ReceiverID, WSMessage{
+			Type: "call_incoming",
+			Data: payload,
+		})
+	}
+
+	callKind := "audio"
+	if call.CallType == "video" {
+		callKind = "vidéo"
+	}
+	SendPushToUser(call.ReceiverID, "Appel TextMe", fmt.Sprintf("%s vous appelle en %s", call.Caller.Username, callKind), map[string]interface{}{
+		"type":            "call",
+		"call_id":         call.ID,
+		"conversation_id": call.ConversationID,
+		"caller_id":       call.CallerID,
+		"call_type":       call.CallType,
+		"call_room":       call.Room,
+	})
+
+	return c.Status(fiber.StatusCreated).JSON(call)
+}
+
+// UpdateCallStatus accepts, declines or ends an existing direct call.
+func (h *MessageHandler) UpdateCallStatus(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	callID, err := strconv.ParseUint(c.Params("id"), 10, 32)
+	if err != nil || callID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "ID appel invalide"})
+	}
+
+	var req struct {
+		Status string `json:"status"`
+	}
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Données invalides"})
+	}
+	req.Status = strings.ToLower(strings.TrimSpace(req.Status))
+
+	allowed := map[string]bool{
+		"accepted":  true,
+		"declined":  true,
+		"missed":    true,
+		"ended":     true,
+		"cancelled": true,
+	}
+	if !allowed[req.Status] {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Statut d'appel invalide"})
+	}
+
+	var call models.Call
+	if err := database.DB.Preload("Caller").Preload("Receiver").First(&call, uint(callID)).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appel non trouvé"})
+	}
+	if call.CallerID != userID && call.ReceiverID != userID {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Accès interdit"})
+	}
+
+	switch req.Status {
+	case "accepted":
+		if call.ReceiverID != userID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Seul le destinataire peut accepter l'appel"})
+		}
+	case "declined", "missed":
+		if call.ReceiverID != userID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Seul le destinataire peut refuser l'appel"})
+		}
+	case "cancelled":
+		if call.CallerID != userID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Seul l'appelant peut annuler l'appel"})
+		}
+	}
+
+	now := time.Now()
+	updates := map[string]interface{}{"status": req.Status}
+	if req.Status == "accepted" {
+		updates["accepted_at"] = &now
+	} else {
+		updates["ended_at"] = &now
+	}
+	if err := database.DB.Model(&call).Updates(updates).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Impossible de mettre à jour l'appel"})
+	}
+
+	database.DB.Preload("Caller").Preload("Receiver").First(&call, call.ID)
+	payload := callEventPayload(call)
+	if h.WSHub != nil {
+		otherID := call.ReceiverID
+		if userID == call.ReceiverID {
+			otherID = call.CallerID
+		}
+		h.WSHub.SendToUser(otherID, WSMessage{
+			Type: "call_status",
+			Data: payload,
+		})
+	}
+
+	return c.JSON(call)
 }
 
 // MarkRead marks messages in a conversation as read and notifies senders via WS.

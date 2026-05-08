@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { ownerGetOrders, ownerUpdateOrderStatus } from "@/lib/api";
@@ -45,7 +45,7 @@ const STATUS_LABELS: Record<
   },
   shipped: {
     label: "Expédiée",
-    color: "bg-violet-50 text-violet-600",
+    color: "bg-blue-50 text-blue-600",
     icon: Truck,
   },
   delivered: {
@@ -92,7 +92,7 @@ export default function OwnerOrdersView() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -177,7 +177,7 @@ export default function OwnerOrdersView() {
                   {nextStatus && (
                     <button
                       onClick={() => handleStatusUpdate(order.id, nextStatus)}
-                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm text-white transition hover:bg-purple-700"
+                      className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700"
                     >
                       Passer à : {STATUS_LABELS[nextStatus]?.label}
                     </button>

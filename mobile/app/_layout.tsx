@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { WSProvider } from "@/lib/ws-context";
 import { ThemeProvider, useTheme } from "@/lib/theme-context";
 import { usePushNotifications } from "@/lib/push-notifications";
+import IncomingCallModal from "@/app/components/IncomingCallModal";
 
 function InnerLayout() {
   const { user } = useAuth();
@@ -57,6 +58,7 @@ function InnerLayout() {
         <Stack.Screen name="location" options={{ title: "Partage de position" }} />
         <Stack.Screen name="carte" options={{ title: "Carte des lieux" }} />
       </Stack>
+      <IncomingCallModal />
     </>
   );
 }

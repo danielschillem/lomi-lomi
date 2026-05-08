@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -112,7 +112,7 @@ export default function AddressesPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -121,46 +121,46 @@ export default function AddressesPage() {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-2">
         <input
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
           placeholder="Label (ex: Maison)"
           value={form.label}
           onChange={(e) => setForm({ ...form, label: e.target.value })}
         />
         <input
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
           placeholder="Nom complet *"
           value={form.full_name}
           onChange={(e) => setForm({ ...form, full_name: e.target.value })}
         />
       </div>
       <input
-        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
         placeholder="Adresse complète *"
         value={form.address}
         onChange={(e) => setForm({ ...form, address: e.target.value })}
       />
       <div className="grid grid-cols-3 gap-2">
         <input
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
           placeholder="Ville *"
           value={form.city}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
         />
         <input
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
           placeholder="Code postal"
           value={form.postal_code}
           onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
         />
         <input
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
           placeholder="Pays"
           value={form.country}
           onChange={(e) => setForm({ ...form, country: e.target.value })}
         />
       </div>
       <input
-        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400"
+        className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400"
         placeholder="Téléphone"
         value={form.phone}
         onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -187,7 +187,7 @@ export default function AddressesPage() {
             setShowCreate(!showCreate);
             resetForm();
           }}
-          className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm text-white transition hover:bg-purple-700"
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white transition hover:bg-blue-700"
         >
           <Plus size={16} /> Ajouter
         </button>
@@ -249,7 +249,7 @@ export default function AddressesPage() {
                         {addr.label || addr.full_name}
                       </p>
                       {addr.is_default && (
-                        <span className="flex items-center gap-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-700">
+                        <span className="flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
                           <Star size={10} /> Par défaut
                         </span>
                       )}
@@ -268,7 +268,7 @@ export default function AddressesPage() {
                       <button
                         title="Définir par défaut"
                         onClick={() => handleSetDefault(addr.id)}
-                        className="rounded-lg p-2 text-gray-400 hover:bg-purple-50 hover:text-purple-600"
+                        className="rounded-lg p-2 text-gray-400 hover:bg-blue-50 hover:text-blue-600"
                       >
                         <Star size={14} />
                       </button>

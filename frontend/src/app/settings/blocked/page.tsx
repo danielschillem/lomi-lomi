@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -53,7 +53,7 @@ export default function BlockedUsersPage() {
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="w-8 h-8 border-4 border-pink-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function BlockedUsersPage() {
         <Link href="/settings" className="text-gray-600 hover:text-gray-900">
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <ShieldOff className="w-5 h-5 text-pink-500" />
+        <ShieldOff className="w-5 h-5 text-blue-500" />
         <h1 className="text-lg font-semibold text-gray-900">
           Utilisateurs bloques
         </h1>

@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { getPlaces } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
+import PremiumGate from "@/app/components/PremiumGate";
 
 type Place = {
   id: number;
@@ -33,7 +34,7 @@ const CATEGORIES = [
   { value: "wellness", label: "Bien-être", icon: "sparkles-outline" as const },
 ];
 
-export default function CarteScreen() {
+function CarteScreenInner() {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
@@ -176,3 +177,11 @@ const styles = StyleSheet.create({
   ratingRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   ratingText: { color: "#facc15", fontSize: 12, fontWeight: "700" },
 });
+
+export default function CarteScreen() {
+  return (
+    <PremiumGate feature="Lieux" icon="map-outline" tone="#14b8a6">
+      <CarteScreenInner />
+    </PremiumGate>
+  );
+}

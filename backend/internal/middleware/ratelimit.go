@@ -1,4 +1,4 @@
-﻿package middleware
+package middleware
 
 import (
 	"strings"
@@ -50,6 +50,7 @@ func RateLimitAPI() fiber.Handler {
 		// read receipts and websocket reconnects.
 		if strings.HasPrefix(path, "/api/v1/messages") ||
 			strings.HasPrefix(path, "/api/v1/conversations") ||
+			strings.HasPrefix(path, "/api/v1/calls") ||
 			strings.HasPrefix(path, "/api/v1/notifications") ||
 			path == "/ws" {
 			return realtimeRL(c)

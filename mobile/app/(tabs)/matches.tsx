@@ -13,6 +13,7 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import PremiumGate from "@/app/components/PremiumGate";
 import { getMatches, unmatch, getOrCreateConversation } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
 import ScreenState from "@/app/components/ScreenState";
@@ -42,7 +43,7 @@ interface Match {
   created_at: string;
 }
 
-export default function MatchesScreen() {
+function MatchesScreenInner() {
   const PAGE_SIZE = 20;
   const { colors } = useTheme();
   const [matches, setMatches] = useState<Match[]>([]);
@@ -277,3 +278,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 });
+
+export default function MatchesScreen() {
+  return (
+    <PremiumGate feature="Matchs" icon="people-outline" tone="#8b5cf6">
+      <MatchesScreenInner />
+    </PremiumGate>
+  );
+}

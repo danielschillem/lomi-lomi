@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div className="absolute inset-0 bg-linear-to-br from-violet-50 via-white to-pink-50" />
+      <div className="absolute inset-0 bg-linear-to-br from-blue-50 via-white to-blue-50" />
 
       <div className="relative w-full max-w-md">
         <button
@@ -144,8 +144,8 @@ export default function LoginPage() {
 
         <div className="bg-white/90 border border-border rounded-2xl p-8">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-violet-50 border border-violet-200 mb-4">
-              <LogIn className="w-7 h-7 text-violet-600" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-50 border border-blue-200 mb-4">
+              <LogIn className="w-7 h-7 text-blue-600" />
             </div>
             <h1 className="text-2xl font-bold">
               {step === "choose" && "Connexion"}
@@ -177,12 +177,12 @@ export default function LoginPage() {
             <div className="space-y-3">
               <button
                 onClick={() => setStep("phone")}
-                className="w-full flex items-center gap-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-4 px-5 rounded-xl transition"
+                className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-5 rounded-xl transition"
               >
                 <Phone className="w-5 h-5" />
                 <div className="text-left flex-1">
                   <p className="text-sm font-semibold">Numéro de téléphone</p>
-                  <p className="text-xs text-violet-600">
+                  <p className="text-xs text-blue-600">
                     Connexion rapide par code SMS
                   </p>
                 </div>
@@ -214,7 +214,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => setShowCountries(!showCountries)}
-                      className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-3 py-3 text-sm text-white hover:border-violet-400 transition whitespace-nowrap"
+                      className="flex items-center gap-1.5 bg-surface border border-border rounded-lg px-3 py-3 text-sm text-white hover:border-blue-400 transition whitespace-nowrap"
                     >
                       <span>{country.flag}</span>
                       <span className="text-muted">{country.dial}</span>
@@ -244,7 +244,7 @@ export default function LoginPage() {
                             }}
                             className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 transition text-left ${
                               c.code === country.code
-                                ? "bg-violet-50 text-violet-600"
+                                ? "bg-blue-50 text-blue-600"
                                 : "text-white"
                             }`}
                           >
@@ -264,14 +264,14 @@ export default function LoginPage() {
                     }
                     required
                     placeholder="6 12 34 56 78"
-                    className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                    className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                   />
                 </div>
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Envoi..." : "Recevoir le code SMS"}
               </button>
@@ -295,14 +295,14 @@ export default function LoginPage() {
                   required
                   maxLength={6}
                   placeholder="000000"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition font-mono"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-[0.5em] text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition font-mono"
                   autoFocus
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading || otpCode.length !== 6}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Vérification..." : "Se connecter"}
               </button>
@@ -339,7 +339,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="votre@email.com"
-                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                  className="w-full bg-surface border border-border rounded-lg px-4 py-3 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                 />
               </div>
               <div>
@@ -353,7 +353,7 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     placeholder="Votre mot de passe"
-                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 pr-12 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-violet-400 transition"
+                    className="w-full bg-surface border border-border rounded-lg px-4 py-3 pr-12 text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:border-blue-400 transition"
                   />
                   <button
                     type="button"
@@ -371,14 +371,14 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition"
               >
                 {loading ? "Connexion..." : "Se connecter"}
               </button>
               <div className="text-center">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-violet-400 hover:text-violet-300"
+                  className="text-sm text-blue-400 hover:text-blue-300"
                 >
                   Mot de passe oublié ?
                 </Link>
@@ -391,7 +391,7 @@ export default function LoginPage() {
               Pas encore de compte ?{" "}
               <Link
                 href="/register"
-                className="text-violet-600 hover:text-violet-600 transition"
+                className="text-blue-600 hover:text-blue-600 transition"
               >
                 S&apos;inscrire gratuitement
               </Link>

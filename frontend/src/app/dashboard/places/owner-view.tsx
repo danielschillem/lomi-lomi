@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { ownerGetPlaces, ownerUpdatePlace } from "@/lib/api";
@@ -48,7 +48,7 @@ export default function OwnerPlacesView() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function OwnerPlacesView() {
               {editId === place.id ? (
                 <div className="space-y-3">
                   <input
-                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
                     defaultValue={place.name}
                     placeholder="Nom"
                     onChange={(e) =>
@@ -84,7 +84,7 @@ export default function OwnerPlacesView() {
                     }
                   />
                   <textarea
-                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
                     defaultValue={place.description}
                     placeholder="Description"
                     rows={3}
@@ -93,7 +93,7 @@ export default function OwnerPlacesView() {
                     }
                   />
                   <input
-                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-violet-400 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-foreground placeholder-gray-400 focus:border-blue-400 focus:outline-none"
                     defaultValue={place.phone}
                     placeholder="Téléphone"
                     onChange={(e) =>
