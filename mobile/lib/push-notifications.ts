@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import Constants from "expo-constants";
-import { Linking, Platform } from "react-native";
+import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { registerPushToken } from "./api";
@@ -115,12 +115,12 @@ function handleNotificationTap(data: Record<string, unknown>) {
   if (data?.type === "call") {
     const room = data.call_room ? String(data.call_room) : "";
     const callType = data.call_type ? String(data.call_type) : "audio";
+    const callId = data.call_id ? String(data.call_id) : undefined;
     if (room) {
-      const url =
-        callType === "video"
-          ? `https://meet.jit.si/${room}`
-          : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
-      Linking.openURL(url).catch(() => router.push("/(tabs)/calls"));
+      router.push({
+        pathname: "/call",
+        params: { room, callType, ...(callId ? { callId } : {}) },
+      });
     } else {
       router.push("/(tabs)/calls");
     }

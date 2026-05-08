@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useLocalSearchParams, Stack, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   getMessages,
@@ -253,20 +253,7 @@ export default function ChatScreen() {
     setSending(false);
   };
 
-  const handleSendImage = async () => {
-    if (sending || !canSendMessage) return;
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (perm.status !== "granted") {
-      Alert.alert("Photo", "Autorise l'accès à la galerie pour envoyer une image.");
-      return;
-    }
-    const picked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.8,
-      allowsEditing: false,
-    });
-    if (picked.canceled || !picked.assets?.length) return;
-    const uri = picked.assets[0].uri;
+  const sendImageFromUri = async (uri: string) => {
     const tempId = -Date.now();
     const optimistic: Message = {
       id: tempId,
@@ -300,6 +287,38 @@ export default function ChatScreen() {
       Alert.alert("Photo", "Impossible d'envoyer cette image.");
     }
     setSending(false);
+  };
+
+  const handleSendImage = async () => {
+    if (sending || !canSendMessage) return;
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== "granted") {
+      Alert.alert("Photo", "Autorise l'accès à la galerie pour envoyer une image.");
+      return;
+    }
+    const picked = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (picked.canceled || !picked.assets?.length) return;
+    await sendImageFromUri(picked.assets[0].uri);
+  };
+
+  const handleTakePhoto = async () => {
+    if (sending || !canSendMessage) return;
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (perm.status !== "granted") {
+      Alert.alert("Caméra", "Autorise l'accès à la caméra pour prendre une photo.");
+      return;
+    }
+    const picked = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: false,
+    });
+    if (picked.canceled || !picked.assets?.length) return;
+    await sendImageFromUri(picked.assets[0].uri);
   };
 
   const shareLocation = async () => {
@@ -337,11 +356,10 @@ export default function ChatScreen() {
         receiver_id: otherUserId,
         call_type: type,
       });
-      const url =
-        type === "video"
-          ? `https://meet.jit.si/${call.room}`
-          : `https://meet.jit.si/${call.room}#config.startWithVideoMuted=true`;
-      await Linking.openURL(url);
+      router.push({
+        pathname: "/call",
+        params: { room: call.room, callType: type, callId: String(call.id) },
+      });
     } catch {
       try {
         const room = `textme-${conversationId}-${Date.now()}`;
@@ -359,11 +377,10 @@ export default function ChatScreen() {
           const sent = res as unknown as Message;
           setMessages((prev) => [sent, ...prev]);
         }
-        const fallbackUrl =
-          type === "video"
-            ? `https://meet.jit.si/${room}`
-            : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
-        await Linking.openURL(fallbackUrl);
+        router.push({
+          pathname: "/call",
+          params: { room, callType: type },
+        });
       } catch {
         Alert.alert("Appel", "Impossible de démarrer l'appel.");
       }
@@ -542,11 +559,10 @@ export default function ChatScreen() {
                 <TouchableOpacity
                   style={[styles.inlineAction, { backgroundColor: isMe ? "rgba(255,255,255,0.22)" : colors.border }]}
                   onPress={() =>
-                    Linking.openURL(
-                      item.call_type === "video"
-                        ? `https://meet.jit.si/${item.call_room}`
-                        : `https://meet.jit.si/${item.call_room}#config.startWithVideoMuted=true`,
-                    )
+                    router.push({
+                      pathname: "/call",
+                      params: { room: item.call_room, callType: item.call_type },
+                    })
                   }
                 >
                   <Ionicons
@@ -625,6 +641,13 @@ export default function ChatScreen() {
       )}
 
       <View style={[styles.inputRow, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
+        <TouchableOpacity
+          style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
+          onPress={handleTakePhoto}
+          disabled={sending || !canSendMessage}
+        >
+          <Ionicons name="camera-outline" size={20} color={sending || !canSendMessage ? colors.textMuted : colors.text} />
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.actionBtn, { backgroundColor: colors.cardSecondary, marginRight: 8 }]}
           onPress={handleSendImage}

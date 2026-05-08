@@ -4,13 +4,13 @@ import {
   Alert,
   FlatList,
   Image,
-  Linking,
   RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   CallRecord,
@@ -98,11 +98,10 @@ export default function CallsScreen() {
         receiver_id: contact.id,
         call_type: type,
       });
-      const url =
-        type === "video"
-          ? `https://meet.jit.si/${call.room}`
-          : `https://meet.jit.si/${call.room}#config.startWithVideoMuted=true`;
-      await Linking.openURL(url);
+      router.push({
+        pathname: "/call",
+        params: { room: call.room, callType: type, callId: String(call.id) },
+      });
       load();
     } catch {
       try {
@@ -117,11 +116,10 @@ export default function CallsScreen() {
           call_type: type,
           call_room: room,
         });
-        const fallbackUrl =
-          type === "video"
-            ? `https://meet.jit.si/${room}`
-            : `https://meet.jit.si/${room}#config.startWithVideoMuted=true`;
-        await Linking.openURL(fallbackUrl);
+        router.push({
+          pathname: "/call",
+          params: { room, callType: type },
+        });
       } catch {
         Alert.alert("Appel", "Impossible de démarrer l'appel.");
       }

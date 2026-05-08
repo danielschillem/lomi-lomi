@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
-  Linking,
   Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { CallRecord, updateCallStatus } from "@/lib/api";
 import { useTheme } from "@/lib/theme-context";
@@ -18,12 +18,6 @@ function normalizePayload(msg: Record<string, unknown>) {
   return ((msg.data as Record<string, unknown>) || msg) as Partial<CallRecord>;
 }
 
-function callUrl(call: CallRecord) {
-  if (call.call_type === "video") {
-    return `https://meet.jit.si/${call.room}`;
-  }
-  return `https://meet.jit.si/${call.room}#config.startWithVideoMuted=true`;
-}
 
 export default function IncomingCallModal() {
   const { colors } = useTheme();
@@ -72,7 +66,10 @@ export default function IncomingCallModal() {
     try {
       const updated = await updateCallStatus(call.id, "accepted");
       setCall(null);
-      await Linking.openURL(callUrl(updated));
+      router.push({
+        pathname: "/call",
+        params: { room: updated.room, callType: updated.call_type, callId: String(updated.id) },
+      });
     } finally {
       setBusyAction(null);
     }
