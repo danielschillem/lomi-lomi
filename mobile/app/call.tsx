@@ -14,13 +14,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { updateCallStatus } from "@/lib/api";
 
 export default function CallScreen() {
-  const { room, callType, callId } = useLocalSearchParams<{
+  const { room, callType, callId, userName } = useLocalSearchParams<{
     room: string;
     callType: string;
     callId?: string;
+    userName?: string;
   }>();
 
   const ended = useRef(false);
+  const isVideo = callType === "video";
+  const displayName = encodeURIComponent(userName || "TextMe User");
 
   useEffect(() => {
     if (Platform.OS !== "android") return;
@@ -30,11 +33,22 @@ export default function CallScreen() {
     ]).catch(() => {});
   }, []);
 
-  // Force desktop mode via URL param so Jitsi skips the "open native app" redirect
-  const jitsiUrl =
-    callType === "video"
-      ? `https://meet.jit.si/${room}?skipPrejoin=true`
-      : `https://meet.jit.si/${room}?skipPrejoin=true#config.startWithVideoMuted=true`;
+  // Hash params control Jitsi behaviour client-side.
+  // They skip prejoin, set the display name and disable native-app prompts.
+  const configHash = [
+    "config.prejoinPageEnabled=false",
+    "config.prejoinConfig.enabled=false",
+    "config.startWithAudioMuted=false",
+    `config.startWithVideoMuted=${!isVideo}`,
+    "config.disableDeepLinking=true",
+    "config.enableInsecureRoomNameWarning=false",
+    "config.resolution=360",
+    "config.disableLobbyChat=true",
+    "config.lobby.enabled=false",
+    `userInfo.displayName=${displayName}`,
+  ].join("&");
+
+  const jitsiUrl = `https://meet.jit.si/${room}#${configHash}`;
 
   const endCall = async () => {
     if (ended.current) return;

@@ -358,7 +358,7 @@ export default function ChatScreen() {
       });
       router.push({
         pathname: "/call",
-        params: { room: call.room, callType: type, callId: String(call.id) },
+        params: { room: call.room, callType: type, callId: String(call.id), userName: user?.username },
       });
     } catch {
       try {
@@ -379,7 +379,7 @@ export default function ChatScreen() {
         }
         router.push({
           pathname: "/call",
-          params: { room, callType: type },
+          params: { room, callType: type, userName: user?.username },
         });
       } catch {
         Alert.alert("Appel", "Impossible de démarrer l'appel.");

@@ -11,6 +11,7 @@ import {
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { CallRecord, updateCallStatus } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { useWS } from "@/lib/ws-context";
 
@@ -20,6 +21,7 @@ function normalizePayload(msg: Record<string, unknown>) {
 
 
 export default function IncomingCallModal() {
+  const { user } = useAuth();
   const { colors } = useTheme();
   const { onMessage } = useWS();
   const [call, setCall] = useState<CallRecord | null>(null);
@@ -68,7 +70,7 @@ export default function IncomingCallModal() {
       setCall(null);
       router.push({
         pathname: "/call",
-        params: { room: updated.room, callType: updated.call_type, callId: String(updated.id) },
+        params: { room: updated.room, callType: updated.call_type, callId: String(updated.id), userName: user?.username },
       });
     } finally {
       setBusyAction(null);
