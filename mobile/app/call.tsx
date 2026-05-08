@@ -24,28 +24,87 @@ export default function CallScreen() {
 
   const ended = useRef(false);
   const [meetError, setMeetError] = useState(false);
+  const [permissionsReady, setPermissionsReady] = useState(
+    Platform.OS !== "android",
+  );
+  const [permissionError, setPermissionError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const isVideo = callType === "video";
   const displayName = encodeURIComponent(userName || "TextMe User");
+  const toolbarButtons = encodeURIComponent(
+    JSON.stringify(["microphone", "camera", "toggle-camera", "hangup"]),
+  );
 
   useEffect(() => {
-    if (Platform.OS !== "android") return;
-    PermissionsAndroid.requestMultiple([
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-    ]).catch(() => {});
-  }, []);
+    let mounted = true;
+
+    const requestMediaPermissions = async () => {
+      if (Platform.OS !== "android") {
+        if (mounted) setPermissionsReady(true);
+        return;
+      }
+
+      const requestedPermissions = [
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ...(isVideo ? [PermissionsAndroid.PERMISSIONS.CAMERA] : []),
+      ];
+
+      try {
+        const result = await PermissionsAndroid.requestMultiple(
+          requestedPermissions,
+        );
+        const denied = requestedPermissions.filter(
+          (permission) => result[permission] !== PermissionsAndroid.RESULTS.GRANTED,
+        );
+
+        if (!mounted) return;
+        setPermissionError(
+          denied.length > 0
+            ? "Autorise le micro et la caméra dans Android pour lancer l'appel."
+            : null,
+        );
+      } catch {
+        if (mounted) {
+          setPermissionError("Impossible de vérifier les permissions d'appel.");
+        }
+      } finally {
+        if (mounted) setPermissionsReady(true);
+      }
+    };
+
+    requestMediaPermissions();
+    return () => {
+      mounted = false;
+    };
+  }, [isVideo, retryNonce]);
 
   // Hash params control Jitsi behaviour client-side.
   // They skip prejoin, set the display name and disable native-app prompts.
   const configHash = [
     "config.prejoinPageEnabled=false",
     "config.prejoinConfig.enabled=false",
+    "config.startAudioMuted=0",
+    "config.startVideoMuted=0",
     "config.startWithAudioMuted=false",
     `config.startWithVideoMuted=${!isVideo}`,
+    "config.startSilent=false",
+    "config.disableInitialGUM=false",
     "config.disableDeepLinking=true",
     "config.enableInsecureRoomNameWarning=false",
     "config.p2p.enabled=false",
+    `config.toolbarButtons=${toolbarButtons}`,
+    "config.toolbarConfig.alwaysVisible=true",
+    "config.disableInviteFunctions=true",
+    "config.disablePolls=true",
+    "config.disableReactions=true",
+    "config.disableRemoteVideoMenu=true",
+    "config.disableProfile=true",
+    "config.disableShortcuts=true",
+    "config.hideConferenceSubject=true",
+    "config.disableModeratorIndicator=true",
+    "config.participantsPane.enabled=false",
+    "config.speakerStats.disabled=true",
+    "config.whiteboard.enabled=false",
     "config.resolution=360",
     "config.disableLobbyChat=true",
     "config.lobby.enabled=false",
@@ -68,8 +127,7 @@ export default function CallScreen() {
   const onNavigationStateChange = (nav: WebViewNavigation) => {
     if (
       nav.url.includes("/close") ||
-      nav.url.includes("close3.html") ||
-      nav.url === "about:blank"
+      nav.url.includes("close3.html")
     ) {
       endCall();
     }
@@ -96,20 +154,29 @@ export default function CallScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <StatusBar hidden />
 
-      {meetError ? (
+      {!permissionsReady ? (
+        <View style={styles.loadingPanel}>
+          <ActivityIndicator color="#fff" size="large" />
+          <Text style={styles.loadingText}>Préparation micro et caméra...</Text>
+        </View>
+      ) : meetError || permissionError ? (
         <View style={styles.errorPanel}>
           <View style={styles.errorIcon}>
             <Ionicons name="videocam-off-outline" size={34} color="#fff" />
           </View>
-          <Text style={styles.errorTitle}>Appel TextMe indisponible</Text>
+          <Text style={styles.errorTitle}>
+            {permissionError ? "Permissions requises" : "Appel TextMe indisponible"}
+          </Text>
           <Text style={styles.errorText}>
-            Le serveur d'appel TextMe n'est pas encore accessible. Active le DNS
-            de meet.texto.life, puis relance l'appel.
+            {permissionError ||
+              "Le serveur d'appel TextMe n'est pas encore accessible. Relance l'appel dans quelques instants."}
           </Text>
           <TouchableOpacity
             style={styles.retryBtn}
             onPress={() => {
               setMeetError(false);
+              setPermissionError(null);
+              setPermissionsReady(false);
               setRetryNonce((value) => value + 1);
             }}
             activeOpacity={0.85}
@@ -130,8 +197,11 @@ export default function CallScreen() {
               <Text style={styles.loadingText}>Connexion TextMe...</Text>
             </View>
           )}
-          // Desktop UA: prevents Jitsi from detecting Android and redirecting to intent://
-          userAgent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+          userAgent={
+            Platform.OS === "android"
+              ? "Mozilla/5.0 (Linux; Android 15; Mobile; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.0.0 Mobile Safari/537.36 TextMe"
+              : undefined
+          }
           // Block intent:// and market:// deep links; WebView can't handle them
           onShouldStartLoadWithRequest={(req: { url: string }) => {
             const { url } = req;
@@ -147,13 +217,23 @@ export default function CallScreen() {
           }}
           onError={() => setMeetError(true)}
           onHttpError={(event) => {
-            if (event.nativeEvent.statusCode >= 400) setMeetError(true);
+            if (
+              event.nativeEvent.statusCode >= 500 &&
+              event.nativeEvent.url.startsWith(meetBaseUrl)
+            ) {
+              setMeetError(true);
+            }
           }}
           onNavigationStateChange={onNavigationStateChange}
           allowsInlineMediaPlayback
           mediaPlaybackRequiresUserAction={false}
           javaScriptEnabled
           domStorageEnabled
+          cacheEnabled={false}
+          cacheMode="LOAD_NO_CACHE"
+          incognito
+          androidLayerType="hardware"
+          thirdPartyCookiesEnabled
           allowsFullscreenVideo
           originWhitelist={["https://*", "http://*", "about:*"]}
           mixedContentMode="always"

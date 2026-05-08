@@ -1,12 +1,23 @@
-// TextMe — Jitsi server-side config overrides
+// TextMe - Jitsi server-side config overrides
 // This file is automatically appended to the generated config.js
+
+const textmeToolbarButtons = [
+  'microphone',
+  'camera',
+  'toggle-camera',
+  'hangup',
+];
 
 // Skip the "ready to join?" pre-call screen entirely
 config.prejoinConfig = { enabled: false };
 
-// Audio on, video muted by default (audio call default — video call URL overrides this)
+// Audio/video are allowed immediately. Audio-call URLs explicitly mute video.
+config.startAudioMuted = 0;
+config.startVideoMuted = 0;
 config.startWithAudioMuted = false;
-config.startWithVideoMuted = true;
+config.startWithVideoMuted = false;
+config.startSilent = false;
+config.disableInitialGUM = false;
 
 // Disable lobby — no moderator approval, direct join
 if (!config.lobby) config.lobby = {};
@@ -19,18 +30,56 @@ config.hideLobbyButton = true;
 config.disableDeepLinking = true;
 config.enableInsecureRoomNameWarning = false;
 
-// P2P for 1-on-1 calls: direct peer connection, no video bridge, lowest latency
+// Always use the TextMe bridge so audio/video works consistently on mobile networks.
 config.p2p = {
-  enabled: true,
-  stunServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-  ],
+  enabled: false,
 };
 
-// Video quality — 480p default, good balance for mobile
+// Minimal TextMe call UI: voice, video, switch camera, hang up.
+config.toolbarButtons = textmeToolbarButtons;
+config.toolbarConfig = {
+  alwaysVisible: true,
+  initialTimeout: 3000,
+  timeout: 3000,
+};
+
+// Remove conference/productivity features that do not belong in a simple call.
+config.disableInviteFunctions = true;
+config.disablePolls = true;
+config.disableReactions = true;
+config.disableRemoteVideoMenu = true;
+config.disableProfile = true;
+config.disableShortcuts = true;
+config.hideConferenceSubject = true;
+config.disableModeratorIndicator = true;
+config.disableJoinLeaveSounds = true;
+config.enableNoAudioDetection = false;
+config.enableNoisyMicDetection = false;
+config.disableSpeakerStatsSearch = true;
+config.speakerStats = { disabled: true };
+config.participantsPane = { enabled: false };
+config.breakoutRooms = {
+  hideAddRoomButton: true,
+  hideAutoAssignButton: true,
+  hideJoinRoomButton: true,
+};
+config.whiteboard = { enabled: false };
+config.remoteVideoMenu = {
+  disabled: true,
+  disableGrantModerator: true,
+  disableKick: true,
+  disablePrivateChat: true,
+};
+
+// TextMe branding, no Jitsi watermark.
+config.defaultLogoUrl = '';
+config.defaultWelcomePageLogoUrl = '';
+config.defaultLocalDisplayName = 'Moi';
+config.defaultRemoteDisplayName = 'Contact TextMe';
+
+// Video quality - mobile-friendly by default.
 config.constraints = {
-  video: { height: { ideal: 480, max: 720, min: 180 } },
+  video: { height: { ideal: 360, max: 480, min: 180 } },
 };
 
 // No analytics

@@ -37,7 +37,7 @@ meet.texto.life {
 	}
 	# Colibri WebSocket (JVB stats/bridge)
 	handle /colibri-ws* {
-		reverse_proxy jitsi-web:80
+		reverse_proxy jitsi-jvb:9090
 	}
 	# Everything else → Jitsi web interface
 	handle {

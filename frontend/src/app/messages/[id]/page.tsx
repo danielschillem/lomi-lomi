@@ -81,13 +81,34 @@ interface ConvUser {
 const CALL_MEET_BASE_URL = "https://meet.texto.life";
 
 function buildCallUrl(room: string, type: "audio" | "video") {
+  const toolbarButtons = encodeURIComponent(
+    JSON.stringify(["microphone", "camera", "toggle-camera", "hangup"]),
+  );
   const config = [
     "config.prejoinPageEnabled=false",
     "config.prejoinConfig.enabled=false",
+    "config.startAudioMuted=0",
+    "config.startVideoMuted=0",
+    "config.startWithAudioMuted=false",
     `config.startWithVideoMuted=${type === "audio"}`,
+    "config.startSilent=false",
+    "config.disableInitialGUM=false",
     "config.disableDeepLinking=true",
     "config.enableInsecureRoomNameWarning=false",
     "config.p2p.enabled=false",
+    `config.toolbarButtons=${toolbarButtons}`,
+    "config.toolbarConfig.alwaysVisible=true",
+    "config.disableInviteFunctions=true",
+    "config.disablePolls=true",
+    "config.disableReactions=true",
+    "config.disableRemoteVideoMenu=true",
+    "config.disableProfile=true",
+    "config.disableShortcuts=true",
+    "config.hideConferenceSubject=true",
+    "config.disableModeratorIndicator=true",
+    "config.participantsPane.enabled=false",
+    "config.speakerStats.disabled=true",
+    "config.whiteboard.enabled=false",
   ].join("&");
 
   return `${CALL_MEET_BASE_URL}/${encodeURIComponent(room)}#${config}`;

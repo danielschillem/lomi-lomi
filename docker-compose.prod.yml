@@ -81,6 +81,7 @@ services:
       - jitsi-web
     networks:
       - internal
+      - meet.jitsi
 
   # ── Jitsi Meet (self-hosted) ─────────────────────────────────────────────────
 
@@ -90,6 +91,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./jitsi/web:/config:Z
+      - ./jitsi/web/plugin.head.html:/usr/share/jitsi-meet/plugin.head.html:ro
     environment:
       PUBLIC_URL: https://meet.texto.life
       XMPP_SERVER: jitsi-prosody
@@ -102,15 +104,36 @@ services:
       ENABLE_GUESTS: "1"
       ENABLE_LETSENCRYPT: "0"
       DISABLE_HTTPS: "1"
+      DISABLE_DEEP_LINKING: "1"
+      DISABLE_GRANT_MODERATOR: "1"
+      DISABLE_KICKOUT: "1"
+      DISABLE_POLLS: "1"
+      DISABLE_PRIVATE_CHAT: "1"
+      DISABLE_PROFILE: "1"
+      DISABLE_REACTIONS: "1"
+      DISABLE_REMOTE_VIDEO_MENU: "1"
       ENABLE_HTTP_REDIRECT: "0"
+      ENABLE_BREAKOUT_ROOMS: "0"
+      ENABLE_CALENDAR: "0"
       ENABLE_LOBBY: "0"
       ENABLE_P2P: "0"
       ENABLE_PREJOIN_PAGE: "0"
+      ENABLE_RECORDING: "0"
+      ENABLE_LIVESTREAMING: "0"
+      ENABLE_NO_AUDIO_DETECTION: "0"
+      ENABLE_NOISY_MIC_DETECTION: "0"
+      ENABLE_TRANSCRIPTIONS: "0"
       ENABLE_WELCOME_PAGE: "0"
       APP_NAME: TextMe
       NATIVE_APP_NAME: TextMe
+      MOBILE_APP_PROMO: "false"
+      START_AUDIO_MUTED: "0"
+      START_VIDEO_MUTED: "0"
+      START_WITH_AUDIO_MUTED: "false"
+      START_WITH_VIDEO_MUTED: "false"
       SHOW_JITSI_WATERMARK: "false"
       SHOW_WATERMARK_FOR_GUESTS: "false"
+      TOOLBAR_BUTTONS: microphone,camera,toggle-camera,hangup
       TZ: UTC
     networks:
       - internal
@@ -182,6 +205,7 @@ services:
       # JITSI_JVB_IP must be set to the server's public IP in .env
       DOCKER_HOST_ADDRESS: ${JITSI_JVB_IP}
       JVB_ADVERTISE_IPS: ${JITSI_JVB_IP}
+      JVB_ADVERTISE_PRIVATE_CANDIDATES: "false"
       XMPP_AUTH_DOMAIN: auth.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_SERVER: jitsi-prosody
@@ -189,7 +213,9 @@ services:
       JVB_AUTH_PASSWORD: ${JITSI_JVB_PASSWORD}
       JVB_BREWERY_MUC: jvbbrewery
       JVB_PORT: "10000"
-      JVB_TCP_HARVESTER_DISABLED: "true"
+      ENABLE_COLIBRI_WEBSOCKET: "1"
+      JVB_WS_DOMAIN: ${JITSI_DOMAIN:-meet.texto.life}
+      JVB_WS_SERVER_ID: textme-jvb
       JVB_STUN_SERVERS: stun.l.google.com:19302,stun1.l.google.com:19302
       TZ: UTC
     depends_on:
