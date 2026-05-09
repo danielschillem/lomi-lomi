@@ -83,8 +83,8 @@ export default function CallScreen() {
   const configHash = [
     "config.prejoinPageEnabled=false",
     "config.prejoinConfig.enabled=false",
-    "config.startAudioMuted=0",
-    "config.startVideoMuted=0",
+    "config.startAudioMuted=10",
+    "config.startVideoMuted=10",
     "config.startWithAudioMuted=false",
     `config.startWithVideoMuted=${!isVideo}`,
     "config.startSilent=false",

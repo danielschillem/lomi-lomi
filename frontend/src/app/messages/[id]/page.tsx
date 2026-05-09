@@ -87,8 +87,8 @@ function buildCallUrl(room: string, type: "audio" | "video") {
   const config = [
     "config.prejoinPageEnabled=false",
     "config.prejoinConfig.enabled=false",
-    "config.startAudioMuted=0",
-    "config.startVideoMuted=0",
+    "config.startAudioMuted=10",
+    "config.startVideoMuted=10",
     "config.startWithAudioMuted=false",
     `config.startWithVideoMuted=${type === "audio"}`,
     "config.startSilent=false",

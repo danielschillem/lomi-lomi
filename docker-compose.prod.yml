@@ -127,8 +127,8 @@ services:
       APP_NAME: TextMe
       NATIVE_APP_NAME: TextMe
       MOBILE_APP_PROMO: "false"
-      START_AUDIO_MUTED: "0"
-      START_VIDEO_MUTED: "0"
+      START_AUDIO_MUTED: "10"
+      START_VIDEO_MUTED: "10"
       START_WITH_AUDIO_MUTED: "false"
       START_WITH_VIDEO_MUTED: "false"
       SHOW_JITSI_WATERMARK: "false"

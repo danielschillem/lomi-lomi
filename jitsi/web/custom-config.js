@@ -12,8 +12,8 @@ const textmeToolbarButtons = [
 config.prejoinConfig = { enabled: false };
 
 // Audio/video are allowed immediately. Audio-call URLs explicitly mute video.
-config.startAudioMuted = 0;
-config.startVideoMuted = 0;
+config.startAudioMuted = 10;
+config.startVideoMuted = 10;
 config.startWithAudioMuted = false;
 config.startWithVideoMuted = false;
 config.startSilent = false;
