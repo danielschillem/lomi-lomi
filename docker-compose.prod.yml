@@ -246,7 +246,6 @@ services:
       - --relay-ip=0.0.0.0
       - --external-ip=${JITSI_JVB_IP}
       - --realm=${JITSI_DOMAIN:-meet.texto.life}
-      - --lt-cred-mech
       - --use-auth-secret
       - --static-auth-secret=${JITSI_TURN_SECRET}
       - --min-port=49160
