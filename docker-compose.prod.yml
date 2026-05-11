@@ -83,7 +83,7 @@ services:
       - internal
       - meet.jitsi
 
-  # ── Jitsi Meet (self-hosted) ─────────────────────────────────────────────────
+  # -- Jitsi Meet (self-hosted) -------------------------------------------------
 
   jitsi-web:
     image: jitsi/web:stable
@@ -163,7 +163,14 @@ services:
       XMPP_GUEST_DOMAIN: guest.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_MUC_DOMAIN: muc.${JITSI_DOMAIN:-meet.texto.life}
       XMPP_INTERNAL_MUC_DOMAIN: internal-muc.${JITSI_DOMAIN:-meet.texto.life}
+      TURN_CREDENTIALS: ${JITSI_TURN_SECRET}
+      TURN_HOST: ${JITSI_TURN_HOST:-meet.texto.life}
+      TURN_PORT: ${JITSI_TURN_PORT:-3478}
+      TURN_TRANSPORT: udp,tcp
+      TURN_TTL: "86400"
       TZ: UTC
+    depends_on:
+      - coturn
     networks:
       meet.jitsi:
         aliases:
@@ -220,6 +227,34 @@ services:
       TZ: UTC
     depends_on:
       - jitsi-prosody
+    networks:
+      - meet.jitsi
+
+  coturn:
+    image: coturn/coturn:4.6.3
+    container_name: textme-turn
+    restart: unless-stopped
+    ports:
+      - "3478:3478/tcp"
+      - "3478:3478/udp"
+      - "49160-49220:49160-49220/udp"
+    command:
+      - --no-cli
+      - --log-file=stdout
+      - --listening-port=3478
+      - --listening-ip=0.0.0.0
+      - --relay-ip=0.0.0.0
+      - --external-ip=${JITSI_JVB_IP}
+      - --realm=${JITSI_DOMAIN:-meet.texto.life}
+      - --lt-cred-mech
+      - --use-auth-secret
+      - --static-auth-secret=${JITSI_TURN_SECRET}
+      - --min-port=49160
+      - --max-port=49220
+      - --no-multicast-peers
+      - --no-tls
+      - --no-dtls
+      - --fingerprint
     networks:
       - meet.jitsi
 
